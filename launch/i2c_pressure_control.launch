@@ -1,0 +1,4 @@
+<?xml version="1.0" ?>
+<launch>
+    <node name="i2c_pressure_control" pkg="byu_pressure_control" type="i2c_pressure_control" output="screen"/>
+</launch>
