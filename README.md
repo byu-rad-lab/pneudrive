@@ -4,6 +4,8 @@ This repository contains all of the designs, code, and instructions needed to cr
 
 The pressure control system consists of one BeagleBone Black acting as the ROS master and communicating over I2C with one or more Arduinos. Each Arduino performs high-rate pressure control of up to 4 chambers and transmits pressure data back to the ROS master. A high level diagram of the pressure control system can be seen in the figure below:
 
+![Alt](/pressure_control_system_diagram.png "Pressure Control System Diagram")
+
 ---
 
 ## How is it organized
