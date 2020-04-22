@@ -27,6 +27,9 @@ cd ros_ws/src
 git clone https://bitbucket.org/byu_rad_lab/byu_pressure_control.git
 cd ~/
 sudo chown -R ubuntu .
+cd ~/ros_ws
+catkin_make
+source devel/setup.bash
 
 # Enable I2C on the BeagleBoneBlack
 
