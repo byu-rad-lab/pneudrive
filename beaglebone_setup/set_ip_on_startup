@@ -1,0 +1,14 @@
+#! /bin/bash
+
+### BEGIN INIT INFO
+# Provides:		set ip
+# Required-Start:	$remote_fs dbus
+# Required-Stop:	
+# Default-Start:	2 3 4 5
+# Default-Stop:		
+# Short-Description:	Sets IP to user selected value
+### END INIT INFO
+
+python /home/ubuntu/ros_ws/src/beaglebone_setup/setIPOnStartup.py
+
+
