@@ -44,6 +44,6 @@ echo "uboot_overlay_addr7=/lib/firmware/BB-I2C2-FAST-00A0.dtbo" >> /boot/uEnv.tx
 #sudo systemctl start imu_publisher
 
 
-rosrun robot_upstart install byu_pressure_control/launch/i2c_pressure.launch --user root --job pressure_control
+rosrun robot_upstart install byu_pressure_control/launch/i2c_pressure.launch --user root --job pressurecontrol
 sudo systemctl daemon-reload 
-sudo systemctl start pressure_control
+sudo systemctl start pressurecontrol
