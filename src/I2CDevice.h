@@ -39,16 +39,15 @@ private:
 	unsigned int device;
 	int file;
 public:
+	I2CDevice::I2CDevice()
 	I2CDevice(unsigned int bus, unsigned int device);
-	virtual int open();
+	virtual int open(unsigned int bus, unsigned int device);
 	virtual int write(unsigned char value);
 	virtual unsigned char readRegister(unsigned int registerAddress);
-	/* virtual unsigned char* readRegisters(unsigned int number, unsigned int fromAddress=0); */
 	virtual int readRegisters(unsigned int registerAddress, int numbytes, unsigned char * data);
 	virtual int writeRegister(unsigned int registerAddress, unsigned char value);
 	virtual int writeRegisters(unsigned int registerAddress, int numbytes, unsigned char * values);
 	
-	/* virtual void debugDumpRegisters(unsigned int number = 0xff); */
 	virtual void close();
 	virtual ~I2CDevice();
 };

@@ -36,38 +36,37 @@ using namespace std;
 
 #define HEX(x) setw(2) << setfill('0') << hex << (int)(x)
 
-/**
- * Constructor for the I2CDevice class. It requires the bus number and device number. The constructor
- * opens a file handle to the I2C device, which is destroyed when the destructor is called
- * @param bus The bus number. Usually 0 or 1 on the BBB
- * @param device The device ID on the bus.
- */
-I2CDevice::I2CDevice(unsigned int bus, unsigned int device) {
-	this->file=-1;
-	this->bus = bus;
-	this->device = device;
-	this->open();
+I2CDevice::I2CDevice()
+{
+  this->file=-1;
 }
 
-/**
- * Open a connection to an I2C device
- * @return 1 on failure to open to the bus or device, 0 on success.
- */
-int I2CDevice::open(){
-   string name;
-   if(this->bus==0) name = BBB_I2C_0;
-   else if(this->bus==1) name = BBB_I2C_1;   
-   else name = BBB_I2C_2;
+I2CDevice::I2CDevice(unsigned int bus, unsigned int device)
+{
+  this->file=-1;
+  this->bus = bus;
+  this->device = device;
+  this->open(bus,device);
+}
 
-   if((this->file=::open(name.c_str(), O_RDWR)) < 0){
-      perror("I2C: failed to open the bus\n");
-	  return 1;
-   }
-   if(ioctl(this->file, I2C_SLAVE, this->device) < 0){
-      perror("I2C: Failed to connect to the device\n");
-	  return 1;
-   }
-   return 0;
+int I2CDevice::open(unsigned int bus, unsigned int device){
+  this->bus = bus;
+  this->device = device;
+
+  string name;
+  if(this->bus==0) name = BBB_I2C_0;
+  else if(this->bus==1) name = BBB_I2C_1;   
+  else name = BBB_I2C_2;
+  
+  if((this->file=::open(name.c_str(), O_RDWR)) < 0){
+    perror("I2C: failed to open the bus\n");
+    return 1;
+  }
+  if(ioctl(this->file, I2C_SLAVE, this->device) < 0){
+    perror("I2C: Failed to connect to the device\n");
+    return 1;
+  }
+  return 0;
 }
 
 /**
