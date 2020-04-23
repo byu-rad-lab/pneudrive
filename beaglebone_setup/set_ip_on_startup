@@ -9,6 +9,6 @@
 # Short-Description:	Sets IP to user selected value
 ### END INIT INFO
 
-python /home/ubuntu/ros_ws/src/beaglebone_setup/setIPOnStartup.py
+python /home/ubuntu/ros_ws/src/byu_pressure_control/beaglebone_setup/setIPOnStartup.py
 
 

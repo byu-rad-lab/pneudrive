@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 
 <launch>
-  <node name='i2c_pressure_node' pkg='phil_hardware_experiments' type='i2c_pressure_control_node' output='screen'/>
+  <node name='i2c_pressure_node' pkg='byu_pressure_control' type='i2c_pressure_control_node' output='screen'/>
 </launch>
