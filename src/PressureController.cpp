@@ -45,13 +45,18 @@ PressureController::PressureController(int bus=1, int firstAddress=10, int press
 
 int PressureController::get_num_devices_on_bus(int bus, int firstAddress)
 {
+  std::cout<<"Looking for devices on the bus!"<<std::endl;  
   int numDevices = 0;
   bool done = false;
   while(!done)
     {
       I2CDevice device;
       int addr = numDevices + firstAddress;
-      int error = device.open(bus,addr);
+      unsigned char testchar;
+      
+      device.open(bus,addr);
+      bool error = device.readRegisters(0,sizeof(testchar),&testchar);
+      
       if(!error)
 	{
 	  numDevices++;
@@ -61,6 +66,7 @@ int PressureController::get_num_devices_on_bus(int bus, int firstAddress)
 	  done = true;
 	}
     }
+  std::cout<<"I found "<<numDevices<<" devices on the bus!"<<std::endl;
   return numDevices;
 }
 
@@ -86,21 +92,21 @@ void PressureController::do_pressure_control()
 	    }
 	  
 	}
-    }
 
-  for(int node = 0; node < numNodes; node++)
-    {
-      std_msgs::Float32MultiArray msg;
-      msg.data.resize(numPressuresPerNode);
-      
-      for(int p=0; p<numPressuresPerNode; p++)
+      for(int node = 0; node < numNodes; node++)
 	{
-	  msg.data[p] = pressures[node][p];
+	  std_msgs::Float32MultiArray msg;
+	  msg.data.resize(numPressuresPerNode);
+	  
+	  for(int p=0; p<numPressuresPerNode; p++)
+	    {
+	      msg.data[p] = pressures[node][p];
+	    }
+	  pressurePublishers[node].publish(msg);
 	}
-      pressurePublishers[node].publish(msg);      
+      
+      ros::spinOnce();
     }
-
-  ros::spinOnce();
 }
 
 

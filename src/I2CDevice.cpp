@@ -154,7 +154,7 @@ int I2CDevice::readRegisters(unsigned int registerAddress, int numbytes, unsigne
   this->write(registerAddress);
   if(::read(this->file, data, numbytes)!=(int)numbytes)
     {
-      perror("IC2: Failed to read in the full buffer.\n");
+      perror("I2C: Failed to read in the full buffer.\n");
       return 1;
     }
   else
