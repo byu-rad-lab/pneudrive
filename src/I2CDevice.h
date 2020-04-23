@@ -39,7 +39,7 @@ private:
 	unsigned int device;
 	int file;
 public:
-	I2CDevice::I2CDevice()
+	I2CDevice();
 	I2CDevice(unsigned int bus, unsigned int device);
 	virtual int open(unsigned int bus, unsigned int device);
 	virtual int write(unsigned char value);

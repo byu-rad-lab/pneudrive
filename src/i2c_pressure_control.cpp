@@ -4,7 +4,8 @@ int main(int argc, char **argv)
 {
   int bus = 1;
   int firstAddress = 10;
-  PressureController::PressureController controller(bus, firstAddress);
+  int pressuresPerNode = 4;
+  PressureController controller(bus, firstAddress, pressuresPerNode);
 
   controller.do_pressure_control();
 
