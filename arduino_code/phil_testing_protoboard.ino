@@ -63,8 +63,9 @@ void loop(void)
   //p[2] = (ads.readADC_SingleEnded(2)-bias)*gain;
   //p[3] = (ads.readADC_SingleEnded(3)-bias)*gain;
 
-  double bias = 95;
-  double gain = 50.0/400.0;
+  double bias = 95*0;
+  //double gain = 50.0/400.0;
+  double gain = 100.0/1024.0;
   p[0] = .5*p[0] + .5*(analogRead(A0)-bias)*gain;
   p[1] = .5*p[1] + .5*(analogRead(A1)-bias)*gain;
   p[2] = .5*p[2] + .5*(analogRead(A2)-bias)*gain;
@@ -91,7 +92,7 @@ void loop(void)
 
 //  for(int i=0; i<4; i++)
 //  {
-//    Serial.print(p[i]);
+//    Serial.print(pcmd[i]);
 //    Serial.print("    ");
 //  }
 //  Serial.println();
@@ -138,6 +139,7 @@ void receiveEvent(int howMany)
     {
       pcmdchar[j] = Wire.read();
     }
+    //Serial.println("Receive Event");
   }
   else
   {
@@ -147,6 +149,7 @@ void receiveEvent(int howMany)
 
 void requestEvent()
 {
+  //Serial.println("Request Event"); 
   Wire.write(pchar, sizeof(pchar));
 }
 

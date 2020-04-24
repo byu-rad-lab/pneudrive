@@ -10,16 +10,12 @@ PressureController::PressureController(int bus=1, int firstAddress=10, int press
   i2cDevices.resize(numNodes);
   pressures.resize(numNodes);
   pressureCommands.resize(numNodes);
-  pressureChars.resize(numNodes);
-  pressureCommandChars.resize(numNodes);
   
   for(int i=0; i<numNodes; i++)
     {
       i2cDevices[i].open(bus,i + firstAddress);
       pressures[i].resize(numPressuresPerNode);
       pressureCommands[i].resize(numPressuresPerNode);
-      pressureChars[i].resize(numPressuresPerNode*2); //two bytes per pressure
-      pressureCommandChars[i].resize(numPressuresPerNode*2); //two bytes per pressure
     }
   
   int argc;
@@ -77,20 +73,28 @@ void PressureController::do_pressure_control()
     {
       for(int node=0; node<numNodes; node++)
 	{
-	  for(int byte=0; byte<numPressuresPerNode; byte++)
-	    {
-	      float_to_two_bytes(pressureCommands[node][byte],&pressureCommandChars[node][byte*2]);
-	    }
-	  
-	  i2cDevices[node].writeRegisters(0,sizeof(pressureCommandChars[node]),&pressureCommandChars[node][0]);
-
-	  i2cDevices[node].readRegisters(0,sizeof(pressureChars),&pressureChars[node][0]);
-
+	  unsigned char pchar[numPressuresPerNode*2];	  
 	  for(int p=0; p<numPressuresPerNode; p++)
 	    {
-	      pressures[node][p] = two_bytes_to_float(&pressureChars[node][p*2]);
+	      float_to_two_bytes(pressureCommands[node][p],&pchar[p*2]);
 	    }
-	  
+	  i2cDevices[node].writeRegisters(0,sizeof(pchar),&pchar[0]);	  
+
+	  i2cDevices[node].readRegisters(0,sizeof(pchar),&pchar[0]);
+	  for(int p=0; p<numPressuresPerNode; p++)
+	    {
+	      pressures[node][p] = two_bytes_to_float(&pchar[p*2]);
+	    }
+	  // std::cout<<"\n\nNode "<<node<<" commands:"<<std::endl;
+	  // for(int p=0; p<numPressuresPerNode; p++)
+	  //   {
+	  //     std::cout<<pressureCommands[node][p]<<"  ";
+	  //   }
+	  // std::cout<<"\nNode "<<node<<" pressures:"<<std::endl;
+	  // for(int p=0; p<numPressuresPerNode; p++)
+	  //   {
+	  //     std::cout<<pressures[node][p]<<"  ";
+	  //   }
 	}
 
       for(int node = 0; node < numNodes; node++)

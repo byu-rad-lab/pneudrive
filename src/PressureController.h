@@ -19,8 +19,6 @@ private:
   std::vector<I2CDevice> i2cDevices;
   std::vector<std::vector<float>> pressures;
   std::vector<std::vector<float>> pressureCommands;
-  std::vector<std::vector<unsigned char>> pressureChars;
-  std::vector<std::vector<unsigned char>> pressureCommandChars;
   
 public:
   PressureController(int bus, int firstAddress, int pressuresPerNode);
