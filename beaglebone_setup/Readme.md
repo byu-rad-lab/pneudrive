@@ -5,6 +5,8 @@ There are two options for configuring a BeagleBone Black (BBB) to run as the ROS
 
 2. Another way to configure the BBB is to follow the instructions below for installing Ubuntu on the BBB, then to download this repo onto the BBB and execute the script byu_pressure_control/beaglebone_setup/bb_install_script.sh to finish the setup. This process is detailed below.
 
+**NOTE:** No matter which way you set up the BBB - you must have it's IP address in your /etc/hosts file in order to receive data from it. It must have your IP address in its /etc/hosts file in order to receive data (pressure commands) from you.
+
 ## Install Ubuntu
 The BBB comes with Debian Linux installed, however we need an OS which is supported by ROS. We choose to use Ubuntu 18.04.
 
