@@ -26,3 +26,15 @@ This repository is a ROS package designed to be placed in a ROS workspace on the
 
 Once all of the PCBs have been populated and wired, the BBB has been setup, and the Arduinos have been programmed, the system should perform pressure control as soon as power is applied. As soon as power is applied, the Arduinos begin performing pressure control (to the default pressure of 0 psi). Once the BBB boots up it creates a ROS node called "PressureController". This node creates publishers and subscribers for every node that it detects on the I2C bus when it boots up. It then cycles through as fast as it can to transfer data from the I2C bus to ROS and vice versa. Obviously, the more nodes you add on, the less frequently each node will be updated.
 
+
+
+## Things to consider in future versions
+
+* The current design has 3 capacitors for each pressure sensor (2 from the datasheet and one from our analog filter). I'd bet we could condense to 2.
+* Consider switching from Arduino Pro Mini to a cheaper equivalent like [this](https://www.pololu.com/product/3160)
+* The current beaglebone setup flashes Ubuntu 18.04.4 to the BBB, but I felt like when I was using 18.04.2 it booted up much faster. We should look into the differences in speed and boot time.
+* No efforts were made to optimize the BBB code for speed. Someone could optimize the code, use lib-orocos to make it more real-timey, or somehow give the pressure control node higher priority so the OS doesn't interrupt it.
+* The current PCB connects the Arduino the the fault pins on the motor driver boards, but we do nothing with it. You may be able to do something like light up an LED for specific errors.
+* We currently are using screw terminals to connect wires to the PCB. A better solution probably involves using some type of clipping connector.
+* Connections between the pressure tubing and the robot are currently made with hot glue. In the future we should probably thread a hole into the robot and screw in a barbed fitting or something.
+
