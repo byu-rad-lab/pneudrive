@@ -1,15 +1,15 @@
 # Places to order parts
 
-For *each* board you will need:
+For *each* board you will need these things. For each item a link is included where we ordered them.
 
-* 4 ABPDRNN100PGAA5 pressure sensors [order here](https://www.mouser.com/ProductDetail/Honeywell/ABPDRNN100PGAA5?qs=sGAEpiMZZMvhQj7WZhFIAD2P7qVC0dZ7tI11ZYAVyGqQk%2FMhVJdgGw%3D%3D)
-* 2 Pololu A4990 Dual Motor Driver Carriers [order here](https://www.pololu.com/product/2137/)
-* 1 Arduino Pro Mini [order here](https://www.sparkfun.com/products/11113) or anywhere else. Just make sure pin footprints match.
-* 7 screw terminals [order here](https://www.amazon.com/Simpo-Terminal-Optional-300v10a-Drawing/dp/B018ORUVTU/ref=sr_1_4?dchild=1&keywords=2.54%2Bmm%2Bscrew%2Bterminal&qid=1587763307&s=industrial&sr=1-4&th=1). They must have 2.54 mm pitch in order to fit in the PCB. They also must accomodate the different wire gauges needed for communication and 32 V power (24 AWG and 18 AWG)
-* 4 12 kOhm resistors
-* 8 100 nF capacitors
-* 4 1 nF capacitors
-* 60 Female header pins (really only 56, but each cut destroys one)
+* 4 ABPDRNN100PGAA5 pressure sensors ([link](https://www.mouser.com/ProductDetail/Honeywell/ABPDRNN100PGAA5?qs=sGAEpiMZZMvhQj7WZhFIAD2P7qVC0dZ7tI11ZYAVyGqQk%2FMhVJdgGw%3D%3D))
+* 2 Pololu A4990 Dual Motor Driver Carriers ([link](https://www.pololu.com/product/2137/))
+* 1 Arduino Pro Mini ([link](https://www.amazon.com/HiLetgo-Atmega328P-AU-Development-Microcontroller-Bootloadered/dp/B00E87VWQW/ref=sr_1_5?dchild=1&keywords=arduino+pro+mini&qid=1587767052&sr=8-5))
+* 7 screw terminals ([link](https://www.amazon.com/Simpo-Terminal-Optional-300v10a-Drawing/dp/B018ORUVTU/ref=sr_1_4?dchild=1&keywords=2.54%2Bmm%2Bscrew%2Bterminal&qid=1587763307&s=industrial&sr=1-4&th=1))
+* 4 12 kOhm resistors ([link](https://www.amazon.com/EDGELEC-Resistor-Tolerance-Resistance-Optional/dp/B07HDGQRSR/ref=sr_1_2?dchild=1&keywords=12k+resistor&qid=1587767472&sr=8-2))
+* ~60 Female header pins (really only 56, but each cut destroys one) ([link](https://www.amazon.com/EDGELEC-Resistor-Tolerance-Resistance-Optional/dp/B07HDGQRSR/ref=sr_1_2?dchild=1&keywords=12k+resistor&qid=1587767472&sr=8-2))
+* 8 100 nF capacitors ([link](https://www.amazon.com/Gikfun-Ceramic-Capacitor-Arduino-100pcs/dp/B00RT02YIU/ref=sr_1_9?dchild=1&keywords=100nf+capacitor&qid=1587767206&sr=8-9))
+* 4 1 nF capacitors (We got away without this capacitor in the prototype...I may try that again...)
 
 
 You will also need wires for:
@@ -18,4 +18,4 @@ You will also need wires for:
 * 5V power and ground. **Note** I don't know what we're going to use yet
 * 32 V power and ground. **Note** I don't know what we're going to use yet
 
-Apart from the 5V power supply which came with your BBB, you will need a power supply capable of 9-32 V DC and however many amps your system can pull (4 A for each board). We choose to use a 24 V 15 A one like [this](https://www.amazon.com/AVAWO-Switching-Transformer-Regulated-Computer/dp/B0146IAXYO/ref=sr_1_3?dchild=1&keywords=24+volt+power+supply&qid=1587765261&sr=8-3)
+Apart from the 5V power supply which came with your BBB, you will need a power supply capable of 9-32 V DC and however many amps your system can pull (4 A for each board). We choose to use a 24 V 15 A one ([link](https://www.amazon.com/AVAWO-Switching-Transformer-Regulated-Computer/dp/B0146IAXYO/ref=sr_1_3?dchild=1&keywords=24+volt+power+supply&qid=1587765261&sr=8-3))
