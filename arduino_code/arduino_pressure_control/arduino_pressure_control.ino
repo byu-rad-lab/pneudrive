@@ -5,7 +5,7 @@
 
 #include <Wire.h>
 
-int i2c_address = 11;
+int i2c_address = 10;
 
 float p[4] = {0, 0, 0, 0};
 float pcmd[4] = {0, 0, 0, 0};
@@ -66,23 +66,33 @@ void loop(void)
   double bias = 95*0;
   //double gain = 50.0/400.0;
   double gain = 100.0/1024.0;
-  p[0] = .5*p[0] + .5*(analogRead(A0)-bias)*gain;
-  p[1] = .5*p[1] + .5*(analogRead(A1)-bias)*gain;
-  p[2] = .5*p[2] + .5*(analogRead(A2)-bias)*gain;
-  p[3] = .5*p[3] + .5*(analogRead(A3)-bias)*gain;
+  p[0] = .75*p[0] + .25*(analogRead(A0)-bias)*gain;
+  p[1] = .75*p[1] + .25*(analogRead(A1)-bias)*gain;
+  p[2] = .75*p[2] + .25*(analogRead(A2)-bias)*gain;
+  p[3] = .75*p[3] + .25*(analogRead(A3)-bias)*gain;
 
-  //move_valve(digital_pins[0],pwm_pins[0],100,1);
+//  for(int i=0; i<4; i++)
+//  {
+//    move_valve(digital_pins[i],pwm_pins[i],255,0);
+//  }
+  move_valve(digital_pins[2],pwm_pins[2],255,0);
   
 
+  float kp = 100.;
+  float deadband = .1;
   for(int i=0; i<4; i++)
   {
     bool dir;
     if(pcmd[i]-p[i]>0){dir=1;}
     else{dir=0;}
-    int cmd = abs(pcmd[i]-p[i])*200.0;
-    if(cmd<50){cmd=0;}
+    int cmd = abs(pcmd[i]-p[i])*kp;
+    if(abs(pcmd[i]-p[i])<deadband){cmd=0;}
     move_valve(digital_pins[i],pwm_pins[i],cmd,dir);
+    
+//    Serial.print(cmd);
+//    Serial.print("    ");
   }
+//  Serial.println();
 
   for (int i = 0; i < 4; i++)
   {
@@ -92,7 +102,8 @@ void loop(void)
 
 //  for(int i=0; i<4; i++)
 //  {
-//    Serial.print(pcmd[i]);
+//    Serial.print(digitalRead(10+i));
+//    
 //    Serial.print("    ");
 //  }
 //  Serial.println();
