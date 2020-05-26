@@ -5,25 +5,27 @@
 
 #include <Wire.h>
 
-int i2c_address = 10;
+int i2c_address = 12;
 
 float p[4] = {0, 0, 0, 0};
 float pcmd[4] = {0, 0, 0, 0};
+
 char pchar[2 * 4];
 char pcmdchar[2 * 4];
 
 int digital_pins [4] = {2,4,7,8};
 int pwm_pins [4] = {3,5,6,9};
 
+float valve_cmd[4] = {0,0,0,0};
+
 
 
 void setup(void) 
 {
   // This speeds up reading from the Arduino's ADC
-  bitClear(ADCSRA, ADPS0);
+  // but generally gives worse data (more noisy)
+  //bitClear(ADCSRA, ADPS0);
   // These two make little difference in speed
-  //bitSet(ADCSRA, ADPS1);
-  //bitClear(ADCSRA, ADPS2); // This one causes bad readings
   
   Wire.begin(i2c_address);
   Wire.onReceive(receiveEvent);
@@ -36,7 +38,7 @@ void setup(void)
   {
     pinMode(digital_pins[i],OUTPUT);
     pinMode(pwm_pins[i], OUTPUT);
-    move_valve(digital_pins[i],pwm_pins[i],0,0);
+    move_valve(digital_pins[i],pwm_pins[i],0);
   }
   
   //Serial.begin(2000000); 
@@ -56,80 +58,50 @@ void setup(void)
 
 void loop(void) 
 {
-  //double bias = 165;
-  //double gain = 80.0/1115.0;
+  //double bias = 165*0;
+  //double gain = 100.0/4095.0;
   //p[0] = (ads.readADC_SingleEnded(0)-bias)*gain; // Reading voltage from external ADC
   //p[1] = (ads.readADC_SingleEnded(1)-bias)*gain;
   //p[2] = (ads.readADC_SingleEnded(2)-bias)*gain;
   //p[3] = (ads.readADC_SingleEnded(3)-bias)*gain;
 
   double bias = 95*0;
-  //double gain = 50.0/400.0;
   double gain = 100.0/1024.0;
-  p[0] = .75*p[0] + .25*(analogRead(A0)-bias)*gain;
-  p[1] = .75*p[1] + .25*(analogRead(A1)-bias)*gain;
-  p[2] = .75*p[2] + .25*(analogRead(A2)-bias)*gain;
-  p[3] = .75*p[3] + .25*(analogRead(A3)-bias)*gain;
+  double a1 = .75;
+  double a2 = 1.0-a1;
+  p[0] = a1*p[0] + a2*(analogRead(A0)-bias)*gain;
+  p[1] = a1*p[1] + a2*(analogRead(A1)-bias)*gain;
+  p[2] = a1*p[2] + a2*(analogRead(A2)-bias)*gain;
+  p[3] = a1*p[3] + a2*(analogRead(A3)-bias)*gain; 
 
-//  for(int i=0; i<4; i++)
-//  {
-//    move_valve(digital_pins[i],pwm_pins[i],255,0);
-//  }
-  move_valve(digital_pins[2],pwm_pins[2],255,0);
-  
-
-  float kp = 100.;
-  float deadband = .1;
+  float kp = 20.;
+  float deadband = .0;
   for(int i=0; i<4; i++)
-  {
-    bool dir;
-    if(pcmd[i]-p[i]>0){dir=1;}
-    else{dir=0;}
-    int cmd = abs(pcmd[i]-p[i])*kp;
-    if(abs(pcmd[i]-p[i])<deadband){cmd=0;}
-    move_valve(digital_pins[i],pwm_pins[i],cmd,dir);
-    
-//    Serial.print(cmd);
-//    Serial.print("    ");
+  { 
+    if(abs(pcmd[i]-p[i])>deadband)
+    {
+      valve_cmd[i] = (pcmd[i]-p[i])*kp;
+    }
+    move_valve(digital_pins[i],pwm_pins[i],valve_cmd[i]);
   }
-//  Serial.println();
 
   for (int i = 0; i < 4; i++)
   {
     float_to_two_bytes(p[i], &pchar[i * 2]);
     pcmd[i] = two_bytes_to_float(&pcmdchar[i * 2]);
   }
-
-//  for(int i=0; i<4; i++)
-//  {
-//    Serial.print(digitalRead(10+i));
-//    
-//    Serial.print("    ");
-//  }
-//  Serial.println();
-
-  digitalWrite(13,!digitalRead(13));
+  
+  //digitalWrite(13,!digitalRead(13));
 }
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-void move_valve(int digital_pin, int pwm_pin, int speed, bool forward)
+void move_valve(int digital_pin, int pwm_pin, int speed)
 {
   if(speed>255){speed=255;}
-  if(speed<0){speed=0;}
+  if(speed<-255){speed=-255;}
   
-  if(forward)
+  if(speed>0)
   {
     digitalWrite(digital_pin,LOW);
     analogWrite(pwm_pin,255-speed);
@@ -137,7 +109,7 @@ void move_valve(int digital_pin, int pwm_pin, int speed, bool forward)
   else
   {
     digitalWrite(digital_pin,HIGH);
-    analogWrite(pwm_pin,speed);
+    analogWrite(pwm_pin,abs(speed));
   }
 }
 
@@ -150,7 +122,6 @@ void receiveEvent(int howMany)
     {
       pcmdchar[j] = Wire.read();
     }
-    //Serial.println("Receive Event");
   }
   else
   {
@@ -159,13 +130,9 @@ void receiveEvent(int howMany)
 }
 
 void requestEvent()
-{
-  //Serial.println("Request Event"); 
+{ 
   Wire.write(pchar, sizeof(pchar));
 }
-
-
-
 
 float two_bytes_to_float(unsigned char * twobytes)
 {
