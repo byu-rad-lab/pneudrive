@@ -13,7 +13,7 @@ char rpychar[2*3];
 
 SoftwareWire softWire(11,10);
 
-int i2c_address = 101;
+int i2c_address = 51;
 
 void setup()
 {
@@ -108,6 +108,7 @@ void loop()
     float_to_two_bytes(rpy[i], &rpychar[i * 2]);
   }
 
+  //TODO - THIS IS IMPORTANT, BUT IS A PRIVATE VARIABLE...
   filter.invSampleFreq = float(micros()-tic)/1000000.0;
 }
 
