@@ -19,3 +19,10 @@ You will also need wires for:
 * 32 V power and ground. **Note** I don't know what we're going to use yet
 
 Apart from the 5V power supply which came with your BBB, you will need a power supply capable of 9-32 V DC and however many amps your system can pull (4 A for each board). We choose to use a 24 V 15 A one ([link](https://www.amazon.com/AVAWO-Switching-Transformer-Regulated-Computer/dp/B0146IAXYO/ref=sr_1_3?dchild=1&keywords=24+volt+power+supply&qid=1587765261&sr=8-3))
+
+# Things to consider for a future revision of the board
+
+* Move the pressure sensor pins farther apart so it fits the sensor better
+* Rename the silk screen labels for the pressure sensors. PS4->PS0. PS3->PS1. PS2->PS2. PS1->PS3.
+* Find a robust way to plug the pressure sensors into the board. Right now my solution is to solder male pins to them, but this is tricky to do.
+* The Arduino Pro mini can take 12 V power and regulate it down to 5V on the VCC pin. This would eliminate the need to run separate 5V and 12V wires.
