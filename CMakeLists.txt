@@ -33,5 +33,5 @@ ${catkin_INCLUDE_DIRS}
 add_executable(i2c_pressure_control_node src/i2c_pressure_control.cpp src/I2CDevice.cpp src/PressureController.cpp)
 target_link_libraries(i2c_pressure_control_node ${catkin_LIBRARIES})
 
-# add_executable(i2c_imu_publisher_node src/i2c_imu_publisher.cpp src/I2CDevice.cpp)
-# target_link_libraries(i2c_imu_publisher_node ${catkin_LIBRARIES})
+add_executable(i2c_imu_publisher_node src/i2c_imu_publisher.cpp src/I2CDevice.cpp src/IMUPublisher.cpp)
+target_link_libraries(i2c_imu_publisher_node ${catkin_LIBRARIES})
