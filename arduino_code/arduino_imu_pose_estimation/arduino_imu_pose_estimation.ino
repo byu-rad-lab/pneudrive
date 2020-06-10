@@ -4,7 +4,8 @@
 
 #define    MPU9250_ADDRESS            0x69
 #define    MAG_ADDRESS                0x0C
-#define    GYRO_FULL_SCALE_250_DPS    0x00  
+#define    GYRO_FULL_SCALE_250_DPS    0x00
+#define    GYRO_FULL_SCALE_500_DPS    0x08  
 #define    ACC_FULL_SCALE_2_G        0x00  
 
 Madgwick filter;
@@ -13,7 +14,52 @@ char rpychar[2*3];
 
 SoftwareWire softWire(11,10);
 
-int i2c_address = 101;
+
+// For IMU A
+int i2c_address = 100;
+float ax_min = -24896;
+float ay_min = -18384;
+float az_min = -19124;
+float ax_max = 17064;
+float ay_max = 19296;
+float az_max = 18884;
+float mx_min = -214;
+float my_min = -118;
+float mz_min = -653;
+float mx_max = 316;
+float my_max = 401;
+float mz_max = -75;
+float gx_offset = -159.4;
+float gy_offset = 44.3;
+float gz_offset = -161.0;
+
+// For IMU B
+//int i2c_address = 101;
+//float ax_min = -19200;
+//float ay_min = -18384;
+//float az_min = -21300;
+//float ax_max = 22660;
+//float ay_max = 17560;
+//float az_max = 21348;
+//float mx_min = -37;
+//float my_min = -212;
+//float mz_min = -567;
+//float mx_max = 471;
+//float my_max = 301;
+//float mz_max = -28;
+//float gx_offset = 34.5;
+//float gy_offset = 303.5;
+//float gz_offset = 68.1;
+
+
+float mx_range = mx_max-mx_min;
+float mx_mid = .5*(mx_max+mx_min);
+float my_range = my_max-my_min;
+float my_mid = .5*(my_max+my_min);
+float mz_range = mz_max-mz_min;
+float mz_mid = .5*(mz_max+mz_min);
+
+unsigned long tic = micros();
 
 void setup()
 {
@@ -48,7 +94,7 @@ void setup()
 
 void loop()
 {
-  unsigned long tic = micros();
+  
   
   // Read accelerometer and gyroscope
   uint8_t Buf[14];
@@ -76,39 +122,74 @@ void loop()
   int16_t miz=(Mag[5]<<8 | Mag[4]);
 
 
-  
+    // Update calibration
+//  float ax_range = ax_max-ax_min;
+//  float ax_mid = .5*(ax_max+ax_min);
+//  float ay_range = ay_max-ay_min;
+//  float ay_mid = .5*(ay_max+ay_min);
+//  float az_range = az_max-az_min;
+//  float az_mid = .5*(az_max+az_min);
 
+ 
   // Apply calibration bias and gain
   // Also - magnetometer and accel/gyro measurements are not in the same frame
   // Also - I negate the accel vector so it points down instead of up
   float ax = -convertRawAcceleration(aiy);
   float ay = -convertRawAcceleration(aix);
   float az = convertRawAcceleration(aiz);
-  float gx = convertRawGyro(giy-50);
-  float gy = convertRawGyro(gix+120);
-  float gz = -convertRawGyro(giz+177);
-  float mx = (mix-56.5)/240.5;
-  float my = (miy+6.0)/248.0;
-  float mz = (miz+1249.5)/279.5;
+  float gx = convertRawGyro(giy-gy_offset);
+  float gy = convertRawGyro(gix-gx_offset);
+  float gz = -convertRawGyro(giz-gz_offset);
+  float mx = (mix-mx_mid)*2.0/mx_range;
+  float my = (miy-my_mid)*2.0/my_range;
+  float mz = (miz-mz_mid)*2.0/mz_range;
 
+  //    // Accelerometer
+//    Serial.print (ax,DEC); 
+//    Serial.print ("\t");
+//    Serial.print (ay,DEC);
+//    Serial.print ("\t");
+//    Serial.print (az,DEC);  
+//    Serial.print ("\t");
+//    
+//    // Gyroscope
+//    Serial.print (gx,DEC); 
+//    Serial.print ("\t");
+//    Serial.print (gy,DEC);
+//    Serial.print ("\t");
+//    Serial.print (gz,DEC);  
+//    Serial.print ("\t");
+//    //Serial.println ("");
+//    
+//    // Magnetometer
+//    Serial.print (mx,DEC); 
+//    Serial.print ("  ");
+//    Serial.print (my,DEC);
+//    Serial.print ("  ");
+//    Serial.println (mz,DEC);  
+//    Serial.println ("");
+
+  filter.invSampleFreq = float(micros()-tic)/1000000.0;
   filter.update(gx, gy, gz, ax, ay, az, mx, my, mz);
+  tic = micros();
+  
   rpy[0] = filter.getRoll();
   rpy[1] = filter.getPitch();
   rpy[2] = filter.getYaw();
   
-//  Serial.print("Orientation: ");
-//  Serial.print(rpy[0]);
-//  Serial.print(" ");
-//  Serial.print(rpy[1]);
-//  Serial.print(" ");
-//  Serial.println(rpy[2]);
+  Serial.print("Orientation: ");
+  Serial.print(rpy[0]);
+  Serial.print(" ");
+  Serial.print(rpy[1]);
+  Serial.print(" ");
+  Serial.println(rpy[2]);
 
   for (int i = 0; i < 3; i++)
   {
     float_to_two_bytes(rpy[i], &rpychar[i * 2]);
   }
 
-  filter.invSampleFreq = float(micros()-tic)/1000000.0;
+  
 }
 
 // This function read Nbytes bytes from I2C device at address Address. 
