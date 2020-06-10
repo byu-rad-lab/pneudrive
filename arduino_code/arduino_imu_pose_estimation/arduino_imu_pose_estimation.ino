@@ -16,7 +16,7 @@ SoftwareWire softWire(11,10);
 
 
 // For IMU A
-int i2c_address = 100;
+int i2c_address = 50;
 float ax_min = -24896;
 float ay_min = -18384;
 float az_min = -19124;
@@ -34,7 +34,7 @@ float gy_offset = 44.3;
 float gz_offset = -161.0;
 
 // For IMU B
-//int i2c_address = 101;
+//int i2c_address = 51;
 //float ax_min = -19200;
 //float ay_min = -18384;
 //float az_min = -21300;
@@ -188,8 +188,6 @@ void loop()
   {
     float_to_two_bytes(rpy[i], &rpychar[i * 2]);
   }
-
-  
 }
 
 // This function read Nbytes bytes from I2C device at address Address. 

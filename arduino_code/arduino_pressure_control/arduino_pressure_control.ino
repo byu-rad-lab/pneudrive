@@ -67,14 +67,14 @@ void loop(void)
 
   double bias = 95*0;
   double gain = 100.0/1024.0;
-  double a1 = .75;
+  double a1 = .5;
   double a2 = 1.0-a1;
   p[0] = a1*p[0] + a2*(analogRead(A0)-bias)*gain;
   p[1] = a1*p[1] + a2*(analogRead(A1)-bias)*gain;
   p[2] = a1*p[2] + a2*(analogRead(A2)-bias)*gain;
   p[3] = a1*p[3] + a2*(analogRead(A3)-bias)*gain; 
 
-  float kp = 20.;
+  float kp = 10.;
   float deadband = .0;
   for(int i=0; i<4; i++)
   { 
