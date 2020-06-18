@@ -16,38 +16,26 @@ SoftwareWire softWire(11,10);
 
 
 // For IMU A
-int i2c_address = 50;
-float ax_min = -24896;
-float ay_min = -18384;
-float az_min = -19124;
-float ax_max = 17064;
-float ay_max = 19296;
-float az_max = 18884;
-float mx_min = -214;
-float my_min = -118;
-float mz_min = -653;
-float mx_max = 316;
-float my_max = 401;
-float mz_max = -75;
-float gx_offset = -159.4;
-float gy_offset = 44.3;
-float gz_offset = -161.0;
+int i2c_address = 101;
+float mx_min = -198;
+float mx_max = 305;
+float my_min = -63;
+float my_max = 448;
+float mz_min = -647;
+float mz_max = -118;
+float gx_offset = -131.25;
+float gy_offset = 39.5;
+float gz_offset = -151.0;
 
 // For IMU B
-//int i2c_address = 51;
-//float ax_min = -19200;
-//float ay_min = -18384;
-//float az_min = -21300;
-//float ax_max = 22660;
-//float ay_max = 17560;
-//float az_max = 21348;
-//float mx_min = -37;
-//float my_min = -212;
-//float mz_min = -567;
-//float mx_max = 471;
-//float my_max = 301;
-//float mz_max = -28;
-//float gx_offset = 34.5;
+//int i2c_address = 100;
+//float mx_min = -2;
+//float my_min = -94;
+//float mz_min = -628;
+//float mx_max = 482;
+//float my_max = 398;
+//float mz_max = -112;
+//float gx_offset = 11.5;
 //float gy_offset = 303.5;
 //float gz_offset = 68.1;
 
@@ -63,7 +51,7 @@ unsigned long tic = micros();
 
 void setup()
 {
-  Serial.begin(2000000);
+  Serial.begin(9600);
 
   Wire.begin(i2c_address);
   Wire.onRequest(requestEvent);
@@ -95,7 +83,6 @@ void setup()
 void loop()
 {
   
-  
   // Read accelerometer and gyroscope
   uint8_t Buf[14];
   I2Cread(MPU9250_ADDRESS,0x3B,14,Buf);
@@ -121,28 +108,29 @@ void loop()
   int16_t miy=(Mag[3]<<8 | Mag[2]);
   int16_t miz=(Mag[5]<<8 | Mag[4]);
 
-
-    // Update calibration
-//  float ax_range = ax_max-ax_min;
-//  float ax_mid = .5*(ax_max+ax_min);
-//  float ay_range = ay_max-ay_min;
-//  float ay_mid = .5*(ay_max+ay_min);
-//  float az_range = az_max-az_min;
-//  float az_mid = .5*(az_max+az_min);
-
  
   // Apply calibration bias and gain
   // Also - magnetometer and accel/gyro measurements are not in the same frame
   // Also - I negate the accel vector so it points down instead of up
-  float ax = -convertRawAcceleration(aiy);
-  float ay = -convertRawAcceleration(aix);
+//  float ax = -convertRawAcceleration(aiy);
+//  float ay = -convertRawAcceleration(aix);
+//  float az = convertRawAcceleration(aiz);
+//  float gx = convertRawGyro(giy-gy_offset);
+//  float gy = convertRawGyro(gix-gx_offset);
+//  float gz = -convertRawGyro(giz-gz_offset);
+//  float mx = (mix-mx_mid)*2.0/mx_range;
+//  float my = (miy-my_mid)*2.0/my_range;
+//  float mz = (miz-mz_mid)*2.0/mz_range;
+
+  float ax = convertRawAcceleration(aix);
+  float ay = convertRawAcceleration(aiy);
   float az = convertRawAcceleration(aiz);
-  float gx = convertRawGyro(giy-gy_offset);
-  float gy = convertRawGyro(gix-gx_offset);
-  float gz = -convertRawGyro(giz-gz_offset);
-  float mx = (mix-mx_mid)*2.0/mx_range;
-  float my = (miy-my_mid)*2.0/my_range;
-  float mz = (miz-mz_mid)*2.0/mz_range;
+  float gx = convertRawGyro(gix-gx_offset);
+  float gy = convertRawGyro(giy-gy_offset);
+  float gz = convertRawGyro(giz-gz_offset);
+  float mx = (miy-my_mid)*2.0/my_range;
+  float my = (mix-mx_mid)*2.0/mx_range;
+  float mz = -(miz-mz_mid)*2.0/mz_range;  
 
   //    // Accelerometer
 //    Serial.print (ax,DEC); 
