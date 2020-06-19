@@ -72,39 +72,36 @@ void loop()
   unsigned long tic = micros();
 
   // Read user input
-  if (Serial.available() >= 2)
+  if (Serial.available() >= 1)
   {
-    if (Serial.read() == '#') // Start of new control message
+    int command = Serial.read(); // Commands
+    if (command == 'v') // visualize
     {
-      int command = Serial.read(); // Commands
-      if (command == 'v') // visualize
-      {
-        visualize = true;
-        calibrate_mag = false;
-        calibrate_acc = false;
-        calibrate_gyr = false;
-      }
-      else if (command == 'm')
-      {
-        visualize = false;
-        calibrate_mag = true;
-        calibrate_acc = false;
-        calibrate_gyr = false;
-      }
-      else if (command == 'a')
-      {
-        visualize = false;
-        calibrate_mag = false;
-        calibrate_acc = true;
-        calibrate_gyr = false;
-      }
-      else if (command == 'g')
-      {
-        visualize = false;
-        calibrate_mag = false;
-        calibrate_acc = false;
-        calibrate_gyr = true;
-      }
+      visualize = true;
+      calibrate_mag = false;
+      calibrate_acc = false;
+      calibrate_gyr = false;
+    }
+    else if (command == 'm')
+    {
+      visualize = false;
+      calibrate_mag = true;
+      calibrate_acc = false;
+      calibrate_gyr = false;
+    }
+    else if (command == 'a')
+    {
+      visualize = false;
+      calibrate_mag = false;
+      calibrate_acc = true;
+      calibrate_gyr = false;
+    }
+    else if (command == 'g')
+    {
+      visualize = false;
+      calibrate_mag = false;
+      calibrate_acc = false;
+      calibrate_gyr = true;
     }
   }
   
@@ -117,6 +114,8 @@ void loop()
   int16_t aix=(Buf[0]<<8 | Buf[1]);
   int16_t aiy=(Buf[2]<<8 | Buf[3]);
   int16_t aiz=(Buf[4]<<8 | Buf[5]);
+
+  int16_t temperatur=(Buf[6]<<8 | Buf[7]);
 
   // Gyroscope
   int16_t gix=(Buf[8]<<8 | Buf[9]);
@@ -141,7 +140,9 @@ void loop()
     if(aix<ax_min){ax_min=aix;}
     if(aiy<ay_min){ay_min=aiy;}
     if(aiz<az_min){az_min=aiz;}
-    Serial.print("ax_min: ");
+    Serial.print("Temperature: ");
+    Serial.print(temperatur);
+    Serial.print("  ax_min: ");
     Serial.print(ax_min);
     Serial.print("  ax_max: ");
     Serial.print(ax_max);
@@ -162,7 +163,9 @@ void loop()
     if(mix<mx_min){mx_min=mix;}
     if(miy<my_min){my_min=miy;}
     if(miz<mz_min){mz_min=miz;}
-    Serial.print("mx_min: ");
+    Serial.print("Temperature: ");
+    Serial.print(temperatur);
+    Serial.print("  mx_min: ");
     Serial.print(mx_min);
     Serial.print("  mx_max: ");
     Serial.print(mx_max);
@@ -180,7 +183,9 @@ void loop()
     gx_offset = .999*gx_offset + .001*float(gix);
     gy_offset = .999*gy_offset + .001*float(giy);
     gz_offset = .999*gz_offset + .001*float(giz);
-    Serial.print("gx_offset: ");
+    Serial.print("Temperature: ");
+    Serial.print(temperatur);
+    Serial.print("  gx_offset: ");
     Serial.print(gx_offset);
     Serial.print("  gy_offset: ");
     Serial.print(gy_offset);
