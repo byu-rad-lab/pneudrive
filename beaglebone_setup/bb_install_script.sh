@@ -21,8 +21,6 @@ sudo update-rc.d set_ip_on_startup defaults
 sudo update-rc.d set_ip_on_startup enable
 
 # Create a ROS Workspace and put this package in it
-#cd ..
-#rm -rf ./byu_pressure_control/
 cd ~/
 mkdir -p ~/ros_ws/src
 cd ros_ws/src
