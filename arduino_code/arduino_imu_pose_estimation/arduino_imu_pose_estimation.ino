@@ -30,7 +30,7 @@ SoftwareWire softWire(11,10);
 
 // For IMU B
 // Temperature 2100
-//int i2c_address = 100;
+//int i2c_address = 101;
 //float mx_min = -200;
 //float mx_max = 344;
 //float my_min = -317;
@@ -42,28 +42,28 @@ SoftwareWire softWire(11,10);
 //float gz_offset = 316.8;
 
 // For IMU C
-//int i2c_address = 100;
-//float mx_min = -130;
-//float mx_max = 394;
-//float my_min = -175;
-//float my_max = 356;
-//float mz_min = -479;
-//float mz_max = 68;
+//int i2c_address = 102;
+//float mx_min = -139;
+//float mx_max = 384;
+//float my_min = -178;
+//float my_max = 354;
+//float mz_min = -469;
+//float mz_max = 64;
 //float gx_offset = -470.5;
-//float gy_offset = 191.0;
-//float gz_offset = -125.7;
+//float gy_offset = 215.0;
+//float gz_offset = -111.7;
 
 // For IMU D
-int i2c_address = 103;
-float mx_min = -281;
-float mx_max = 209;
-float my_min = -141;
-float my_max = 357;
-float mz_min = -314;
-float mz_max = 184;
-float gx_offset = 172.2;
-float gy_offset = 141.2;
-float gz_offset = 299.8;
+//int i2c_address = 103;
+//float mx_min = -281;
+//float mx_max = 209;
+//float my_min = -141;
+//float my_max = 357;
+//float mz_min = -314;
+//float mz_max = 184;
+//float gx_offset = 172.2;
+//float gy_offset = 141.2;
+//float gz_offset = 299.8;
 
 
 float mx_range = mx_max-mx_min;
