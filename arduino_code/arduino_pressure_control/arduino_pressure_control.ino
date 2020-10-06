@@ -5,7 +5,7 @@
 
 #include <Wire.h>
 
-int i2c_address = 12;
+int i2c_address = 12; //This is set individually before flashing the arduino.  As of Oct 5 2020 10 is the base 11 is the middle joint and 12 is the tip
 
 float p[4] = {0, 0, 0, 0};
 float pcmd[4] = {0, 0, 0, 0};
