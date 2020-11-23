@@ -22,7 +22,5 @@ Apart from the 5V power supply which came with your BBB, you will need a power s
 
 # Things to consider for a future revision of the board
 
-* Move the pressure sensor pins farther apart so it fits the sensor better
-* Rename the silk screen labels for the pressure sensors. PS4->PS0. PS3->PS1. PS2->PS2. PS1->PS3.
 * Find a robust way to plug the pressure sensors into the board. Right now they're soldered directly to the board, but it would be convenient to be able to unplug and replace them.
 * The Arduino Pro mini can take 12 V power and regulate it down to 5V on the VCC pin. This would eliminate the need to run separate 5V and 12V wires.
