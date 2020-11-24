@@ -23,8 +23,8 @@ Apart from the 5V power supply which came with your BBB, you will need a power s
 
 # Populating the board
 
-The image below shows the stop surface of the board. The yellow highlighted sections represent the areas where we soldered headers to the board (we plug the Arduino and both motor controllers into headers rather than soldering them directly to the board).
-Values and placement for resistors and capacitors are also shown on the image below. 
+The image below shows the top-down view of the board with some added annotations. The yellow highlighted sections represent the areas where we soldered headers to the board (we plug the Arduino and both motor controllers into headers rather than soldering them directly to the board).
+Values and placement for resistors and capacitors are also shown on the image below. Pressure sensors should be soldered in the areas labeled PS1 - PS4 along the top edge of the board. The connectors for power, I2C, and valves are located along the opposite edge.
 
 ![PCB Labels](/pcb_top.png "PCB Silkscreen and Values")
 
