@@ -23,7 +23,8 @@ Apart from the 5V power supply which came with your BBB, you will need a power s
 
 # Populating the board
 
-To populate the board, solder female headers into the board for the Arduino and both motor drivers (see yellow highlighted sections on the image below). Solder resistors, capacitors, and connectors directly into the board where shown (see image below for values).
+The image below shows the stop surface of the board. The yellow highlighted sections represent the areas where we soldered headers to the board (we plug the Arduino and both motor controllers into headers rather than soldering them directly to the board).
+Values and placement for resistors and capacitors are also shown on the image below. 
 
 ![PCB Labels](/pcb_top.png "PCB Silkscreen and Values")
 
