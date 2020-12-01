@@ -1,3 +1,7 @@
+# Files
+
+These PCBs were designed using Autodesk EAGLE. The corresponding project, board, and schematic files are found in this directory, as well as the CAM outputs.
+
 # Places to order parts
 
 For *each* board you will need these things. For each item a link is included where we ordered them.
