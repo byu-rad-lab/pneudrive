@@ -5,6 +5,7 @@
 #include <std_msgs/Float32MultiArray.h>
 #include<ros/ros.h>
 #include "I2CDevice.h"
+#include<ros/console.h>
 
 /**
  * @class PressureController
