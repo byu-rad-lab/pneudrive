@@ -13848,8 +13848,6 @@ http://www.xganon.com</description>
 <part name="U$3" library="pololu-stepper-driver" deviceset="A4990" device=""/>
 <part name="GND1" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND2" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="R5" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="0204/7" package3d_urn="urn:adsk.eagle:package:23498/2"/>
-<part name="I2CPULLUP" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="0204/7" package3d_urn="urn:adsk.eagle:package:23498/2"/>
 <part name="32V" library="1778625" deviceset="1778625" device=""/>
 <part name="VALVE0" library="1778625" deviceset="1778625" device=""/>
 <part name="VALVE1" library="1778625" deviceset="1778625" device=""/>
@@ -13857,6 +13855,8 @@ http://www.xganon.com</description>
 <part name="VALVE3" library="1778625" deviceset="1778625" device=""/>
 <part name="5V" library="1778625" deviceset="1778625" device=""/>
 <part name="I2C" library="1778625" deviceset="1778625" device=""/>
+<part name="I2CPULLUP" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="0204/7" package3d_urn="urn:adsk.eagle:package:23498/2"/>
+<part name="I2CPULLUP1" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="0204/7" package3d_urn="urn:adsk.eagle:package:23498/2"/>
 </parts>
 <sheets>
 <sheet>
@@ -13959,14 +13959,6 @@ http://www.xganon.com</description>
 <instance part="GND2" gate="1" x="88.9" y="142.24" smashed="yes">
 <attribute name="VALUE" x="88.9" y="142.24" size="1.778" layer="96" rot="MR0"/>
 </instance>
-<instance part="R5" gate="G$1" x="-33.02" y="91.44" smashed="yes" rot="R90">
-<attribute name="NAME" x="-34.5186" y="87.63" size="1.778" layer="95" rot="R90"/>
-<attribute name="VALUE" x="-29.718" y="87.63" size="1.778" layer="96" rot="R90"/>
-</instance>
-<instance part="I2CPULLUP" gate="G$1" x="-22.86" y="86.36" smashed="yes" rot="R90">
-<attribute name="NAME" x="-24.3586" y="82.55" size="1.778" layer="95" rot="R90"/>
-<attribute name="VALUE" x="-19.558" y="82.55" size="1.778" layer="96" rot="R90"/>
-</instance>
 <instance part="32V" gate="G$1" x="-7.62" y="182.88" smashed="yes" rot="MR90">
 <attribute name="NAME" x="10.16" y="185.42" size="1.27" layer="95" rot="MR90"/>
 <attribute name="VALUE" x="-10.16" y="185.42" size="1.27" layer="96" rot="MR90"/>
@@ -13993,6 +13985,14 @@ http://www.xganon.com</description>
 <instance part="I2C" gate="G$1" x="-38.1" y="73.66" smashed="yes" rot="R180">
 <attribute name="NAME" x="-45.72" y="60.96" size="1.27" layer="95" rot="R180"/>
 <attribute name="VALUE" x="-40.64" y="76.2" size="1.27" layer="96" rot="R180"/>
+</instance>
+<instance part="I2CPULLUP" gate="G$1" x="-25.4" y="93.98" smashed="yes" rot="R90">
+<attribute name="NAME" x="-26.8986" y="90.17" size="1.778" layer="95" rot="R90"/>
+<attribute name="VALUE" x="-22.098" y="90.17" size="1.778" layer="96" rot="R90"/>
+</instance>
+<instance part="I2CPULLUP1" gate="G$1" x="-30.48" y="93.98" smashed="yes" rot="R90">
+<attribute name="NAME" x="-31.9786" y="90.17" size="1.778" layer="95" rot="R90"/>
+<attribute name="VALUE" x="-27.178" y="90.17" size="1.778" layer="96" rot="R90"/>
 </instance>
 </instances>
 <busses>
@@ -14195,33 +14195,22 @@ http://www.xganon.com</description>
 <label x="101.6" y="137.16" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="U$1" gate="G$1" pin="A4"/>
-<wire x1="17.78" y1="83.82" x2="15.24" y2="83.82" width="0.1524" layer="91"/>
-<wire x1="-25.4" y1="60.96" x2="17.78" y2="60.96" width="0.1524" layer="91"/>
-<wire x1="17.78" y1="60.96" x2="17.78" y2="83.82" width="0.1524" layer="91"/>
-<pinref part="I2CPULLUP" gate="G$1" pin="1"/>
-<wire x1="-25.4" y1="60.96" x2="-25.4" y2="81.28" width="0.1524" layer="91"/>
-<wire x1="-25.4" y1="81.28" x2="-22.86" y2="81.28" width="0.1524" layer="91"/>
-<junction x="-25.4" y="60.96"/>
-<pinref part="I2C" gate="G$1" pin="2"/>
-<wire x1="-33.02" y1="63.5" x2="-33.02" y2="60.96" width="0.1524" layer="91"/>
-<wire x1="-33.02" y1="60.96" x2="-25.4" y2="60.96" width="0.1524" layer="91"/>
-</segment>
-<segment>
-<pinref part="U$1" gate="G$1" pin="VCC"/>
-<wire x1="0" y1="78.74" x2="-2.54" y2="78.74" width="0.1524" layer="91"/>
-<label x="-5.08" y="78.74" size="1.778" layer="95"/>
-</segment>
-<segment>
 <label x="-22.86" y="106.68" size="1.778" layer="95"/>
-<pinref part="R5" gate="G$1" pin="2"/>
-<wire x1="-33.02" y1="96.52" x2="-33.02" y2="106.68" width="0.1524" layer="91"/>
-<wire x1="-33.02" y1="106.68" x2="-22.86" y2="106.68" width="0.1524" layer="91"/>
-<pinref part="I2CPULLUP" gate="G$1" pin="2"/>
-<wire x1="-22.86" y1="91.44" x2="-22.86" y2="106.68" width="0.1524" layer="91"/>
+<wire x1="-30.48" y1="99.06" x2="-30.48" y2="106.68" width="0.1524" layer="91"/>
+<wire x1="-30.48" y1="106.68" x2="-25.4" y2="106.68" width="0.1524" layer="91"/>
 <pinref part="5V" gate="G$1" pin="2"/>
-<wire x1="-35.56" y1="106.68" x2="-33.02" y2="106.68" width="0.1524" layer="91"/>
-<junction x="-33.02" y="106.68"/>
+<wire x1="-25.4" y1="106.68" x2="-22.86" y2="106.68" width="0.1524" layer="91"/>
+<wire x1="-35.56" y1="106.68" x2="-30.48" y2="106.68" width="0.1524" layer="91"/>
+<junction x="-30.48" y="106.68"/>
+<wire x1="-25.4" y1="99.06" x2="-25.4" y2="106.68" width="0.1524" layer="91"/>
+<junction x="-25.4" y="106.68"/>
+<pinref part="I2CPULLUP" gate="G$1" pin="2"/>
+<pinref part="I2CPULLUP1" gate="G$1" pin="2"/>
+</segment>
+<segment>
+<pinref part="U$1" gate="G$1" pin="RAW"/>
+<wire x1="0" y1="71.12" x2="-2.54" y2="71.12" width="0.1524" layer="91"/>
+<label x="-5.08" y="71.12" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="N$13" class="0">
@@ -14282,12 +14271,11 @@ http://www.xganon.com</description>
 <pinref part="U$1" gate="G$1" pin="A5"/>
 <wire x1="-30.48" y1="68.58" x2="15.24" y2="68.58" width="0.1524" layer="91"/>
 <wire x1="15.24" y1="68.58" x2="15.24" y2="78.74" width="0.1524" layer="91"/>
-<pinref part="R5" gate="G$1" pin="1"/>
-<wire x1="-30.48" y1="68.58" x2="-30.48" y2="86.36" width="0.1524" layer="91"/>
-<wire x1="-30.48" y1="86.36" x2="-33.02" y2="86.36" width="0.1524" layer="91"/>
+<wire x1="-30.48" y1="68.58" x2="-30.48" y2="88.9" width="0.1524" layer="91"/>
 <pinref part="I2C" gate="G$1" pin="1"/>
 <wire x1="-30.48" y1="68.58" x2="-33.02" y2="68.58" width="0.1524" layer="91"/>
 <junction x="-30.48" y="68.58"/>
+<pinref part="I2CPULLUP1" gate="G$1" pin="1"/>
 </segment>
 </net>
 <net name="E1" class="0">
@@ -14518,15 +14506,22 @@ http://www.xganon.com</description>
 <wire x1="48.26" y1="152.4" x2="33.02" y2="152.4" width="0.1524" layer="91"/>
 </segment>
 </net>
+<net name="N$9" class="0">
+<segment>
+<pinref part="I2C" gate="G$1" pin="2"/>
+<wire x1="-33.02" y1="63.5" x2="-25.4" y2="63.5" width="0.1524" layer="91"/>
+<wire x1="-25.4" y1="63.5" x2="17.78" y2="63.5" width="0.1524" layer="91"/>
+<wire x1="17.78" y1="63.5" x2="17.78" y2="83.82" width="0.1524" layer="91"/>
+<pinref part="U$1" gate="G$1" pin="A4"/>
+<wire x1="17.78" y1="83.82" x2="15.24" y2="83.82" width="0.1524" layer="91"/>
+<wire x1="-25.4" y1="88.9" x2="-25.4" y2="63.5" width="0.1524" layer="91"/>
+<junction x="-25.4" y="63.5"/>
+<pinref part="I2CPULLUP" gate="G$1" pin="1"/>
+</segment>
+</net>
 </nets>
 </sheet>
 </sheets>
-<errors>
-<approved hash="113,1,2.54,29.1871,PS1,,,,,"/>
-<approved hash="113,1,50.8,29.1871,PS2,,,,,"/>
-<approved hash="113,1,96.52,29.1871,PS3,,,,,"/>
-<approved hash="113,1,144.78,29.1871,PS4,,,,,"/>
-</errors>
 </schematic>
 </drawing>
 <compatibility>

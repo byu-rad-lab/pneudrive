@@ -1,25 +1,25 @@
 EAGLE AutoRouter Statistics:
 
-Job           : C:/Users/curti/Local_Documents/Github_Repos/byu_pressure_control/pcb_design/Sch_v5.brd
+Job           : /home/alexalindberg/git/byu_pressure_control/pcb_design/Sch_v5.brd
 
-Start at      : 15:57:26 (1/25/2021)
-End at        : 15:57:37 (1/25/2021)
-Elapsed time  : 00:00:02
+Start at      : 17:06:34 (1/25/21)
+End at        : 17:06:36 (1/25/21)
+Elapsed time  : 00:00:00
 
-Signals       :    33   RoutingGrid: 12.5 mil  Layers: 2
-Connections   :    77   predefined:  53 ( 3 Vias )
+Signals       :    34   RoutingGrid: 25 mil  Layers: 2
+Connections   :    76   predefined:  19 ( 0 Vias )
 
-Router memory :   184368
+Router memory :   49984
 
 Passname          :    Busses     Route Optimize1 Optimize2 Optimize3 Optimize4
 
-Time per pass     :  00:00:00  00:00:00  00:00:01  00:00:00  00:00:00  00:00:01
+Time per pass     :  00:00:00  00:00:00  00:00:00  00:00:00  00:00:00  00:00:00
 Number of Ripups  :         0         0         0         0         0         0
 max. Level        :         0         0         0         0         0         0
 max. Total        :         0         0         0         0         0         0
 
-Routed            :         0        24        24        24        24        24
-Vias              :         0        28        14         8         1         1
-Resolution        :    68.8 %   100.0 %   100.0 %   100.0 %   100.0 %   100.0 %
+Routed            :         1        57        57        57        57        57
+Vias              :         0        45        14        11        10        10
+Resolution        :    26.3 %   100.0 %   100.0 %   100.0 %   100.0 %   100.0 %
 
 Final             : 100.0% finished
