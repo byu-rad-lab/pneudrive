@@ -14021,7 +14021,7 @@ http://www.xganon.com</description>
 </bus>
 </busses>
 <nets>
-<net name="GND" class="2">
+<net name="GND" class="3">
 <segment>
 <pinref part="GND4" gate="1" pin="GND"/>
 <pinref part="PS1" gate="G$1" pin="1"/>
