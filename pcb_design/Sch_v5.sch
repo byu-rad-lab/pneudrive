@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
+<grid distance="5" unitdist="mm" unit="mm" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
@@ -13813,11 +13813,15 @@ http://www.xganon.com</description>
 <class number="0" name="default" width="0" drill="0">
 </class>
 <class number="1" name="Power" width="0.3048" drill="0">
+<clearance class="1" value="0.508"/>
 </class>
-<class number="2" name="GND" width="0" drill="0">
+<class number="2" name="Motor Power" width="0.3048" drill="0">
+<clearance class="2" value="1.27"/>
 </class>
-<class number="3" name="Motor Power" width="0.3048" drill="0">
-<clearance class="3" value="0.0508"/>
+<class number="3" name="Analog Signal" width="0" drill="0">
+<clearance class="3" value="0.254"/>
+</class>
+<class number="4" name="I2C Bus" width="0" drill="0">
 </class>
 </classes>
 <parts>
@@ -14021,7 +14025,7 @@ http://www.xganon.com</description>
 </bus>
 </busses>
 <nets>
-<net name="GND" class="3">
+<net name="GND" class="0">
 <segment>
 <pinref part="GND4" gate="1" pin="GND"/>
 <pinref part="PS1" gate="G$1" pin="1"/>
@@ -14168,21 +14172,21 @@ http://www.xganon.com</description>
 <pinref part="C6" gate="G$1" pin="+"/>
 <wire x1="58.42" y1="27.94" x2="58.42" y2="15.24" width="0.1524" layer="91"/>
 <wire x1="58.42" y1="15.24" x2="55.88" y2="15.24" width="0.1524" layer="91"/>
-<label x="81.28" y="22.86" size="1.778" layer="95" rot="MR90"/>
+<label x="58.42" y="22.86" size="1.778" layer="95" rot="MR90"/>
 </segment>
 <segment>
 <pinref part="PS2" gate="G$1" pin="6"/>
 <pinref part="C7" gate="G$1" pin="+"/>
 <wire x1="104.14" y1="27.94" x2="104.14" y2="15.24" width="0.1524" layer="91"/>
 <wire x1="104.14" y1="15.24" x2="101.6" y2="15.24" width="0.1524" layer="91"/>
-<label x="83.82" y="22.86" size="1.778" layer="95" rot="R90"/>
+<label x="106.68" y="22.86" size="1.778" layer="95" rot="R90"/>
 </segment>
 <segment>
 <pinref part="PS3" gate="G$1" pin="6"/>
 <pinref part="C8" gate="G$1" pin="+"/>
 <wire x1="152.4" y1="27.94" x2="152.4" y2="15.24" width="0.1524" layer="91"/>
 <wire x1="152.4" y1="15.24" x2="149.86" y2="15.24" width="0.1524" layer="91"/>
-<label x="157.48" y="15.24" size="1.778" layer="95" rot="MR90"/>
+<label x="152.48" y="20.24" size="1.778" layer="95" rot="MR90"/>
 </segment>
 <segment>
 <pinref part="U$2" gate="G$1" pin="INH"/>
@@ -14238,7 +14242,7 @@ http://www.xganon.com</description>
 <wire x1="83.82" y1="185.42" x2="83.82" y2="187.96" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="VIN" class="3">
+<net name="MOTOR_VDD" class="2">
 <segment>
 <pinref part="U$3" gate="G$1" pin="VIN"/>
 <wire x1="91.44" y1="180.34" x2="91.44" y2="182.88" width="0.1524" layer="91"/>
@@ -14253,7 +14257,7 @@ http://www.xganon.com</description>
 <label x="-2.54" y="172.72" size="1.778" layer="95" rot="MR0"/>
 </segment>
 </net>
-<net name="GND2" class="0">
+<net name="MOTOR_GND" class="0">
 <segment>
 <pinref part="U$3" gate="G$1" pin="GND2"/>
 <wire x1="88.9" y1="180.34" x2="73.66" y2="180.34" width="0.1524" layer="91"/>
@@ -14266,7 +14270,7 @@ http://www.xganon.com</description>
 <label x="2.54" y="170.18" size="1.778" layer="95"/>
 </segment>
 </net>
-<net name="N$21" class="0">
+<net name="SCL" class="4">
 <segment>
 <pinref part="U$1" gate="G$1" pin="A5"/>
 <wire x1="-30.48" y1="68.58" x2="15.24" y2="68.58" width="0.1524" layer="91"/>
@@ -14276,6 +14280,7 @@ http://www.xganon.com</description>
 <wire x1="-30.48" y1="68.58" x2="-33.02" y2="68.58" width="0.1524" layer="91"/>
 <junction x="-30.48" y="68.58"/>
 <pinref part="I2CPULLUP1" gate="G$1" pin="1"/>
+<label x="-15" y="70" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="E1" class="0">
@@ -14333,7 +14338,7 @@ http://www.xganon.com</description>
 <wire x1="104.14" y1="180.34" x2="104.14" y2="187.96" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="A0" class="0">
+<net name="A0" class="3">
 <segment>
 <pinref part="U$1" gate="G$1" pin="A0"/>
 <wire x1="0" y1="88.9" x2="-17.78" y2="88.9" width="0.1524" layer="91"/>
@@ -14347,7 +14352,7 @@ http://www.xganon.com</description>
 <junction x="-17.78" y="40.64"/>
 </segment>
 </net>
-<net name="A1" class="0">
+<net name="A1" class="3">
 <segment>
 <pinref part="U$1" gate="G$1" pin="A1"/>
 <wire x1="0" y1="86.36" x2="-17.78" y2="86.36" width="0.1524" layer="91"/>
@@ -14360,7 +14365,7 @@ http://www.xganon.com</description>
 <junction x="30.48" y="40.64"/>
 </segment>
 </net>
-<net name="A2" class="0">
+<net name="A2" class="3">
 <segment>
 <pinref part="U$1" gate="G$1" pin="A2"/>
 <wire x1="0" y1="83.82" x2="-17.78" y2="83.82" width="0.1524" layer="91"/>
@@ -14373,7 +14378,7 @@ http://www.xganon.com</description>
 <junction x="76.2" y="40.64"/>
 </segment>
 </net>
-<net name="A3" class="0">
+<net name="A3" class="3">
 <segment>
 <pinref part="U$1" gate="G$1" pin="A3"/>
 <wire x1="0" y1="81.28" x2="-17.78" y2="81.28" width="0.1524" layer="91"/>
@@ -14506,7 +14511,7 @@ http://www.xganon.com</description>
 <wire x1="48.26" y1="152.4" x2="33.02" y2="152.4" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$9" class="0">
+<net name="SDA" class="4">
 <segment>
 <pinref part="I2C" gate="G$1" pin="2"/>
 <wire x1="-33.02" y1="63.5" x2="-25.4" y2="63.5" width="0.1524" layer="91"/>
@@ -14517,6 +14522,7 @@ http://www.xganon.com</description>
 <wire x1="-25.4" y1="88.9" x2="-25.4" y2="63.5" width="0.1524" layer="91"/>
 <junction x="-25.4" y="63.5"/>
 <pinref part="I2CPULLUP" gate="G$1" pin="1"/>
+<label x="-30" y="60" size="1.778" layer="95"/>
 </segment>
 </net>
 </nets>

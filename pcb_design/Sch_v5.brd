@@ -3,7 +3,7 @@
 <eagle version="9.6.2">
 <drawing>
 <settings>
-<setting alwaysvectorfont="no"/>
+<setting alwaysvectorfont="yes"/>
 <setting verticaltext="up"/>
 </settings>
 <grid distance="3" unitdist="mm" unit="mm" style="lines" multiple="1" display="no" altdistance="0.5" altunitdist="mm" altunit="mm"/>
@@ -1394,11 +1394,15 @@ http://www.xganon.com</description>
 <class number="0" name="default" width="0" drill="0">
 </class>
 <class number="1" name="Power" width="0.3048" drill="0">
+<clearance class="1" value="0.508"/>
 </class>
-<class number="2" name="GND" width="0" drill="0">
+<class number="2" name="Motor Power" width="0.3048" drill="0">
+<clearance class="2" value="1.27"/>
 </class>
-<class number="3" name="Motor Power" width="0.3048" drill="0">
-<clearance class="3" value="0.0508"/>
+<class number="3" name="Analog Signal" width="0" drill="0">
+<clearance class="3" value="0.254"/>
+</class>
+<class number="4" name="I2C Bus" width="0" drill="0">
 </class>
 </classes>
 <designrules name="4pcb">
@@ -1775,7 +1779,7 @@ design rules under a new name.</description>
 </element>
 </elements>
 <signals>
-<signal name="GND" class="3">
+<signal name="GND">
 <contactref element="PS1" pad="1"/>
 <contactref element="C6" pad="-"/>
 <contactref element="C9" pad="-"/>
@@ -1900,21 +1904,21 @@ design rules under a new name.</description>
 <contactref element="VALVE2" pad="2"/>
 <wire x1="153.34" y1="17.51" x2="162.21" y2="12.01" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="VIN" class="3">
+<signal name="MOTOR_VDD" class="2">
 <contactref element="U$3" pad="7"/>
 <contactref element="U$2" pad="7"/>
 <contactref element="32V" pad="1"/>
 <wire x1="160.96" y1="17.51" x2="183.82" y2="17.51" width="0" layer="19" extent="1-1"/>
 <wire x1="121.61" y1="12.01" x2="160.96" y2="17.51" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="GND2">
+<signal name="MOTOR_GND">
 <contactref element="U$3" pad="8"/>
 <contactref element="U$2" pad="8"/>
 <contactref element="32V" pad="2"/>
 <wire x1="163.5" y1="17.51" x2="186.36" y2="17.51" width="0" layer="19" extent="1-1"/>
 <wire x1="124.11" y1="12.01" x2="163.5" y2="17.51" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="N$21">
+<signal name="SCL" class="4">
 <contactref element="U$1" pad="A5"/>
 <contactref element="I2C" pad="1"/>
 <contactref element="I2CPULLUP1" pad="1"/>
@@ -1946,28 +1950,28 @@ design rules under a new name.</description>
 <contactref element="VALVE3" pad="2"/>
 <wire x1="150.78" y1="12.01" x2="148.26" y2="17.51" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="A0">
+<signal name="A0" class="3">
 <contactref element="U$1" pad="A0"/>
 <contactref element="R1" pad="2"/>
 <contactref element="C9" pad="+"/>
-<wire x1="111.43" y1="37.83" x2="108.89" y2="44.18" width="0" layer="19" extent="1-1"/>
-<wire x1="121.209" y1="31.48" x2="111.43" y2="37.83" width="0" layer="19" extent="1-1"/>
+<wire x1="111.43" y1="37.83" x2="121.209" y2="31.48" width="0" layer="19" extent="1-1"/>
+<wire x1="108.89" y1="44.18" x2="111.43" y2="37.83" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="A1">
+<signal name="A1" class="3">
 <contactref element="U$1" pad="A1"/>
 <contactref element="R2" pad="2"/>
 <contactref element="C10" pad="+"/>
 <wire x1="131.75" y1="37.83" x2="126.67" y2="44.18" width="0" layer="19" extent="1-1"/>
 <wire x1="123.749" y1="31.48" x2="131.75" y2="37.83" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="A2">
+<signal name="A2" class="3">
 <contactref element="U$1" pad="A2"/>
 <contactref element="R3" pad="2"/>
 <contactref element="C11" pad="+"/>
-<wire x1="153.34" y1="37.83" x2="144.45" y2="44.18" width="0" layer="19" extent="1-1"/>
+<wire x1="144.45" y1="44.18" x2="153.34" y2="37.83" width="0" layer="19" extent="1-1"/>
 <wire x1="126.289" y1="31.48" x2="144.45" y2="44.18" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="A3">
+<signal name="A3" class="3">
 <contactref element="U$1" pad="A3"/>
 <contactref element="R4" pad="2"/>
 <contactref element="C12" pad="+"/>
@@ -2034,7 +2038,7 @@ design rules under a new name.</description>
 <contactref element="U$2" pad="13"/>
 <wire x1="131.369" y1="16.24" x2="176.2" y2="30.21" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="N$9">
+<signal name="SDA" class="4">
 <contactref element="I2C" pad="2"/>
 <contactref element="U$1" pad="A4"/>
 <contactref element="I2CPULLUP" pad="1"/>
