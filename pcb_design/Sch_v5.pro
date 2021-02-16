@@ -2,8 +2,8 @@ EAGLE AutoRouter Statistics:
 
 Job           : C:/Users/curti/Local_Documents/Github_Repos/byu_pressure_control/pcb_design/Sch_v5.brd
 
-Start at      : 21:00:27 (2/15/2021)
-End at        : 21:00:37 (2/15/2021)
+Start at      : 14:37:01 (2/16/2021)
+End at        : 14:37:11 (2/16/2021)
 Elapsed time  : 00:00:08
 
 Signals       :    34   RoutingGrid: 9.84252 mil  Layers: 2
@@ -19,7 +19,7 @@ max. Level        :         0         0         0         0         0         0
 max. Total        :         0         0         0         0         0         0
 
 Routed            :         0        53        53        53        53        53
-Vias              :         0        46        15         8         7         3
+Vias              :         0        55        22        11        10         7
 Resolution        :    30.3 %   100.0 %   100.0 %   100.0 %   100.0 %   100.0 %
 
 Final             : 100.0% finished

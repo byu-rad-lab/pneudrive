@@ -8,34 +8,34 @@
 </settings>
 <grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
-<layer number="1" name="Top" color="4" fill="1" visible="yes" active="no"/>
-<layer number="2" name="Route2" color="16" fill="1" visible="yes" active="no"/>
-<layer number="3" name="Route3" color="17" fill="1" visible="yes" active="no"/>
-<layer number="4" name="Route4" color="18" fill="1" visible="yes" active="no"/>
-<layer number="5" name="Route5" color="19" fill="1" visible="yes" active="no"/>
-<layer number="6" name="Route6" color="25" fill="1" visible="yes" active="no"/>
-<layer number="7" name="Route7" color="26" fill="1" visible="yes" active="no"/>
-<layer number="8" name="Route8" color="27" fill="1" visible="yes" active="no"/>
-<layer number="9" name="Route9" color="28" fill="1" visible="yes" active="no"/>
-<layer number="10" name="Route10" color="29" fill="1" visible="yes" active="no"/>
-<layer number="11" name="Route11" color="30" fill="1" visible="yes" active="no"/>
-<layer number="12" name="Route12" color="20" fill="1" visible="yes" active="no"/>
-<layer number="13" name="Route13" color="21" fill="1" visible="yes" active="no"/>
-<layer number="14" name="Route14" color="22" fill="1" visible="yes" active="no"/>
-<layer number="15" name="Route15" color="23" fill="1" visible="yes" active="no"/>
-<layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="no"/>
-<layer number="17" name="Pads" color="2" fill="1" visible="yes" active="no"/>
-<layer number="18" name="Vias" color="2" fill="1" visible="yes" active="no"/>
-<layer number="19" name="Unrouted" color="6" fill="1" visible="yes" active="no"/>
-<layer number="20" name="Dimension" color="24" fill="1" visible="yes" active="no"/>
-<layer number="21" name="tPlace" color="7" fill="1" visible="yes" active="no"/>
-<layer number="22" name="bPlace" color="7" fill="1" visible="yes" active="no"/>
-<layer number="23" name="tOrigins" color="15" fill="1" visible="yes" active="no"/>
-<layer number="24" name="bOrigins" color="15" fill="1" visible="yes" active="no"/>
-<layer number="25" name="tNames" color="7" fill="1" visible="yes" active="no"/>
-<layer number="26" name="bNames" color="7" fill="1" visible="yes" active="no"/>
-<layer number="27" name="tValues" color="7" fill="1" visible="yes" active="no"/>
-<layer number="28" name="bValues" color="7" fill="1" visible="yes" active="no"/>
+<layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
+<layer number="2" name="Route2" color="16" fill="1" visible="no" active="no"/>
+<layer number="3" name="Route3" color="17" fill="1" visible="no" active="no"/>
+<layer number="4" name="Route4" color="18" fill="1" visible="no" active="no"/>
+<layer number="5" name="Route5" color="19" fill="1" visible="no" active="no"/>
+<layer number="6" name="Route6" color="25" fill="1" visible="no" active="no"/>
+<layer number="7" name="Route7" color="26" fill="1" visible="no" active="no"/>
+<layer number="8" name="Route8" color="27" fill="1" visible="no" active="no"/>
+<layer number="9" name="Route9" color="28" fill="1" visible="no" active="no"/>
+<layer number="10" name="Route10" color="29" fill="1" visible="no" active="no"/>
+<layer number="11" name="Route11" color="30" fill="1" visible="no" active="no"/>
+<layer number="12" name="Route12" color="20" fill="1" visible="no" active="no"/>
+<layer number="13" name="Route13" color="21" fill="1" visible="no" active="no"/>
+<layer number="14" name="Route14" color="22" fill="1" visible="no" active="no"/>
+<layer number="15" name="Route15" color="23" fill="1" visible="no" active="no"/>
+<layer number="16" name="Bottom" color="1" fill="1" visible="no" active="no"/>
+<layer number="17" name="Pads" color="2" fill="1" visible="no" active="no"/>
+<layer number="18" name="Vias" color="2" fill="1" visible="no" active="no"/>
+<layer number="19" name="Unrouted" color="6" fill="1" visible="no" active="no"/>
+<layer number="20" name="Dimension" color="24" fill="1" visible="no" active="no"/>
+<layer number="21" name="tPlace" color="7" fill="1" visible="no" active="no"/>
+<layer number="22" name="bPlace" color="7" fill="1" visible="no" active="no"/>
+<layer number="23" name="tOrigins" color="15" fill="1" visible="no" active="no"/>
+<layer number="24" name="bOrigins" color="15" fill="1" visible="no" active="no"/>
+<layer number="25" name="tNames" color="7" fill="1" visible="no" active="no"/>
+<layer number="26" name="bNames" color="7" fill="1" visible="no" active="no"/>
+<layer number="27" name="tValues" color="7" fill="1" visible="no" active="no"/>
+<layer number="28" name="bValues" color="7" fill="1" visible="no" active="no"/>
 <layer number="29" name="tStop" color="7" fill="3" visible="no" active="no"/>
 <layer number="30" name="bStop" color="7" fill="6" visible="no" active="no"/>
 <layer number="31" name="tCream" color="7" fill="4" visible="no" active="no"/>
@@ -44,8 +44,8 @@
 <layer number="34" name="bFinish" color="6" fill="6" visible="no" active="no"/>
 <layer number="35" name="tGlue" color="7" fill="4" visible="no" active="no"/>
 <layer number="36" name="bGlue" color="7" fill="5" visible="no" active="no"/>
-<layer number="37" name="tTest" color="7" fill="1" visible="yes" active="no"/>
-<layer number="38" name="bTest" color="7" fill="1" visible="yes" active="no"/>
+<layer number="37" name="tTest" color="7" fill="1" visible="no" active="no"/>
+<layer number="38" name="bTest" color="7" fill="1" visible="no" active="no"/>
 <layer number="39" name="tKeepout" color="4" fill="11" visible="no" active="no"/>
 <layer number="40" name="bKeepout" color="1" fill="11" visible="no" active="no"/>
 <layer number="41" name="tRestrict" color="4" fill="10" visible="no" active="no"/>
@@ -53,19 +53,19 @@
 <layer number="43" name="vRestrict" color="2" fill="10" visible="no" active="no"/>
 <layer number="44" name="Drills" color="7" fill="1" visible="no" active="no"/>
 <layer number="45" name="Holes" color="7" fill="1" visible="no" active="no"/>
-<layer number="46" name="Milling" color="3" fill="1" visible="yes" active="no"/>
-<layer number="47" name="Measures" color="7" fill="1" visible="yes" active="no"/>
-<layer number="48" name="Document" color="7" fill="1" visible="yes" active="no"/>
-<layer number="49" name="Reference" color="7" fill="1" visible="yes" active="no"/>
-<layer number="50" name="dxf" color="7" fill="1" visible="yes" active="no"/>
-<layer number="51" name="tDocu" color="7" fill="1" visible="yes" active="no"/>
-<layer number="52" name="bDocu" color="7" fill="1" visible="yes" active="no"/>
-<layer number="53" name="tGND_GNDA" color="7" fill="9" visible="yes" active="no"/>
-<layer number="54" name="bGND_GNDA" color="1" fill="9" visible="yes" active="no"/>
-<layer number="56" name="wert" color="7" fill="1" visible="yes" active="no"/>
-<layer number="57" name="tCAD" color="7" fill="1" visible="yes" active="no"/>
-<layer number="59" name="tCarbon" color="7" fill="1" visible="yes" active="no"/>
-<layer number="60" name="bCarbon" color="7" fill="1" visible="yes" active="no"/>
+<layer number="46" name="Milling" color="3" fill="1" visible="no" active="no"/>
+<layer number="47" name="Measures" color="7" fill="1" visible="no" active="no"/>
+<layer number="48" name="Document" color="7" fill="1" visible="no" active="no"/>
+<layer number="49" name="Reference" color="7" fill="1" visible="no" active="no"/>
+<layer number="50" name="dxf" color="7" fill="1" visible="no" active="no"/>
+<layer number="51" name="tDocu" color="7" fill="1" visible="no" active="no"/>
+<layer number="52" name="bDocu" color="7" fill="1" visible="no" active="no"/>
+<layer number="53" name="tGND_GNDA" color="7" fill="9" visible="no" active="no"/>
+<layer number="54" name="bGND_GNDA" color="1" fill="9" visible="no" active="no"/>
+<layer number="56" name="wert" color="7" fill="1" visible="no" active="no"/>
+<layer number="57" name="tCAD" color="7" fill="1" visible="no" active="no"/>
+<layer number="59" name="tCarbon" color="7" fill="1" visible="no" active="no"/>
+<layer number="60" name="bCarbon" color="7" fill="1" visible="no" active="no"/>
 <layer number="88" name="SimResults" color="9" fill="1" visible="yes" active="yes"/>
 <layer number="89" name="SimProbes" color="9" fill="1" visible="yes" active="yes"/>
 <layer number="90" name="Modules" color="5" fill="1" visible="yes" active="yes"/>
@@ -4716,149 +4716,6 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 </deviceset>
 </devicesets>
 </library>
-<library name="byu_pressure_control">
-<packages>
-<package name="NANO_FOOTPRINT" urn="urn:adsk.eagle:footprint:26714877/3" locally_modified="yes">
-<description>Arduino Nano Every Footprint</description>
-<pad name="8" x="-7.62" y="0" drill="1.016"/>
-<pad name="7" x="-7.62" y="2.54" drill="1.016"/>
-<pad name="6" x="-7.62" y="5.08" drill="1.016"/>
-<pad name="5" x="-7.62" y="7.62" drill="1.016"/>
-<pad name="4" x="-7.62" y="10.16" drill="1.016"/>
-<pad name="3" x="-7.62" y="12.7" drill="1.016"/>
-<pad name="9" x="-7.62" y="-2.54" drill="1.016"/>
-<pad name="10" x="-7.62" y="-5.08" drill="1.016"/>
-<pad name="11" x="-7.62" y="-7.62" drill="1.016"/>
-<pad name="12" x="-7.62" y="-10.16" drill="1.016"/>
-<pad name="13" x="-7.62" y="-12.7" drill="1.016"/>
-<pad name="14" x="-7.62" y="-15.24" drill="1.016"/>
-<pad name="15" x="-7.62" y="-17.78" drill="1.016"/>
-<pad name="2" x="-7.62" y="15.24" drill="1.016"/>
-<pad name="1" x="-7.62" y="17.78" drill="1.016"/>
-<pad name="23" x="7.62" y="0" drill="1.016" rot="R180"/>
-<pad name="22" x="7.62" y="-2.54" drill="1.016" rot="R180"/>
-<pad name="21" x="7.62" y="-5.08" drill="1.016" rot="R180"/>
-<pad name="20" x="7.62" y="-7.62" drill="1.016" rot="R180"/>
-<pad name="19" x="7.62" y="-10.16" drill="1.016" rot="R180"/>
-<pad name="18" x="7.62" y="-12.7" drill="1.016" rot="R180"/>
-<pad name="24" x="7.62" y="2.54" drill="1.016" rot="R180"/>
-<pad name="25" x="7.62" y="5.08" drill="1.016" rot="R180"/>
-<pad name="26" x="7.62" y="7.62" drill="1.016" rot="R180"/>
-<pad name="27" x="7.62" y="10.16" drill="1.016" rot="R180"/>
-<pad name="28" x="7.62" y="12.7" drill="1.016" rot="R180"/>
-<pad name="29" x="7.62" y="15.24" drill="1.016" rot="R180"/>
-<pad name="30" x="7.62" y="17.78" drill="1.016" rot="R180"/>
-<pad name="17" x="7.62" y="-15.24" drill="1.016" rot="R180"/>
-<pad name="16" x="7.62" y="-17.78" drill="1.016" rot="R180"/>
-<wire x1="-8.89" y1="21.59" x2="8.89" y2="21.59" width="0.127" layer="21"/>
-<wire x1="8.89" y1="21.59" x2="8.89" y2="-21.59" width="0.127" layer="21"/>
-<wire x1="8.89" y1="-21.59" x2="-8.89" y2="-21.59" width="0.127" layer="21"/>
-<wire x1="-8.89" y1="-21.59" x2="-8.89" y2="21.59" width="0.127" layer="21"/>
-<wire x1="-2.54" y1="21.59" x2="-2.54" y2="19.05" width="0.127" layer="21"/>
-<wire x1="-2.54" y1="19.05" x2="2.54" y2="19.05" width="0.127" layer="21"/>
-<wire x1="2.54" y1="19.05" x2="2.54" y2="21.59" width="0.127" layer="21"/>
-<circle x="-7.62" y="-20.32" radius="0.8255" width="0.127" layer="21"/>
-<circle x="7.62" y="-20.32" radius="0.8255" width="0.127" layer="21"/>
-<circle x="7.62" y="20.32" radius="0.8255" width="0.127" layer="21"/>
-<circle x="-7.62" y="20.32" radius="0.8255" width="0.127" layer="21"/>
-</package>
-</packages>
-<packages3d>
-<package3d name="NANO" urn="urn:adsk.eagle:package:26714879/3" type="box">
-<description>Arduino Nano Every Footprint</description>
-<packageinstances>
-<packageinstance name="NANO_FOOTPRINT"/>
-</packageinstances>
-</package3d>
-</packages3d>
-<symbols>
-<symbol name="NANO_SYMBOL" urn="urn:adsk.eagle:symbol:26714878/4">
-<pin name="D0/RX" x="12.7" y="20.32" length="short" rot="R180"/>
-<pin name="D1/TX" x="12.7" y="17.78" length="short" rot="R180"/>
-<pin name="RESET" x="-12.7" y="10.16" length="short"/>
-<pin name="GND" x="-12.7" y="12.7" length="short"/>
-<pin name="D2" x="12.7" y="12.7" length="short" rot="R180"/>
-<pin name="D3" x="12.7" y="10.16" length="short" rot="R180"/>
-<pin name="D4" x="12.7" y="7.62" length="short" rot="R180"/>
-<pin name="D5" x="12.7" y="5.08" length="short" rot="R180"/>
-<pin name="D6" x="12.7" y="2.54" length="short" rot="R180"/>
-<pin name="D7" x="12.7" y="0" length="short" rot="R180"/>
-<pin name="D8" x="12.7" y="-2.54" length="short" rot="R180"/>
-<pin name="D9" x="12.7" y="-5.08" length="short" rot="R180"/>
-<pin name="D10" x="12.7" y="-7.62" length="short" rot="R180"/>
-<pin name="D11" x="12.7" y="-10.16" length="short" rot="R180"/>
-<pin name="D12" x="12.7" y="-12.7" length="short" rot="R180"/>
-<pin name="VIN" x="-12.7" y="15.24" length="short" direction="in"/>
-<pin name="5V" x="-12.7" y="20.32" length="short" direction="out"/>
-<pin name="A0" x="-12.7" y="-15.24" length="short"/>
-<pin name="A1" x="-12.7" y="-12.7" length="short"/>
-<pin name="A2" x="-12.7" y="-10.16" length="short"/>
-<pin name="A3" x="-12.7" y="-7.62" length="short"/>
-<pin name="A4/SDA" x="-12.7" y="-5.08" length="short"/>
-<pin name="A5/SCL" x="-12.7" y="-2.54" length="short"/>
-<pin name="A6" x="-12.7" y="0" length="short"/>
-<pin name="A7" x="-12.7" y="2.54" length="short"/>
-<pin name="AREF" x="-12.7" y="5.08" length="short"/>
-<pin name="3V3" x="-12.7" y="17.78" length="short" direction="out"/>
-<pin name="D13" x="12.7" y="-15.24" length="short" rot="R180"/>
-<wire x1="-10.16" y1="22.86" x2="-10.16" y2="-17.78" width="0.254" layer="94"/>
-<wire x1="-10.16" y1="-17.78" x2="10.16" y2="-17.78" width="0.254" layer="94"/>
-<wire x1="10.16" y1="-17.78" x2="10.16" y2="22.86" width="0.254" layer="94"/>
-<wire x1="10.16" y1="22.86" x2="-10.16" y2="22.86" width="0.254" layer="94"/>
-<text x="-10.16" y="23.368" size="1.778" layer="95" font="vector">Nano_Every</text>
-</symbol>
-</symbols>
-<devicesets>
-<deviceset name="ARDUINO_NANO_EVERY" urn="urn:adsk.eagle:component:26714880/9" prefix="J">
-<description>Arduino Nano Every</description>
-<gates>
-<gate name="NANO_EVERY" symbol="NANO_SYMBOL" x="0" y="0"/>
-</gates>
-<devices>
-<device name="" package="NANO_FOOTPRINT">
-<connects>
-<connect gate="NANO_EVERY" pin="3V3" pad="2"/>
-<connect gate="NANO_EVERY" pin="5V" pad="12"/>
-<connect gate="NANO_EVERY" pin="A0" pad="4"/>
-<connect gate="NANO_EVERY" pin="A1" pad="5"/>
-<connect gate="NANO_EVERY" pin="A2" pad="6"/>
-<connect gate="NANO_EVERY" pin="A3" pad="7"/>
-<connect gate="NANO_EVERY" pin="A4/SDA" pad="8"/>
-<connect gate="NANO_EVERY" pin="A5/SCL" pad="9"/>
-<connect gate="NANO_EVERY" pin="A6" pad="10"/>
-<connect gate="NANO_EVERY" pin="A7" pad="11"/>
-<connect gate="NANO_EVERY" pin="AREF" pad="3"/>
-<connect gate="NANO_EVERY" pin="D0/RX" pad="17"/>
-<connect gate="NANO_EVERY" pin="D1/TX" pad="16"/>
-<connect gate="NANO_EVERY" pin="D10" pad="28"/>
-<connect gate="NANO_EVERY" pin="D11" pad="29"/>
-<connect gate="NANO_EVERY" pin="D12" pad="30"/>
-<connect gate="NANO_EVERY" pin="D13" pad="1"/>
-<connect gate="NANO_EVERY" pin="D2" pad="20"/>
-<connect gate="NANO_EVERY" pin="D3" pad="21"/>
-<connect gate="NANO_EVERY" pin="D4" pad="22"/>
-<connect gate="NANO_EVERY" pin="D5" pad="23"/>
-<connect gate="NANO_EVERY" pin="D6" pad="24"/>
-<connect gate="NANO_EVERY" pin="D7" pad="25"/>
-<connect gate="NANO_EVERY" pin="D8" pad="26"/>
-<connect gate="NANO_EVERY" pin="D9" pad="27"/>
-<connect gate="NANO_EVERY" pin="GND" pad="14 19"/>
-<connect gate="NANO_EVERY" pin="RESET" pad="13 18"/>
-<connect gate="NANO_EVERY" pin="VIN" pad="15"/>
-</connects>
-<package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:26714879/3"/>
-</package3dinstances>
-<technologies>
-<technology name="">
-<attribute name="WEBSITE" value="https://store.arduino.cc/usa/nano-every"/>
-</technology>
-</technologies>
-</device>
-</devices>
-</deviceset>
-</devicesets>
-</library>
 <library name="byu_pressure_control" urn="urn:adsk.eagle:library:26800355">
 <packages>
 <package name="PHOENIX_CONNECTOR_1778625" urn="urn:adsk.eagle:footprint:26802268/2" library_version="24">
@@ -4890,7 +4747,7 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <wire x1="0" y1="5.6" x2="0" y2="5.7" width="0.2" layer="21"/>
 <wire x1="-4.75" y1="7.325" x2="0" y2="7.325" width="0.2" layer="21"/>
 </package>
-<package name="A4990_DUAL_MOTOR_DRIVER_CARRIER" urn="urn:adsk.eagle:footprint:26895816/2" library_version="18">
+<package name="A4990_DUAL_MOTOR_DRIVER_CARRIER" urn="urn:adsk.eagle:footprint:26895816/3" library_version="32">
 <wire x1="0" y1="20.32" x2="15.24" y2="20.32" width="0.127" layer="21"/>
 <wire x1="15.24" y1="20.32" x2="15.24" y2="0" width="0.127" layer="21"/>
 <wire x1="15.24" y1="0" x2="0" y2="0" width="0.127" layer="21"/>
@@ -4900,19 +4757,19 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <wire x1="15.24" y1="0" x2="0" y2="0" width="0.127" layer="51"/>
 <wire x1="0" y1="0" x2="0" y2="20.32" width="0.127" layer="51"/>
 <text x="1.14" y="20.66" size="1.27" layer="25">&gt;NAME</text>
-<text x="9.525" y="3.175" size="1.27" layer="21">VIN</text>
+<text x="3.175" y="3.175" size="1.27" layer="21">VIN</text>
 <pad name="1" x="1.27" y="19.05" drill="1.016"/>
 <pad name="2" x="1.27" y="16.51" drill="1.016"/>
 <pad name="3" x="1.27" y="13.97" drill="1.016"/>
 <pad name="4" x="1.27" y="11.43" drill="1.016"/>
-<pad name="5" x="1.27" y="8.89" drill="1.016"/>
+<pad name="5" x="1.27" y="8.89" drill="1.016" shape="square"/>
 <pad name="6" x="1.27" y="6.35" drill="1.016"/>
 <pad name="7" x="1.27" y="3.81" drill="1.016"/>
 <pad name="8" x="1.27" y="1.27" drill="1.016" shape="square"/>
 <pad name="9" x="13.97" y="1.27" drill="1.016" shape="square" rot="R180"/>
 <pad name="10" x="13.97" y="3.81" drill="1.016" rot="R180"/>
 <pad name="11" x="13.97" y="6.35" drill="1.016" rot="R180"/>
-<pad name="12" x="13.97" y="8.89" drill="1.016" shape="square" rot="R180"/>
+<pad name="12" x="13.97" y="8.89" drill="1.016" rot="R180"/>
 <pad name="13" x="13.97" y="11.43" drill="1.016" rot="R180"/>
 <pad name="14" x="13.97" y="13.97" drill="1.016" rot="R180"/>
 <pad name="15" x="13.97" y="16.51" drill="1.016" rot="R180"/>
@@ -4921,7 +4778,7 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <dimension x1="15.24" y1="20.32" x2="13.97" y2="19.05" x3="29.21" y3="19.685" textsize="1.27" layer="47" dtype="vertical" unit="mil"/>
 <dimension x1="15.24" y1="0" x2="13.97" y2="1.27" x3="14.605" y3="-6.35" textsize="1.27" layer="47" dtype="horizontal" unit="mil"/>
 </package>
-<package name="CERAMIC_CAPACITOR" urn="urn:adsk.eagle:footprint:26904904/1" locally_modified="yes" library_version="23" library_locally_modified="yes">
+<package name="CERAMIC_CAPACITOR" urn="urn:adsk.eagle:footprint:26904904/2" library_version="26">
 <description>&lt;h3&gt;CAP-PTH-SMALL-KIT&lt;/h3&gt;
 Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.com/products/8375) or 22pF caps (http://www.sparkfun.com/products/8571).&lt;br&gt;
 &lt;br&gt;
@@ -4959,6 +4816,50 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 </polygon>
 <text x="-3.81" y="1.27" size="1.27" layer="21">&gt;VALUE</text>
 </package>
+<package name="ARDUINO_NANO_EVERY" urn="urn:adsk.eagle:footprint:26916802/1" library_version="29">
+<description>Arduino Nano Every Footprint</description>
+<pad name="8" x="-7.62" y="0" drill="1.016"/>
+<pad name="7" x="-7.62" y="2.54" drill="1.016"/>
+<pad name="6" x="-7.62" y="5.08" drill="1.016"/>
+<pad name="5" x="-7.62" y="7.62" drill="1.016"/>
+<pad name="4" x="-7.62" y="10.16" drill="1.016"/>
+<pad name="3" x="-7.62" y="12.7" drill="1.016"/>
+<pad name="9" x="-7.62" y="-2.54" drill="1.016"/>
+<pad name="10" x="-7.62" y="-5.08" drill="1.016"/>
+<pad name="11" x="-7.62" y="-7.62" drill="1.016"/>
+<pad name="12" x="-7.62" y="-10.16" drill="1.016"/>
+<pad name="13" x="-7.62" y="-12.7" drill="1.016"/>
+<pad name="14" x="-7.62" y="-15.24" drill="1.016"/>
+<pad name="15" x="-7.62" y="-17.78" drill="1.016"/>
+<pad name="2" x="-7.62" y="15.24" drill="1.016"/>
+<pad name="23" x="7.62" y="0" drill="1.016" rot="R180"/>
+<pad name="22" x="7.62" y="-2.54" drill="1.016" rot="R180"/>
+<pad name="21" x="7.62" y="-5.08" drill="1.016" rot="R180"/>
+<pad name="20" x="7.62" y="-7.62" drill="1.016" rot="R180"/>
+<pad name="19" x="7.62" y="-10.16" drill="1.016" rot="R180"/>
+<pad name="18" x="7.62" y="-12.7" drill="1.016" rot="R180"/>
+<pad name="24" x="7.62" y="2.54" drill="1.016" rot="R180"/>
+<pad name="25" x="7.62" y="5.08" drill="1.016" rot="R180"/>
+<pad name="26" x="7.62" y="7.62" drill="1.016" rot="R180"/>
+<pad name="27" x="7.62" y="10.16" drill="1.016" rot="R180"/>
+<pad name="28" x="7.62" y="12.7" drill="1.016" rot="R180"/>
+<pad name="29" x="7.62" y="15.24" drill="1.016" rot="R180"/>
+<pad name="30" x="7.62" y="17.78" drill="1.016" rot="R180"/>
+<pad name="17" x="7.62" y="-15.24" drill="1.016" rot="R180"/>
+<pad name="16" x="7.62" y="-17.78" drill="1.016" rot="R180"/>
+<pad name="1" x="-7.62" y="17.78" drill="1.016"/>
+<wire x1="-8.89" y1="21.59" x2="8.89" y2="21.59" width="0.127" layer="21"/>
+<wire x1="8.89" y1="21.59" x2="8.89" y2="-21.59" width="0.127" layer="21"/>
+<wire x1="8.89" y1="-21.59" x2="-8.89" y2="-21.59" width="0.127" layer="21"/>
+<wire x1="-8.89" y1="-21.59" x2="-8.89" y2="21.59" width="0.127" layer="21"/>
+<wire x1="-2.54" y1="21.59" x2="-2.54" y2="19.05" width="0.127" layer="21"/>
+<wire x1="-2.54" y1="19.05" x2="2.54" y2="19.05" width="0.127" layer="21"/>
+<wire x1="2.54" y1="19.05" x2="2.54" y2="21.59" width="0.127" layer="21"/>
+<circle x="-7.62" y="-20.32" radius="0.8255" width="0.127" layer="21"/>
+<circle x="7.62" y="-20.32" radius="0.8255" width="0.127" layer="21"/>
+<circle x="7.62" y="20.32" radius="0.8255" width="0.127" layer="21"/>
+<circle x="-7.62" y="20.32" radius="0.8255" width="0.127" layer="21"/>
+</package>
 </packages>
 <packages3d>
 <package3d name="PHOENIX_CONNECTOR_1778625" urn="urn:adsk.eagle:package:26802270/3" type="model" library_version="24">
@@ -4966,25 +4867,31 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <packageinstance name="PHOENIX_CONNECTOR_1778625"/>
 </packageinstances>
 </package3d>
-<package3d name="PRESSURE_SENSOR_ABPDRNN100PGAA5" urn="urn:adsk.eagle:package:26802408/4" type="box" library_version="24">
+<package3d name="PRESSURE_SENSOR_ABPDRNN100PGAA5" urn="urn:adsk.eagle:package:26802408/7" type="model" library_version="29">
 <description>&lt;p&gt;Honeywell Pressure Sensor&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://www.mouser.com/datasheet/2/187/honeywell_sensing_basic_board_mount_pressure_abp_s-1662208.pdf"&gt;Dimensions&lt;/a&gt;&lt;/p&gt;</description>
 <packageinstances>
 <packageinstance name="PRESSURE_SENSOR_ABPDRNN100PGAA5"/>
 </packageinstances>
 </package3d>
-<package3d name="A4990_DUAL_MOTOR_DRIVER_CARRIER" urn="urn:adsk.eagle:package:26895818/3" type="model" library_version="18">
+<package3d name="A4990_DUAL_MOTOR_DRIVER_CARRIER" urn="urn:adsk.eagle:package:26895818/6" type="model" library_version="32">
 <packageinstances>
 <packageinstance name="A4990_DUAL_MOTOR_DRIVER_CARRIER"/>
 </packageinstances>
 </package3d>
-<package3d name="CERAMIC_CAPACITOR" urn="urn:adsk.eagle:package:26904906/1" type="box" library_version="23" library_locally_modified="yes">
+<package3d name="CERAMIC_CAPACITOR" urn="urn:adsk.eagle:package:26904906/3" type="model" library_version="29">
 <description>&lt;h3&gt;CAP-PTH-SMALL-KIT&lt;/h3&gt;
 Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.com/products/8375) or 22pF caps (http://www.sparkfun.com/products/8571).&lt;br&gt;
 &lt;br&gt;
 &lt;b&gt;Warning:&lt;/b&gt; This is the KIT version of this package. This package has a smaller diameter top stop mask, which doesn't cover the diameter of the pad. This means only the bottom side of the pads' copper will be exposed. You'll only be able to solder to the bottom side.</description>
 <packageinstances>
 <packageinstance name="CERAMIC_CAPACITOR"/>
+</packageinstances>
+</package3d>
+<package3d name="ARDUINO_NANO_EVERY" urn="urn:adsk.eagle:package:26916803/3" type="model" library_version="30">
+<description>Arduino Nano Every Footprint</description>
+<packageinstances>
+<packageinstance name="ARDUINO_NANO_EVERY"/>
 </packageinstances>
 </package3d>
 </packages3d>
@@ -5043,6 +4950,41 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <pin name="1" x="0" y="5.08" visible="off" length="short" direction="pas" swaplevel="1" rot="R270"/>
 <pin name="2" x="0" y="-2.54" visible="off" length="short" direction="pas" swaplevel="1" rot="R90"/>
 </symbol>
+<symbol name="ARDUINO_NANO_EVERY" urn="urn:adsk.eagle:symbol:26714878/7" library_version="29">
+<pin name="RX" x="12.7" y="20.32" length="short" rot="R180"/>
+<pin name="TX" x="12.7" y="17.78" length="short" rot="R180"/>
+<pin name="RESET" x="-12.7" y="10.16" length="short"/>
+<pin name="GND" x="-12.7" y="12.7" length="short"/>
+<pin name="D2" x="12.7" y="12.7" length="short" rot="R180"/>
+<pin name="D3" x="12.7" y="10.16" length="short" rot="R180"/>
+<pin name="D4" x="12.7" y="7.62" length="short" rot="R180"/>
+<pin name="D5" x="12.7" y="5.08" length="short" rot="R180"/>
+<pin name="D6" x="12.7" y="2.54" length="short" rot="R180"/>
+<pin name="D7" x="12.7" y="0" length="short" rot="R180"/>
+<pin name="D8" x="12.7" y="-2.54" length="short" rot="R180"/>
+<pin name="D9" x="12.7" y="-5.08" length="short" rot="R180"/>
+<pin name="D10" x="12.7" y="-7.62" length="short" rot="R180"/>
+<pin name="D11" x="12.7" y="-10.16" length="short" rot="R180"/>
+<pin name="D12" x="12.7" y="-12.7" length="short" rot="R180"/>
+<pin name="VIN" x="-12.7" y="15.24" length="short" direction="in"/>
+<pin name="5V" x="-12.7" y="20.32" length="short" direction="out"/>
+<pin name="A0" x="-12.7" y="-15.24" length="short"/>
+<pin name="A1" x="-12.7" y="-12.7" length="short"/>
+<pin name="A2" x="-12.7" y="-10.16" length="short"/>
+<pin name="A3" x="-12.7" y="-7.62" length="short"/>
+<pin name="A4/SDA" x="-12.7" y="-5.08" length="short"/>
+<pin name="A5/SCL" x="-12.7" y="-2.54" length="short"/>
+<pin name="A6" x="-12.7" y="0" length="short"/>
+<pin name="A7" x="-12.7" y="2.54" length="short"/>
+<pin name="AREF" x="-12.7" y="5.08" length="short"/>
+<pin name="3V3" x="-12.7" y="17.78" length="short" direction="out"/>
+<pin name="D13" x="12.7" y="-15.24" length="short" rot="R180"/>
+<wire x1="-10.16" y1="22.86" x2="-10.16" y2="-17.78" width="0.254" layer="94"/>
+<wire x1="-10.16" y1="-17.78" x2="10.16" y2="-17.78" width="0.254" layer="94"/>
+<wire x1="10.16" y1="-17.78" x2="10.16" y2="22.86" width="0.254" layer="94"/>
+<wire x1="10.16" y1="22.86" x2="-10.16" y2="22.86" width="0.254" layer="94"/>
+<text x="-10.16" y="23.368" size="1.778" layer="95" font="vector">&gt;NAME</text>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="PHOENIX_CONNECTOR_1778625" urn="urn:adsk.eagle:component:26802271/7" prefix="PHX_CONN" library_version="24">
@@ -5073,7 +5015,7 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 </device>
 </devices>
 </deviceset>
-<deviceset name="PRESSURE_SENSOR_ABPDRNN100PGAA5" urn="urn:adsk.eagle:component:26802409/9" prefix="PS" library_version="24">
+<deviceset name="PRESSURE_SENSOR_ABPDRNN100PGAA5" urn="urn:adsk.eagle:component:26802409/10" prefix="PS" library_version="29">
 <description>&lt;p&gt;&lt;strong&gt;Honeywell Pressure Sensor (ABPDRNN100PGAA5)&lt;br /&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://www.mouser.com/ProductDetail/Honeywell/ABPDRNN100PGAA5?qs=sGAEpiMZZMvhQj7WZhFIAD2P7qVC0dZ7tI11ZYAVyGqQk%2FMhVJdgGw%3D%3D"&gt;Link&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&amp;nbsp;&lt;/p&gt;</description>
@@ -5091,7 +5033,7 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <connect gate="G$1" pin="VSUPPLY" pad="6"/>
 </connects>
 <package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:26802408/4"/>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:26802408/7"/>
 </package3dinstances>
 <technologies>
 <technology name="">
@@ -5106,7 +5048,7 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 </device>
 </devices>
 </deviceset>
-<deviceset name="A4990_DUAL_MOTOR_DRIVER_CARRIER" urn="urn:adsk.eagle:component:26895819/6" prefix="DRIVER" library_version="18">
+<deviceset name="A4990_DUAL_MOTOR_DRIVER_CARRIER" urn="urn:adsk.eagle:component:26895819/9" prefix="DRIVER" library_version="32">
 <description>&lt;p&gt;&lt;strong&gt;A4990 Dual Motor Driver Carrier (Pololu)&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://www.pololu.com/product/2137"&gt;Link&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;span style="text-decoration: underline;"&gt;Important Note:&lt;/span&gt;&lt;/p&gt;
@@ -5117,24 +5059,24 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <devices>
 <device name="" package="A4990_DUAL_MOTOR_DRIVER_CARRIER">
 <connects>
-<connect gate="G$1" pin="EF1" pad="1"/>
-<connect gate="G$1" pin="EF2" pad="2"/>
-<connect gate="G$1" pin="GND" pad="8 12"/>
-<connect gate="G$1" pin="IN1" pad="4"/>
-<connect gate="G$1" pin="IN2" pad="5"/>
-<connect gate="G$1" pin="IN3" pad="6"/>
-<connect gate="G$1" pin="IN4" pad="7"/>
-<connect gate="G$1" pin="INH" pad="3"/>
-<connect gate="G$1" pin="MTR_GND" pad="9"/>
-<connect gate="G$1" pin="OUT1" pad="16"/>
-<connect gate="G$1" pin="OUT2" pad="15"/>
-<connect gate="G$1" pin="OUT3" pad="14"/>
-<connect gate="G$1" pin="OUT4" pad="13"/>
-<connect gate="G$1" pin="VBB" pad="11"/>
-<connect gate="G$1" pin="VIN" pad="10"/>
+<connect gate="G$1" pin="EF1" pad="16"/>
+<connect gate="G$1" pin="EF2" pad="15"/>
+<connect gate="G$1" pin="GND" pad="5 9"/>
+<connect gate="G$1" pin="IN1" pad="13"/>
+<connect gate="G$1" pin="IN2" pad="12"/>
+<connect gate="G$1" pin="IN3" pad="11"/>
+<connect gate="G$1" pin="IN4" pad="10"/>
+<connect gate="G$1" pin="INH" pad="14"/>
+<connect gate="G$1" pin="MTR_GND" pad="8"/>
+<connect gate="G$1" pin="OUT1" pad="1"/>
+<connect gate="G$1" pin="OUT2" pad="2"/>
+<connect gate="G$1" pin="OUT3" pad="3"/>
+<connect gate="G$1" pin="OUT4" pad="4"/>
+<connect gate="G$1" pin="VBB" pad="6"/>
+<connect gate="G$1" pin="VIN" pad="7"/>
 </connects>
 <package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:26895818/3"/>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:26895818/6"/>
 </package3dinstances>
 <technologies>
 <technology name=""/>
@@ -5142,7 +5084,7 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 </device>
 </devices>
 </deviceset>
-<deviceset name="CERAMIC_CAPACITOR" urn="urn:adsk.eagle:component:26904907/5" prefix="C" library_version="23" library_locally_modified="yes">
+<deviceset name="CERAMIC_CAPACITOR" urn="urn:adsk.eagle:component:26904907/7" prefix="C" library_version="29">
 <description>&lt;h3&gt;Ceramic capacitors&lt;/h3&gt;
 &lt;p&gt;A capacitor is a passive two-terminal electrical component used to store electrical energy temporarily in an electric field.&lt;/p&gt;</description>
 <gates>
@@ -5155,10 +5097,64 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <connect gate="G$1" pin="2" pad="2"/>
 </connects>
 <package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:26904906/1"/>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:26904906/3"/>
 </package3dinstances>
 <technologies>
 <technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="ARDUINO_NANO_EVERY" urn="urn:adsk.eagle:component:26714880/19" prefix="NANO" library_version="30">
+<description>&lt;p&gt;&lt;strong&gt;Arduino Nano Every&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://store.arduino.cc/usa/nano-every"&gt;Website&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;The Nano Every is Arduino&amp;rsquo;s 5V compatible board in the smallest available form factor: 45x18mm!&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&amp;nbsp;&lt;/strong&gt;The Arduino Nano is the preferred board for many projects requiring a small and easy to use microcontroller board. The small footprint and low price, make the Nano Every particularly suited for wearable inventions, low-cost robotics, electronic musical instruments, and general use to control smaller parts of larger projects.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&amp;nbsp;&lt;/strong&gt;The Arduino Nano Every is an evolution of the traditional Arduino Nano board but features a lot more powerful processor, the ATMega4809. This will allow you to make larger programs than with the Arduino Uno (it has 50% more program memory), and with a lot more variables (the RAM is 200% bigger).&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</description>
+<gates>
+<gate name="NANO_EVERY" symbol="ARDUINO_NANO_EVERY" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="ARDUINO_NANO_EVERY">
+<connects>
+<connect gate="NANO_EVERY" pin="3V3" pad="2"/>
+<connect gate="NANO_EVERY" pin="5V" pad="12"/>
+<connect gate="NANO_EVERY" pin="A0" pad="4"/>
+<connect gate="NANO_EVERY" pin="A1" pad="5"/>
+<connect gate="NANO_EVERY" pin="A2" pad="6"/>
+<connect gate="NANO_EVERY" pin="A3" pad="7"/>
+<connect gate="NANO_EVERY" pin="A4/SDA" pad="8"/>
+<connect gate="NANO_EVERY" pin="A5/SCL" pad="9"/>
+<connect gate="NANO_EVERY" pin="A6" pad="10"/>
+<connect gate="NANO_EVERY" pin="A7" pad="11"/>
+<connect gate="NANO_EVERY" pin="AREF" pad="3"/>
+<connect gate="NANO_EVERY" pin="D10" pad="28"/>
+<connect gate="NANO_EVERY" pin="D11" pad="29"/>
+<connect gate="NANO_EVERY" pin="D12" pad="30"/>
+<connect gate="NANO_EVERY" pin="D13" pad="1"/>
+<connect gate="NANO_EVERY" pin="D2" pad="20"/>
+<connect gate="NANO_EVERY" pin="D3" pad="21"/>
+<connect gate="NANO_EVERY" pin="D4" pad="22"/>
+<connect gate="NANO_EVERY" pin="D5" pad="23"/>
+<connect gate="NANO_EVERY" pin="D6" pad="24"/>
+<connect gate="NANO_EVERY" pin="D7" pad="25"/>
+<connect gate="NANO_EVERY" pin="D8" pad="26"/>
+<connect gate="NANO_EVERY" pin="D9" pad="27"/>
+<connect gate="NANO_EVERY" pin="GND" pad="14 19"/>
+<connect gate="NANO_EVERY" pin="RESET" pad="13 18"/>
+<connect gate="NANO_EVERY" pin="RX" pad="17"/>
+<connect gate="NANO_EVERY" pin="TX" pad="16"/>
+<connect gate="NANO_EVERY" pin="VIN" pad="15"/>
+</connects>
+<package3dinstances>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:26916803/3"/>
+</package3dinstances>
+<technologies>
+<technology name="">
+<attribute name="WEBSITE" value="https://store.arduino.cc/usa/nano-every"/>
+</technology>
 </technologies>
 </device>
 </devices>
@@ -5201,27 +5197,27 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <part name="VALVE2" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="PHOENIX_CONNECTOR_1778625" device="" package3d_urn="urn:adsk.eagle:package:26802270/3"/>
 <part name="VALVE3" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="PHOENIX_CONNECTOR_1778625" device="" package3d_urn="urn:adsk.eagle:package:26802270/3"/>
 <part name="I2C_IN" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="PHOENIX_CONNECTOR_1778625" device="" package3d_urn="urn:adsk.eagle:package:26802270/3"/>
-<part name="NANO" library="byu_pressure_control" deviceset="ARDUINO_NANO_EVERY" device="" package3d_urn="urn:adsk.eagle:package:26714879/3"/>
 <part name="12V_IN" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="PHOENIX_CONNECTOR_1778625" device="" package3d_urn="urn:adsk.eagle:package:26802270/3"/>
-<part name="PS0" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="PRESSURE_SENSOR_ABPDRNN100PGAA5" device="" package3d_urn="urn:adsk.eagle:package:26802408/4"/>
-<part name="PS1" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="PRESSURE_SENSOR_ABPDRNN100PGAA5" device="" package3d_urn="urn:adsk.eagle:package:26802408/4"/>
-<part name="PS2" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="PRESSURE_SENSOR_ABPDRNN100PGAA5" device="" package3d_urn="urn:adsk.eagle:package:26802408/4"/>
-<part name="PS3" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="PRESSURE_SENSOR_ABPDRNN100PGAA5" device="" package3d_urn="urn:adsk.eagle:package:26802408/4"/>
-<part name="DRIVER_A" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="A4990_DUAL_MOTOR_DRIVER_CARRIER" device="" package3d_urn="urn:adsk.eagle:package:26895818/3"/>
-<part name="DRIVER_B" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="A4990_DUAL_MOTOR_DRIVER_CARRIER" device="" package3d_urn="urn:adsk.eagle:package:26895818/3"/>
-<part name="C1" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/1" value="1nF"/>
-<part name="C2" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/1" value="1nF"/>
-<part name="C3" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/1" value="1nF"/>
-<part name="C4" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/1" value="1nF"/>
-<part name="C9" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/1" value="100nF"/>
-<part name="C10" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/1" value="100nF"/>
-<part name="C11" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/1" value="100nF"/>
-<part name="C12" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/1" value="100nF"/>
-<part name="C5" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/1" value="100nF"/>
-<part name="C6" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/1" value="100nF"/>
-<part name="C7" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/1" value="100nF"/>
-<part name="C8" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/1" value="100nF"/>
+<part name="PS0" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="PRESSURE_SENSOR_ABPDRNN100PGAA5" device="" package3d_urn="urn:adsk.eagle:package:26802408/7"/>
+<part name="PS1" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="PRESSURE_SENSOR_ABPDRNN100PGAA5" device="" package3d_urn="urn:adsk.eagle:package:26802408/7"/>
+<part name="PS2" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="PRESSURE_SENSOR_ABPDRNN100PGAA5" device="" package3d_urn="urn:adsk.eagle:package:26802408/7"/>
+<part name="PS3" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="PRESSURE_SENSOR_ABPDRNN100PGAA5" device="" package3d_urn="urn:adsk.eagle:package:26802408/7"/>
+<part name="DRIVER_A" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="A4990_DUAL_MOTOR_DRIVER_CARRIER" device="" package3d_urn="urn:adsk.eagle:package:26895818/6"/>
+<part name="DRIVER_B" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="A4990_DUAL_MOTOR_DRIVER_CARRIER" device="" package3d_urn="urn:adsk.eagle:package:26895818/6"/>
+<part name="C1" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/3" value="1nF"/>
+<part name="C2" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/3" value="1nF"/>
+<part name="C3" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/3" value="1nF"/>
+<part name="C4" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/3" value="1nF"/>
+<part name="C9" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/3" value="100nF"/>
+<part name="C10" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/3" value="100nF"/>
+<part name="C11" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/3" value="100nF"/>
+<part name="C12" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/3" value="100nF"/>
+<part name="C5" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/3" value="100nF"/>
+<part name="C6" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/3" value="100nF"/>
+<part name="C7" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/3" value="100nF"/>
+<part name="C8" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/3" value="100nF"/>
 <part name="I2C_OUT" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="PHOENIX_CONNECTOR_1778625" device="" package3d_urn="urn:adsk.eagle:package:26802270/3"/>
+<part name="NANO1" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="ARDUINO_NANO_EVERY" device="" package3d_urn="urn:adsk.eagle:package:26916803/3"/>
 </parts>
 <sheets>
 <sheet>
@@ -5277,7 +5273,6 @@ a lower impedance path back to the power source.</text>
 <instance part="I2C_IN" gate="G$1" x="-35.56" y="78.74" smashed="yes" rot="R180">
 <attribute name="NAME" x="-35.56" y="62.992" size="1.27" layer="95" rot="R180"/>
 </instance>
-<instance part="NANO" gate="NANO_EVERY" x="35.56" y="101.6" smashed="yes"/>
 <instance part="12V_IN" gate="G$1" x="-35.56" y="101.6" smashed="yes" rot="R180">
 <attribute name="NAME" x="-35.56" y="85.852" size="1.27" layer="95" rot="R180"/>
 </instance>
@@ -5349,6 +5344,9 @@ a lower impedance path back to the power source.</text>
 </instance>
 <instance part="I2C_OUT" gate="G$1" x="-35.56" y="55.88" smashed="yes" rot="R180">
 <attribute name="NAME" x="-35.56" y="40.132" size="1.27" layer="95" rot="R180"/>
+</instance>
+<instance part="NANO1" gate="NANO_EVERY" x="35.56" y="101.6" smashed="yes">
+<attribute name="NAME" x="25.4" y="124.968" size="1.778" layer="95" font="vector"/>
 </instance>
 </instances>
 <busses>
@@ -5447,9 +5445,9 @@ a lower impedance path back to the power source.</text>
 <pinref part="C8" gate="G$1" pin="1"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="GND"/>
 <wire x1="22.86" y1="114.3" x2="12.7" y2="114.3" width="0.1524" layer="91"/>
 <label x="12.7" y="114.3" size="1.778" layer="95"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="GND"/>
 </segment>
 <segment>
 <pinref part="DRIVER_B" gate="G$1" pin="GND"/>
@@ -5527,9 +5525,9 @@ a lower impedance path back to the power source.</text>
 <pinref part="DRIVER_B" gate="G$1" pin="INH"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="5V"/>
 <wire x1="22.86" y1="121.92" x2="10.16" y2="121.92" width="0.1524" layer="91"/>
 <label x="12.7" y="121.92" size="1.778" layer="95"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="5V"/>
 </segment>
 <segment>
 <wire x1="35.56" y1="22.86" x2="55.88" y2="22.86" width="0.1524" layer="91"/>
@@ -5566,9 +5564,9 @@ a lower impedance path back to the power source.</text>
 </net>
 <net name="12V" class="2">
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="VIN"/>
 <wire x1="22.86" y1="116.84" x2="12.7" y2="116.84" width="0.1524" layer="91"/>
 <label x="12.7" y="116.84" size="1.778" layer="95"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="VIN"/>
 </segment>
 <segment>
 <pinref part="12V_IN" gate="G$1" pin="1"/>
@@ -5612,9 +5610,9 @@ a lower impedance path back to the power source.</text>
 <wire x1="-30.48" y1="73.66" x2="-10.16" y2="73.66" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="A5/SCL"/>
 <wire x1="22.86" y1="99.06" x2="15.24" y2="99.06" width="0.1524" layer="91"/>
 <label x="15.24" y="99.06" size="1.778" layer="95"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="A5/SCL"/>
 </segment>
 <segment>
 <pinref part="I2C_OUT" gate="G$1" pin="1"/>
@@ -5632,8 +5630,8 @@ a lower impedance path back to the power source.</text>
 <pinref part="C9" gate="G$1" pin="1"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="A0"/>
 <wire x1="22.86" y1="86.36" x2="2.54" y2="86.36" width="0.1524" layer="91"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="A0"/>
 </segment>
 </net>
 <net name="A1" class="3">
@@ -5645,8 +5643,8 @@ a lower impedance path back to the power source.</text>
 <pinref part="C10" gate="G$1" pin="1"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="A1"/>
 <wire x1="22.86" y1="88.9" x2="2.54" y2="88.9" width="0.1524" layer="91"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="A1"/>
 </segment>
 </net>
 <net name="A2" class="3">
@@ -5658,8 +5656,8 @@ a lower impedance path back to the power source.</text>
 <pinref part="C11" gate="G$1" pin="1"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="A2"/>
 <wire x1="22.86" y1="91.44" x2="2.54" y2="91.44" width="0.1524" layer="91"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="A2"/>
 </segment>
 </net>
 <net name="A3" class="3">
@@ -5671,8 +5669,8 @@ a lower impedance path back to the power source.</text>
 <pinref part="C12" gate="G$1" pin="1"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="A3"/>
 <wire x1="22.86" y1="93.98" x2="2.54" y2="93.98" width="0.1524" layer="91"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="A3"/>
 </segment>
 </net>
 <net name="N$6" class="0">
@@ -5718,9 +5716,9 @@ a lower impedance path back to the power source.</text>
 <wire x1="-30.48" y1="68.58" x2="-10.16" y2="68.58" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="A4/SDA"/>
 <wire x1="22.86" y1="96.52" x2="15.24" y2="96.52" width="0.1524" layer="91"/>
 <label x="15.24" y="96.52" size="1.778" layer="95"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="A4/SDA"/>
 </segment>
 <segment>
 <pinref part="I2C_OUT" gate="G$1" pin="2"/>
@@ -5734,8 +5732,8 @@ a lower impedance path back to the power source.</text>
 <pinref part="DRIVER_A" gate="G$1" pin="IN1"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="D6"/>
 <wire x1="48.26" y1="104.14" x2="53.34" y2="104.14" width="0.1524" layer="91"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="D6"/>
 </segment>
 </net>
 <net name="D7" class="0">
@@ -5744,8 +5742,8 @@ a lower impedance path back to the power source.</text>
 <pinref part="DRIVER_A" gate="G$1" pin="IN2"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="D7"/>
 <wire x1="48.26" y1="101.6" x2="53.34" y2="101.6" width="0.1524" layer="91"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="D7"/>
 </segment>
 </net>
 <net name="D8" class="0">
@@ -5754,8 +5752,8 @@ a lower impedance path back to the power source.</text>
 <pinref part="DRIVER_A" gate="G$1" pin="IN3"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="D8"/>
 <wire x1="48.26" y1="99.06" x2="53.34" y2="99.06" width="0.1524" layer="91"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="D8"/>
 </segment>
 </net>
 <net name="D9" class="0">
@@ -5764,8 +5762,8 @@ a lower impedance path back to the power source.</text>
 <pinref part="DRIVER_A" gate="G$1" pin="IN4"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="D9"/>
 <wire x1="48.26" y1="96.52" x2="53.34" y2="96.52" width="0.1524" layer="91"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="D9"/>
 </segment>
 </net>
 <net name="D2" class="0">
@@ -5774,8 +5772,8 @@ a lower impedance path back to the power source.</text>
 <pinref part="DRIVER_B" gate="G$1" pin="IN1"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="D2"/>
 <wire x1="48.26" y1="114.3" x2="53.34" y2="114.3" width="0.1524" layer="91"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="D2"/>
 </segment>
 </net>
 <net name="D3" class="0">
@@ -5784,8 +5782,8 @@ a lower impedance path back to the power source.</text>
 <pinref part="DRIVER_B" gate="G$1" pin="IN2"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="D3"/>
 <wire x1="48.26" y1="111.76" x2="53.34" y2="111.76" width="0.1524" layer="91"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="D3"/>
 </segment>
 </net>
 <net name="D4" class="0">
@@ -5794,8 +5792,8 @@ a lower impedance path back to the power source.</text>
 <pinref part="DRIVER_B" gate="G$1" pin="IN3"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="D4"/>
 <wire x1="48.26" y1="109.22" x2="53.34" y2="109.22" width="0.1524" layer="91"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="D4"/>
 </segment>
 </net>
 <net name="D5" class="0">
@@ -5804,8 +5802,8 @@ a lower impedance path back to the power source.</text>
 <pinref part="DRIVER_B" gate="G$1" pin="IN4"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="D5"/>
 <wire x1="48.26" y1="106.68" x2="53.34" y2="106.68" width="0.1524" layer="91"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="D5"/>
 </segment>
 </net>
 <net name="EF1_B" class="0">
@@ -5818,16 +5816,16 @@ a lower impedance path back to the power source.</text>
 <wire x1="73.66" y1="129.54" x2="72.39" y2="129.54" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="D12"/>
 <wire x1="48.26" y1="88.9" x2="55.88" y2="88.9" width="0.1524" layer="91"/>
 <label x="50.8" y="88.9" size="1.778" layer="95"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="D12"/>
 </segment>
 </net>
 <net name="EF2_B" class="0">
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="A7"/>
 <wire x1="22.86" y1="104.14" x2="15.24" y2="104.14" width="0.1524" layer="91"/>
 <label x="12.7" y="104.14" size="1.778" layer="95"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="A7"/>
 </segment>
 <segment>
 <pinref part="DRIVER_B" gate="G$1" pin="EF2"/>
@@ -5843,9 +5841,9 @@ a lower impedance path back to the power source.</text>
 <pinref part="DRIVER_A" gate="G$1" pin="EF1"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="D10"/>
 <wire x1="48.26" y1="93.98" x2="55.88" y2="93.98" width="0.1524" layer="91"/>
 <label x="50.8" y="93.98" size="1.778" layer="95"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="D10"/>
 </segment>
 </net>
 <net name="EF2_A" class="0">
@@ -5855,9 +5853,9 @@ a lower impedance path back to the power source.</text>
 <pinref part="DRIVER_A" gate="G$1" pin="EF2"/>
 </segment>
 <segment>
-<pinref part="NANO" gate="NANO_EVERY" pin="D11"/>
 <wire x1="48.26" y1="91.44" x2="55.88" y2="91.44" width="0.1524" layer="91"/>
 <label x="50.8" y="91.44" size="1.778" layer="95"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="D11"/>
 </segment>
 </net>
 <net name="N$10" class="0">
