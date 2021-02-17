@@ -4860,6 +4860,22 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <circle x="7.62" y="20.32" radius="0.8255" width="0.127" layer="21"/>
 <circle x="-7.62" y="20.32" radius="0.8255" width="0.127" layer="21"/>
 </package>
+<package name="2PIN_DIP_DS01-254-S-02BE" urn="urn:adsk.eagle:footprint:26935662/2" library_version="34">
+<wire x1="-3.25" y1="4.95" x2="3.302" y2="4.95" width="0.127" layer="21"/>
+<wire x1="3.302" y1="4.95" x2="3.302" y2="-4.95" width="0.127" layer="21"/>
+<wire x1="3.302" y1="-4.953" x2="-3.302" y2="-4.953" width="0.127" layer="51"/>
+<wire x1="-3.302" y1="4.953" x2="-3.302" y2="1.27" width="0.127" layer="21"/>
+<wire x1="-3.302" y1="1.27" x2="-2.54" y2="1.27" width="0.127" layer="21"/>
+<wire x1="-2.54" y1="1.27" x2="-2.54" y2="-1.397" width="0.127" layer="21"/>
+<wire x1="-2.54" y1="-1.397" x2="-3.302" y2="-1.397" width="0.127" layer="21"/>
+<wire x1="-3.302" y1="-1.397" x2="-3.302" y2="-4.953" width="0.127" layer="21"/>
+<text x="-3.73" y="6" size="1.778" layer="25">&gt;NAME</text>
+<text x="-3.73" y="-8" size="1.778" layer="27">&gt;VALUE</text>
+<pad name="1A" x="-1.27" y="-3.81" drill="1" diameter="1.58" shape="square"/>
+<pad name="1B" x="-1.27" y="3.81" drill="1" diameter="1.58"/>
+<pad name="2A" x="1.27" y="-3.81" drill="1" diameter="1.58"/>
+<pad name="2B" x="1.27" y="3.81" drill="1" diameter="1.58"/>
+</package>
 </packages>
 <packages3d>
 <package3d name="PHOENIX_CONNECTOR_1778625" urn="urn:adsk.eagle:package:26802270/3" type="model" library_version="24">
@@ -4892,6 +4908,11 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <description>Arduino Nano Every Footprint</description>
 <packageinstances>
 <packageinstance name="ARDUINO_NANO_EVERY"/>
+</packageinstances>
+</package3d>
+<package3d name="2PIN_DIP_DS01-254-S-02BE" urn="urn:adsk.eagle:package:26935664/3" type="model" library_version="34">
+<packageinstances>
+<packageinstance name="2PIN_DIP_DS01-254-S-02BE"/>
 </packageinstances>
 </package3d>
 </packages3d>
@@ -4984,6 +5005,22 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <wire x1="10.16" y1="-17.78" x2="10.16" y2="22.86" width="0.254" layer="94"/>
 <wire x1="10.16" y1="22.86" x2="-10.16" y2="22.86" width="0.254" layer="94"/>
 <text x="-10.16" y="23.368" size="1.778" layer="95" font="vector">&gt;NAME</text>
+</symbol>
+<symbol name="2PIN_DIP_DS01-254-S-02BE" urn="urn:adsk.eagle:symbol:26935663/1" library_version="34">
+<wire x1="-2.54" y1="2.54" x2="2.54" y2="5.08" width="0.1524" layer="94"/>
+<wire x1="-2.54" y1="-2.54" x2="2.54" y2="0" width="0.1524" layer="94"/>
+<wire x1="-5.08" y1="7.62" x2="-5.08" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="-5.08" y1="-5.08" x2="5.08" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="5.08" y1="-5.08" x2="5.08" y2="7.62" width="0.254" layer="94"/>
+<wire x1="5.08" y1="7.62" x2="-5.08" y2="7.62" width="0.254" layer="94"/>
+<circle x="2.032" y="2.54" radius="0.508" width="0.1524" layer="94"/>
+<circle x="2.032" y="-2.54" radius="0.508" width="0.1524" layer="94"/>
+<text x="-5.08" y="8.636" size="1.778" layer="95">&gt;NAME</text>
+<text x="-5.08" y="-7.62" size="1.778" layer="96">&gt;VALUE</text>
+<pin name="COM1" x="-7.62" y="2.54" visible="pad" length="middle" direction="pas"/>
+<pin name="NO1" x="7.62" y="2.54" visible="pad" length="middle" direction="pas" rot="R180"/>
+<pin name="COM2" x="-7.62" y="-2.54" visible="pad" length="middle" direction="pas"/>
+<pin name="NO2" x="7.62" y="-2.54" visible="pad" length="middle" direction="pas" rot="R180"/>
 </symbol>
 </symbols>
 <devicesets>
@@ -5159,6 +5196,76 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 </device>
 </devices>
 </deviceset>
+<deviceset name="2PIN_DIP_DS01-254-S-02BE" urn="urn:adsk.eagle:component:26935665/2" prefix="S" library_version="34">
+<gates>
+<gate name="G$1" symbol="2PIN_DIP_DS01-254-S-02BE" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="2PIN_DIP_DS01-254-S-02BE">
+<connects>
+<connect gate="G$1" pin="COM1" pad="1A"/>
+<connect gate="G$1" pin="COM2" pad="2A"/>
+<connect gate="G$1" pin="NO1" pad="1B"/>
+<connect gate="G$1" pin="NO2" pad="2B"/>
+</connects>
+<package3dinstances>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:26935664/3"/>
+</package3dinstances>
+<technologies>
+<technology name="">
+<attribute name="CUI_PURCHASE_URL" value="https://www.cuidevices.com/product/switches/dip-switches/ds01-254-series?utm_source=snapeda.com&amp;utm_medium=referral&amp;utm_campaign=snapedaBOM"/>
+<attribute name="DESCRIPTION" value="2 Position, Through Hole, 2.54 mm Pitch, Raised Slide Actuator, Flat Bottom, Short Pin, DIP Switch"/>
+<attribute name="DIGI-KEY_PART_NUMBER" value="2223-DS01-254-S-02BE-ND"/>
+<attribute name="MF" value="CUI Devices"/>
+<attribute name="MP" value="DS01-254-S-02BE"/>
+<attribute name="PACKAGE" value="None"/>
+<attribute name="PURCHASE-URL" value="https://pricing.snapeda.com/search/part/DS01-254-S-02BE/?ref=eda"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
+<library name="SparkFun-PowerSymbols">
+<description>&lt;h3&gt;SparkFun Power Symbols&lt;/h3&gt;
+This library contains power, ground, and voltage-supply symbols.
+&lt;br&gt;
+&lt;br&gt;
+We've spent an enormous amount of time creating and checking these footprints and parts, but it is &lt;b&gt; the end user's responsibility&lt;/b&gt; to ensure correctness and suitablity for a given componet or application. 
+&lt;br&gt;
+&lt;br&gt;If you enjoy using this library, please buy one of our products at &lt;a href=" www.sparkfun.com"&gt;SparkFun.com&lt;/a&gt;.
+&lt;br&gt;
+&lt;br&gt;
+&lt;b&gt;Licensing:&lt;/b&gt; Creative Commons ShareAlike 4.0 International - https://creativecommons.org/licenses/by-sa/4.0/ 
+&lt;br&gt;
+&lt;br&gt;
+You are welcome to use this library for commercial purposes. For attribution, we ask that when you begin to sell your device using our footprint, you email us with a link to the product being sold. We want bragging rights that we helped (in a very small part) to create your 8th world wonder. We would like the opportunity to feature your device on our homepage.</description>
+<packages>
+</packages>
+<symbols>
+<symbol name="DGND">
+<description>&lt;h3&gt;Digital Ground Supply&lt;/h3&gt;</description>
+<wire x1="-1.905" y1="0" x2="1.905" y2="0" width="0.254" layer="94"/>
+<pin name="GND" x="0" y="2.54" visible="off" length="short" direction="sup" rot="R270"/>
+<text x="0" y="-0.254" size="1.778" layer="96" align="top-center">&gt;VALUE</text>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="GND" prefix="GND">
+<description>&lt;h3&gt;Ground Supply Symbol&lt;/h3&gt;
+&lt;p&gt;Generic signal ground supply symbol.&lt;/p&gt;</description>
+<gates>
+<gate name="1" symbol="DGND" x="0" y="0"/>
+</gates>
+<devices>
+<device name="">
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
 </devicesets>
 </library>
 </libraries>
@@ -5181,6 +5288,10 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <class number="4" name="I2C Bus" width="0" drill="0">
 <clearance class="2" value="0.762"/>
 <clearance class="3" value="0.254"/>
+</class>
+<class number="5" name="Valve Power" width="0.762" drill="0.762">
+<clearance class="3" value="0.508"/>
+<clearance class="4" value="0.508"/>
 </class>
 </classes>
 <parts>
@@ -5218,6 +5329,11 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <part name="C8" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/3" value="100nF"/>
 <part name="I2C_OUT" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="PHOENIX_CONNECTOR_1778625" device="" package3d_urn="urn:adsk.eagle:package:26802270/3"/>
 <part name="NANO1" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="ARDUINO_NANO_EVERY" device="" package3d_urn="urn:adsk.eagle:package:26916803/3"/>
+<part name="I2C_SEL" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="2PIN_DIP_DS01-254-S-02BE" device="" package3d_urn="urn:adsk.eagle:package:26935664/3"/>
+<part name="R5" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="0204/7" package3d_urn="urn:adsk.eagle:package:23498/2" value="4.7k"/>
+<part name="R6" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="0204/7" package3d_urn="urn:adsk.eagle:package:23498/2" value="4.7k"/>
+<part name="GND5" library="SparkFun-PowerSymbols" deviceset="GND" device=""/>
+<part name="GND6" library="SparkFun-PowerSymbols" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -5348,6 +5464,23 @@ a lower impedance path back to the power source.</text>
 <instance part="NANO1" gate="NANO_EVERY" x="35.56" y="101.6" smashed="yes">
 <attribute name="NAME" x="25.4" y="124.968" size="1.778" layer="95" font="vector"/>
 </instance>
+<instance part="I2C_SEL" gate="G$1" x="76.2" y="73.66" smashed="yes">
+<attribute name="NAME" x="71.12" y="82.296" size="1.778" layer="95"/>
+</instance>
+<instance part="R5" gate="G$1" x="55.88" y="66.04" smashed="yes" rot="MR270">
+<attribute name="NAME" x="54.3814" y="69.85" size="1.778" layer="95" rot="MR270"/>
+<attribute name="VALUE" x="59.182" y="69.85" size="1.778" layer="96" rot="MR270"/>
+</instance>
+<instance part="R6" gate="G$1" x="63.5" y="81.28" smashed="yes" rot="MR270">
+<attribute name="NAME" x="62.0014" y="85.09" size="1.778" layer="95" rot="MR270"/>
+<attribute name="VALUE" x="66.802" y="85.09" size="1.778" layer="96" rot="MR270"/>
+</instance>
+<instance part="GND5" gate="1" x="63.5" y="58.42" smashed="yes">
+<attribute name="VALUE" x="63.5" y="58.166" size="1.778" layer="96" align="top-center"/>
+</instance>
+<instance part="GND6" gate="1" x="93.98" y="86.36" smashed="yes">
+<attribute name="VALUE" x="93.98" y="86.106" size="1.778" layer="96" align="top-center"/>
+</instance>
 </instances>
 <busses>
 <bus name="A[0..3]">
@@ -5461,8 +5594,19 @@ a lower impedance path back to the power source.</text>
 <wire x1="180.34" y1="104.14" x2="187.96" y2="104.14" width="0.1524" layer="91"/>
 <wire x1="187.96" y1="104.14" x2="187.96" y2="83.82" width="0.1524" layer="91"/>
 </segment>
+<segment>
+<pinref part="R5" gate="G$1" pin="2"/>
+<pinref part="GND5" gate="1" pin="GND"/>
+<wire x1="55.88" y1="60.96" x2="63.5" y2="60.96" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="R6" gate="G$1" pin="1"/>
+<wire x1="63.5" y1="86.36" x2="63.5" y2="88.9" width="0.1524" layer="91"/>
+<pinref part="GND6" gate="1" pin="GND"/>
+<wire x1="63.5" y1="88.9" x2="93.98" y2="88.9" width="0.1524" layer="91"/>
+</segment>
 </net>
-<net name="N$1" class="3">
+<net name="N$1" class="0">
 <segment>
 <wire x1="15.24" y1="40.64" x2="7.62" y2="40.64" width="0.1524" layer="91"/>
 <pinref part="R1" gate="G$1" pin="1"/>
@@ -5474,7 +5618,7 @@ a lower impedance path back to the power source.</text>
 <pinref part="C1" gate="G$1" pin="1"/>
 </segment>
 </net>
-<net name="N$2" class="3">
+<net name="N$2" class="0">
 <segment>
 <wire x1="83.82" y1="40.64" x2="76.2" y2="40.64" width="0.1524" layer="91"/>
 <pinref part="R2" gate="G$1" pin="1"/>
@@ -5487,7 +5631,7 @@ a lower impedance path back to the power source.</text>
 <pinref part="C2" gate="G$1" pin="1"/>
 </segment>
 </net>
-<net name="N$3" class="3">
+<net name="N$3" class="0">
 <segment>
 <wire x1="160.02" y1="40.64" x2="152.4" y2="40.64" width="0.1524" layer="91"/>
 <pinref part="R3" gate="G$1" pin="1"/>
@@ -5500,7 +5644,7 @@ a lower impedance path back to the power source.</text>
 <pinref part="C3" gate="G$1" pin="1"/>
 </segment>
 </net>
-<net name="N$4" class="3">
+<net name="N$4" class="0">
 <segment>
 <wire x1="236.22" y1="40.64" x2="228.6" y2="40.64" width="0.1524" layer="91"/>
 <pinref part="R4" gate="G$1" pin="1"/>
@@ -5560,6 +5704,16 @@ a lower impedance path back to the power source.</text>
 <wire x1="279.4" y1="33.02" x2="274.32" y2="33.02" width="0.1524" layer="91"/>
 <label x="266.7" y="22.86" size="1.778" layer="95"/>
 <pinref part="C8" gate="G$1" pin="2"/>
+</segment>
+<segment>
+<pinref part="I2C_SEL" gate="G$1" pin="NO1"/>
+<wire x1="83.82" y1="76.2" x2="93.98" y2="76.2" width="0.1524" layer="91"/>
+<pinref part="I2C_SEL" gate="G$1" pin="NO2"/>
+<wire x1="93.98" y1="76.2" x2="99.06" y2="76.2" width="0.1524" layer="91"/>
+<wire x1="83.82" y1="71.12" x2="93.98" y2="71.12" width="0.1524" layer="91"/>
+<wire x1="93.98" y1="71.12" x2="93.98" y2="76.2" width="0.1524" layer="91"/>
+<junction x="93.98" y="76.2"/>
+<label x="96.52" y="76.2" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="12V" class="2">
@@ -5673,7 +5827,7 @@ a lower impedance path back to the power source.</text>
 <pinref part="NANO1" gate="NANO_EVERY" pin="A3"/>
 </segment>
 </net>
-<net name="N$6" class="0">
+<net name="N$6" class="5">
 <segment>
 <pinref part="VALVE1" gate="G$1" pin="1"/>
 <wire x1="182.88" y1="121.92" x2="200.66" y2="121.92" width="0.1524" layer="91"/>
@@ -5682,7 +5836,7 @@ a lower impedance path back to the power source.</text>
 <wire x1="182.88" y1="116.84" x2="180.34" y2="116.84" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$5" class="0">
+<net name="N$5" class="5">
 <segment>
 <pinref part="VALVE1" gate="G$1" pin="2"/>
 <wire x1="185.42" y1="116.84" x2="200.66" y2="116.84" width="0.1524" layer="91"/>
@@ -5691,7 +5845,7 @@ a lower impedance path back to the power source.</text>
 <wire x1="185.42" y1="114.3" x2="180.34" y2="114.3" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$7" class="0">
+<net name="N$7" class="5">
 <segment>
 <pinref part="VALVE0" gate="G$1" pin="1"/>
 <wire x1="193.04" y1="101.6" x2="200.66" y2="101.6" width="0.1524" layer="91"/>
@@ -5700,7 +5854,7 @@ a lower impedance path back to the power source.</text>
 <wire x1="193.04" y1="111.76" x2="180.34" y2="111.76" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$8" class="0">
+<net name="N$8" class="5">
 <segment>
 <wire x1="190.5" y1="109.22" x2="190.5" y2="96.52" width="0.1524" layer="91"/>
 <pinref part="VALVE0" gate="G$1" pin="2"/>
@@ -5816,9 +5970,9 @@ a lower impedance path back to the power source.</text>
 <wire x1="73.66" y1="129.54" x2="72.39" y2="129.54" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<wire x1="48.26" y1="88.9" x2="55.88" y2="88.9" width="0.1524" layer="91"/>
-<label x="50.8" y="88.9" size="1.778" layer="95"/>
-<pinref part="NANO1" gate="NANO_EVERY" pin="D12"/>
+<pinref part="NANO1" gate="NANO_EVERY" pin="A6"/>
+<wire x1="22.86" y1="101.6" x2="12.7" y2="101.6" width="0.1524" layer="91"/>
+<label x="12.7" y="101.6" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="EF2_B" class="0">
@@ -5858,7 +6012,7 @@ a lower impedance path back to the power source.</text>
 <pinref part="NANO1" gate="NANO_EVERY" pin="D11"/>
 </segment>
 </net>
-<net name="N$10" class="0">
+<net name="N$10" class="5">
 <segment>
 <pinref part="DRIVER_B" gate="G$1" pin="OUT2"/>
 <wire x1="76.2" y1="165.1" x2="76.2" y2="170.18" width="0.1524" layer="91"/>
@@ -5867,7 +6021,7 @@ a lower impedance path back to the power source.</text>
 <wire x1="71.12" y1="170.18" x2="71.12" y2="175.26" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$9" class="0">
+<net name="N$9" class="5">
 <segment>
 <pinref part="DRIVER_B" gate="G$1" pin="OUT1"/>
 <wire x1="73.66" y1="165.1" x2="73.66" y2="167.64" width="0.1524" layer="91"/>
@@ -5876,7 +6030,7 @@ a lower impedance path back to the power source.</text>
 <wire x1="66.04" y1="167.64" x2="66.04" y2="175.26" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$11" class="0">
+<net name="N$11" class="5">
 <segment>
 <pinref part="DRIVER_B" gate="G$1" pin="OUT3"/>
 <wire x1="78.74" y1="165.1" x2="78.74" y2="177.8" width="0.1524" layer="91"/>
@@ -5885,13 +6039,37 @@ a lower impedance path back to the power source.</text>
 <wire x1="88.9" y1="177.8" x2="88.9" y2="180.34" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$12" class="0">
+<net name="N$12" class="5">
 <segment>
 <pinref part="DRIVER_B" gate="G$1" pin="OUT4"/>
 <wire x1="81.28" y1="165.1" x2="81.28" y2="175.26" width="0.1524" layer="91"/>
 <wire x1="81.28" y1="175.26" x2="93.98" y2="175.26" width="0.1524" layer="91"/>
 <pinref part="VALVE2" gate="G$1" pin="2"/>
 <wire x1="93.98" y1="175.26" x2="93.98" y2="180.34" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$13" class="0">
+<segment>
+<pinref part="NANO1" gate="NANO_EVERY" pin="D12"/>
+<wire x1="48.26" y1="88.9" x2="58.42" y2="88.9" width="0.1524" layer="91"/>
+<wire x1="58.42" y1="88.9" x2="58.42" y2="76.2" width="0.1524" layer="91"/>
+<pinref part="I2C_SEL" gate="G$1" pin="COM1"/>
+<wire x1="58.42" y1="76.2" x2="63.5" y2="76.2" width="0.1524" layer="91"/>
+<pinref part="R6" gate="G$1" pin="2"/>
+<wire x1="63.5" y1="76.2" x2="68.58" y2="76.2" width="0.1524" layer="91"/>
+<junction x="63.5" y="76.2"/>
+</segment>
+</net>
+<net name="N$14" class="0">
+<segment>
+<pinref part="NANO1" gate="NANO_EVERY" pin="D13"/>
+<wire x1="48.26" y1="86.36" x2="53.34" y2="86.36" width="0.1524" layer="91"/>
+<wire x1="53.34" y1="86.36" x2="53.34" y2="71.12" width="0.1524" layer="91"/>
+<pinref part="I2C_SEL" gate="G$1" pin="COM2"/>
+<wire x1="53.34" y1="71.12" x2="55.88" y2="71.12" width="0.1524" layer="91"/>
+<pinref part="R5" gate="G$1" pin="1"/>
+<wire x1="55.88" y1="71.12" x2="68.58" y2="71.12" width="0.1524" layer="91"/>
+<junction x="55.88" y="71.12"/>
 </segment>
 </net>
 </nets>
