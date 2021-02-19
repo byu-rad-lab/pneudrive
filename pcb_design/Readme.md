@@ -2,6 +2,21 @@
 
 These PCBs were designed using Autodesk EAGLE. The corresponding project, board, and schematic files are found in this directory, as well as the CAM outputs.
 
+We used OSHPARK to print out PCBs. For convenience, their design rules are also included in this repo. To use them, navigate to 'Design Rules' in Eagle and click load to select the .dru file. This will load OSHPARK's manufacturing rules automatically for design rule checking.
+
+We have also created a custom part library which includes footprints, schematics, and 3d models for each major component used in this design. To use the library, simply add the filepath of the .lbr file to Eagle's search path in the Control Panel. For more info see [here](https://www.instructables.com/Adding-a-Library-to-Eagle-CAD/).
+
+# Specifications and Design Notes
+## I2C Design
+The I2C bus on this pcb has both an IN and OUT port. The OUT port is useful for daisy chaining multiple of these pcbs, but is not required. The arduino communicates on a 5V logic level, which is incompatible with the 3.3V logic of the BBB. To remedy this, we use a bi-directional logic level shifter to make sure voltages are at the right levels for each device. The shifter is used once on the BBB cape and outputs 5V to any arudino board down the line. The logic shifter uses 10k pullup resistors on the SDA and SCL lines. According to [this](https://www.ti.com/lit/an/slva689/slva689.pdf?ts=1612978067135&ref_url=https%253A%252F%252Fwww.google.com%252F) resource, 10k is too high for our I2C line. 
+
+The max for I2C fast mode is 400 pF according to Table 1. Since we don't have that many devices and the wires aren't super long, we assumed a bus capacitance of about 150pF. This combined with the operating voltage of 5V on fast mode gives a minimum resistance value of about 1.5k (from Fig 2) and a max resistance of about 2.5k 9 (from Fig 3). In order to get an equivalent resistance in this range with the 10k resistors in the logic shifter, we add a 2.2k resistor in parallel to get an equivalent pullup resistance of 1.8k. We measured the performance of the I2C bus with these resistors in place and observed about 380-390Hz bit rate (the 10k resistors alone work, but the bit rate was ~340Hz and the voltage level was barely reaching high). The closer the equivalent resistance is to the minimum resistance, the faster the line can transfer data at the cost of higher power consumption. 
+
+## PCB Design Notes
+Something about trace width (and calculator I used for it), net classes, and clearance. Also talk about the 2 ground planes to minimize noise. 
+
+# PCB Schematic
+
 # Places to order parts
 
 For *each* board you will need these things. For each item a link is included where we ordered them. The total price per board (including printing the pcb) is about $150. Note that there are farily significant bulk discounts for many of these parts. 
