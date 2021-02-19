@@ -13,9 +13,13 @@ The I2C bus on this pcb has both an IN and OUT port. The OUT port is useful for 
 The max for I2C fast mode is 400 pF according to Table 1. Since we don't have that many devices and the wires aren't super long, we assumed a bus capacitance of about 150pF. This combined with the operating voltage of 5V on fast mode gives a minimum resistance value of about 1.5k (from Fig 2) and a max resistance of about 2.5k 9 (from Fig 3). In order to get an equivalent resistance in this range with the 10k resistors in the logic shifter, we add a 2.2k resistor in parallel to get an equivalent pullup resistance of 1.8k. We measured the performance of the I2C bus with these resistors in place and observed about 380-390Hz bit rate (the 10k resistors alone work, but the bit rate was ~340Hz and the voltage level was barely reaching high). The closer the equivalent resistance is to the minimum resistance, the faster the line can transfer data at the cost of higher power consumption. 
 
 ## PCB Design Notes
-Something about trace width (and calculator I used for it), net classes, and clearance. Also talk about the 2 ground planes to minimize noise. 
+
+* Trace widths on the board are mostly the default that eagle uses with a few exceptions. The 12V line is 80mils wide and the 5V line is 30 mils wide. The trace for the 12V line was made as as large as possible because it is a high current line. Each 2 phase driver board can deliver 0.7 amps/phase, which gives a total continuous current of up to 2.8A on each board. The driver boards can go up to 0.9A/phase, but not for long. Using [this](https://www.digikey.com/en/resources/conversion-calculators/conversion-calculator-pcb-trace-width) trace width calculator tool (with 2.8A, 1oz/ft^2, and an ambient temp of 25C) gives us an acceptably low temperature rise (5-10C) for an external trace.
+
+* There are two ground planes in this PCB. The top plane is for the signal ground and the bottom plane is the motor power ground. This was done in an attempt to minimize noise from the motors on the analog pressure sensors. These ground are connected through the GND pins on the driver boards so that the both ground planes are connected to each other when it is running. But by only connecting the ground planes through the driver boards, it encourages any noisy currents to follow the path of least impedance (the ground plane) back to source instead of going through the signal ground. We used [this](https://www.nxp.com/docs/en/application-note/AN1259.pdf) and [this](https://electronics.stackexchange.com/questions/112508/ground-vs-power-ground) as resources as to why we chose to do this. We also did our best to separate the two areas of the board (i.e. the drivers from the pressure sensors) as much as possible without making the board too big. 
 
 # PCB Schematic
+![Schematic](/schematic_v5.png "Schematic v5")
 
 # Places to order parts
 
