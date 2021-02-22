@@ -44,13 +44,14 @@ And for *each* BBB cape, you'll need:
 * 1 Phoenix PTSM connector ([link](https://www.digikey.com/en/products/detail/phoenix-contact/1778625/2625578) to female part, [link](https://www.digikey.com/en/products/detail/phoenix-contact/1778832/2625556) to male part. In previous iterations, we used [these screw terminals](https://www.amazon.com/Simpo-Terminal-Optional-300v10a-Drawing/dp/B018ORUVTU/ref=sr_1_4?dchild=1&keywords=2.54%2Bmm%2Bscrew%2Bterminal&qid=1587763307&s=industrial&sr=1-4&th=1).)
 
 
-You will also need wires for:
+Additional random stuff:
 
-* I2C communication. We used 8128T1 from [here](https://www.mcmaster.com/shielded-wire) because it is small gauge (24 AWG) and double shielded.
-* 12 V power and ground.
+* I2C communication wires. We used 8128T1 from [here](https://www.mcmaster.com/shielded-wire) because it is small gauge (24 AWG) and double shielded.
+* 12v DC power supply. Rated for at least 12A continuous. (each board can pull max 2.8 amps continuously, up to 3.6 amps briefly) ([link](https://www.amazon.com/AVAWO-Switching-Transformer-Regulated-Computer/dp/B0146IAXYO/ref=sr_1_3?dchild=1&keywords=24+volt+power+supply&qid=1587765261&sr=8-3))
+* 12 V power and ground wire. Rated based on power supply.
 * Splicing connections are useful for getting 12V to each arudino board in a quick and clean way ([link](https://www.amazon.com/dp/B07XMJ5KTY/ref=sspa_dk_detail_0?spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUFPUFdLM1RZU1g4M0kmZW5jcnlwdGVkSWQ9QTAzODQzNDEyU1RMUVlGNVgwM1VNJmVuY3J5cHRlZEFkSWQ9QTAwNTA5MTUyWERMTFQ3TzBUUDNIJndpZGdldE5hbWU9c3BfZGV0YWlsMiZhY3Rpb249Y2xpY2tSZWRpcmVjdCZkb05vdExvZ0NsaWNrPXRydWU&th=1))
+* Digitally controlled power strip for controlling power to arduinos from BBB. ([link](https://www.sparkfun.com/products/14236))
 
-Apart from the 5V power supply which came with your BBB, you will need a power supply capable of 7-21 V DC and however many amps your system can pull (4 A for each board). We choose to use a 12 V 15 A one ([link](https://www.amazon.com/AVAWO-Switching-Transformer-Regulated-Computer/dp/B0146IAXYO/ref=sr_1_3?dchild=1&keywords=24+volt+power+supply&qid=1587765261&sr=8-3))
 
 # Populating the board
 
@@ -63,3 +64,4 @@ Values and placement for resistors and capacitors are also shown on the image be
 
 * Find a robust way to plug the pressure sensors into the board. Right now they're soldered directly to the board, but it would be convenient to be able to unplug and replace them.
 * Possibly use a different connector. The female connectors are prone to bending if you're not careful plugging them in. We really like the male spring loaded connectors though because they don't require crimping.
+* Do something with the EF pins on the driver board. Right now they are connected to the arduino, but not doing anything with them. 
