@@ -4860,10 +4860,10 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <circle x="7.62" y="20.32" radius="0.8255" width="0.127" layer="21"/>
 <circle x="-7.62" y="20.32" radius="0.8255" width="0.127" layer="21"/>
 </package>
-<package name="2PIN_DIP_DS01-254-S-02BE" urn="urn:adsk.eagle:footprint:26935662/2" library_version="34">
+<package name="2PIN_DIP_DS01-254-S-02BE" urn="urn:adsk.eagle:footprint:26935662/3" library_version="35">
 <wire x1="-3.25" y1="4.95" x2="3.302" y2="4.95" width="0.127" layer="21"/>
 <wire x1="3.302" y1="4.95" x2="3.302" y2="-4.95" width="0.127" layer="21"/>
-<wire x1="3.302" y1="-4.953" x2="-3.302" y2="-4.953" width="0.127" layer="51"/>
+<wire x1="3.302" y1="-4.953" x2="-3.302" y2="-4.953" width="0.127" layer="21"/>
 <wire x1="-3.302" y1="4.953" x2="-3.302" y2="1.27" width="0.127" layer="21"/>
 <wire x1="-3.302" y1="1.27" x2="-2.54" y2="1.27" width="0.127" layer="21"/>
 <wire x1="-2.54" y1="1.27" x2="-2.54" y2="-1.397" width="0.127" layer="21"/>
@@ -4910,7 +4910,7 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <packageinstance name="ARDUINO_NANO_EVERY"/>
 </packageinstances>
 </package3d>
-<package3d name="2PIN_DIP_DS01-254-S-02BE" urn="urn:adsk.eagle:package:26935664/3" type="model" library_version="34">
+<package3d name="2PIN_DIP_DS01-254-S-02BE" urn="urn:adsk.eagle:package:26935664/4" type="model" library_version="35">
 <packageinstances>
 <packageinstance name="2PIN_DIP_DS01-254-S-02BE"/>
 </packageinstances>
@@ -5196,7 +5196,7 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 </device>
 </devices>
 </deviceset>
-<deviceset name="2PIN_DIP_DS01-254-S-02BE" urn="urn:adsk.eagle:component:26935665/2" prefix="S" library_version="34">
+<deviceset name="2PIN_DIP_DS01-254-S-02BE" urn="urn:adsk.eagle:component:26935665/3" prefix="S" library_version="35">
 <gates>
 <gate name="G$1" symbol="2PIN_DIP_DS01-254-S-02BE" x="0" y="0"/>
 </gates>
@@ -5209,7 +5209,7 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <connect gate="G$1" pin="NO2" pad="2B"/>
 </connects>
 <package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:26935664/3"/>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:26935664/4"/>
 </package3dinstances>
 <technologies>
 <technology name="">
@@ -5329,7 +5329,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="C8" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="CERAMIC_CAPACITOR" device="" package3d_urn="urn:adsk.eagle:package:26904906/3" value="100nF"/>
 <part name="I2C_OUT" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="PHOENIX_CONNECTOR_1778625" device="" package3d_urn="urn:adsk.eagle:package:26802270/3"/>
 <part name="NANO1" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="ARDUINO_NANO_EVERY" device="" package3d_urn="urn:adsk.eagle:package:26916803/3"/>
-<part name="I2C_SEL" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="2PIN_DIP_DS01-254-S-02BE" device="" package3d_urn="urn:adsk.eagle:package:26935664/3"/>
+<part name="I2C_SEL" library="byu_pressure_control" library_urn="urn:adsk.eagle:library:26800355" deviceset="2PIN_DIP_DS01-254-S-02BE" device="" package3d_urn="urn:adsk.eagle:package:26935664/4"/>
 <part name="R5" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="0204/7" package3d_urn="urn:adsk.eagle:package:23498/2" value="4.7k"/>
 <part name="R6" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="0204/7" package3d_urn="urn:adsk.eagle:package:23498/2" value="4.7k"/>
 <part name="GND5" library="SparkFun-PowerSymbols" deviceset="GND" device=""/>
