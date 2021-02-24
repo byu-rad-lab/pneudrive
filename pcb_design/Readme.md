@@ -19,7 +19,7 @@ The max for I2C fast mode is 400 pF according to Table 1. Since we don't have th
 * There are two ground planes in this PCB. The top plane is for the signal ground and the bottom plane is the motor power ground. This was done in an attempt to minimize noise from the motors on the analog pressure sensors. These ground are connected through the GND pins on the driver boards so that the both ground planes are connected to each other when it is running. But by only connecting the ground planes through the driver boards, it encourages any noisy currents to follow the path of least impedance (the ground plane) back to source instead of going through the signal ground. We used [this](https://www.nxp.com/docs/en/application-note/AN1259.pdf) and [this](https://electronics.stackexchange.com/questions/112508/ground-vs-power-ground) as resources as to why we chose to do this. We also did our best to separate the two areas of the board (i.e. the drivers from the pressure sensors) as much as possible without making the board too big. 
 
 # PCB Schematic
-![Schematic](/schematic_v5.png "Schematic v5")
+![Schematic](schematic_v5.png)
 
 # Places to order parts
 
@@ -53,15 +53,13 @@ Additional random stuff:
 * Digitally controlled power strip for controlling power to arduinos from BBB. ([link](https://www.sparkfun.com/products/14236))
 
 
-# Populating the board
+# Board and CAD File
 
-The image below shows the top-down view of the board with some added annotations. The yellow highlighted sections represent the areas where we soldered headers to the board (we plug the Arduino and both motor controllers into headers rather than soldering them directly to the board).
-Values and placement for resistors and capacitors are also shown on the image below. Pressure sensors should be soldered in the areas labeled PS1 - PS4 along the top edge of the board. The connectors for power, I2C, and valves are located along the opposite edge.
-
-![PCB Labels](/pcb_top.png "PCB Silkscreen and Values")
+See [here](https://a360.co/2NUtMc7) to see the 3d version of the board. You can download a step file too if you want to design a case, for example.
 
 # Things to consider for a future revision of the board
 
 * Find a robust way to plug the pressure sensors into the board. Right now they're soldered directly to the board, but it would be convenient to be able to unplug and replace them.
 * Possibly use a different connector. The female connectors are prone to bending if you're not careful plugging them in. We really like the male spring loaded connectors though because they don't require crimping.
 * Do something with the EF pins on the driver board. Right now they are connected to the arduino, but not doing anything with them. 
+* We are using shielded cable for the i2c bus. Technically, the cable shield should be grounded somewhere. It isn't currently. Could add a screw terminal to the board to ground the bare ground wire possibly.
