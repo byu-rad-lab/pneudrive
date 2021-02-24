@@ -42,24 +42,27 @@ And for *each* BBB cape, you'll need:
 * 1 Logic Level Shifter, 4-Channel, Bidirectional ([link](https://www.pololu.com/product/2595))
 * 2 2.2k resistors
 * 1 Phoenix PTSM connector ([link](https://www.digikey.com/en/products/detail/phoenix-contact/1778625/2625578) to female part, [link](https://www.digikey.com/en/products/detail/phoenix-contact/1778832/2625556) to male part. In previous iterations, we used [these screw terminals](https://www.amazon.com/Simpo-Terminal-Optional-300v10a-Drawing/dp/B018ORUVTU/ref=sr_1_4?dchild=1&keywords=2.54%2Bmm%2Bscrew%2Bterminal&qid=1587763307&s=industrial&sr=1-4&th=1).)
+* BBB protocape ([link](https://www.adafruit.com/product/572)). This is what we are using for now. The plan is to eventually design a pcb to replace this.
 
 
 Additional random stuff:
 
-* I2C communication wires. We used 8128T1 from [here](https://www.mcmaster.com/shielded-wire) because it is small gauge (24 AWG) and double shielded.
+* I2C communication wires. We used this[here](https://www.mcmaster.com/8128T1/) because it is double shielded and rated for up to 35 Mbps data rates (we are at 400kbps).
 * 12v DC power supply. Rated for at least 12A continuous. (each board can pull max 2.8 amps continuously, up to 3.6 amps briefly) ([link](https://www.amazon.com/AVAWO-Switching-Transformer-Regulated-Computer/dp/B0146IAXYO/ref=sr_1_3?dchild=1&keywords=24+volt+power+supply&qid=1587765261&sr=8-3))
-* 12 V power and ground wire. Rated based on power supply.
+* 12 V power and ground wire. (20-26 AWG wire to fit in Phoenix connectors). Rated for at least 10 amps. We used the black and red versions here ([link](https://www.mcmaster.com/8054T14/)
 * Splicing connections are useful for getting 12V to each arudino board in a quick and clean way ([link](https://www.amazon.com/dp/B07XMJ5KTY/ref=sspa_dk_detail_0?spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUFPUFdLM1RZU1g4M0kmZW5jcnlwdGVkSWQ9QTAzODQzNDEyU1RMUVlGNVgwM1VNJmVuY3J5cHRlZEFkSWQ9QTAwNTA5MTUyWERMTFQ3TzBUUDNIJndpZGdldE5hbWU9c3BfZGV0YWlsMiZhY3Rpb249Y2xpY2tSZWRpcmVjdCZkb05vdExvZ0NsaWNrPXRydWU&th=1))
-* Digitally controlled power strip for controlling power to arduinos from BBB. ([link](https://www.sparkfun.com/products/14236))
+* Digitally controlled power strip for controlling power to arduinos from BBB on e-stop. ([link](https://www.sparkfun.com/products/14236))
 
 
 # Board and CAD File
+
+Note that the female connectors are prone to bending when plugging things in. So be careful with them. It is a good idea to put a dab of hot glue under each connector when populating the board to make them more robust. Just make sure to not cover any conductive surfaces with the glue.
 
 See [here](https://a360.co/2NUtMc7) to see the 3d version of the board. You can download a step file too if you want to design a case, for example.
 
 # Things to consider for a future revision of the board
 
 * Find a robust way to plug the pressure sensors into the board. Right now they're soldered directly to the board, but it would be convenient to be able to unplug and replace them.
-* Possibly use a different connector. The female connectors are prone to bending if you're not careful plugging them in. We really like the male spring loaded connectors though because they don't require crimping.
-* Do something with the EF pins on the driver board. Right now they are connected to the arduino, but not doing anything with them. 
+* Possibly use a different connector. The female connectors are prone to bending if you're not careful plugging them in. We really like the male spring loaded connectors though because they don't require crimping. Currently, we put a dab of hot glue under the female connector to keep it more secure on the board.
+* Do something with the EF pins on the driver boards. Right now they are connected to the arduino, but not doing anything with them. 
 * We are using shielded cable for the i2c bus. Technically, the cable shield should be grounded somewhere. It isn't currently. Could add a screw terminal to the board to ground the bare ground wire possibly.
