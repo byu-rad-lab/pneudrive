@@ -7,6 +7,7 @@
 
 float p[4] = {0, 0, 0, 0};
 float pcmd[4] = {0, 0, 0, 0};
+float pbias[4] = {0, 0, 0, 0};
 
 // arrays of 8 chars used for i2c comms. Each pressure uses 2 chars (bytes).
 char pchar[2 * 4];
@@ -63,6 +64,14 @@ void setup(void)
     pinMode(pwm_pins[i], OUTPUT);
     move_valve(digital_pins[i],pwm_pins[i],0);
   }
+
+  //calibrate sensors and serial print results
+  calibrateSensors(pbias);
+
+  for (int i=0; i<4; i++)
+  {
+    Serial.print(pbias[i]);
+  }
 }
 
 
@@ -79,11 +88,11 @@ void loop(void)
   double prev_weight = .5;
   double sensor_weight = 1.0-prev_weight;
 
-  // moving weighted average of pressures
-  p[0] = prev_weight*p[0] + sensor_weight*readPressure(A0);
-  p[1] = prev_weight*p[1] + sensor_weight*readPressure(A1);
-  p[2] = prev_weight*p[2] + sensor_weight*readPressure(A2);
-  p[3] = prev_weight*p[3] + sensor_weight*readPressure(A3); 
+  // moving weighted average of pressures, maybe not what we want long term?
+  p[0] = prev_weight*p[0] + sensor_weight*(readPressure(A0) + pbias[0]);
+  p[1] = prev_weight*p[1] + sensor_weight*(readPressure(A1) + pbias[1]);
+  p[2] = prev_weight*p[2] + sensor_weight*(readPressure(A2) + pbias[2]);
+  p[3] = prev_weight*p[3] + sensor_weight*(readPressure(A3) + pbias[3]); 
 
   // CONTROL
   float kp = 1.;
@@ -275,4 +284,31 @@ void vent(int digital_pin, int pwm_pin, int speed)
    */
   digitalWrite(digital_pin,HIGH);
   analogWrite(pwm_pin,abs(speed));
+}
+
+void calibrateSensors(float *pbias)
+{
+  /*
+   * Calibrate sensors by taking a time series of data,
+   * averaging them, and then zeroing out the bias because
+   * sensors should be reading atmospheric pressure = 0.
+   * 
+   * Recursively update average to reduce memory usage.
+   * 
+   * Input to function is an array of 4 floats, one for each pressure sensor bias
+   */
+
+   //valves have been opened,but wait to make sure everything is done
+   delay(5000);
+
+   int N = 1000; //number of data points to average
+
+  for (int n=0; n<N; n++)
+  {
+    pbias[0] = pbias[0] + (readPressure(A0) - pbias[0])/n;
+    pbias[1] = pbias[1] + (readPressure(A1) - pbias[1])/n;
+    pbias[2] = pbias[2] + (readPressure(A2) - pbias[2])/n;
+    pbias[3] = pbias[3] + (readPressure(A3) - pbias[3])/n;
+  }
+
 }
