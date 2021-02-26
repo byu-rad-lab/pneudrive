@@ -68,10 +68,13 @@ void setup(void)
   //calibrate sensors and serial print results
   calibrateSensors(pbias);
 
-  for (int i=0; i<4; i++)
-  {
-    Serial.print(pbias[i]);
-  }
+//  Serial.print("CALIBRATION BIAS (kPA)");
+//  Serial.println();
+//  for (int i=0; i<4; i++)
+//  {
+//    Serial.print(pbias[i],8);
+//    Serial.println();
+//  }
 }
 
 
@@ -89,10 +92,10 @@ void loop(void)
   double sensor_weight = 1.0-prev_weight;
 
   // moving weighted average of pressures, maybe not what we want long term?
-  p[0] = prev_weight*p[0] + sensor_weight*(readPressure(A0) + pbias[0]);
-  p[1] = prev_weight*p[1] + sensor_weight*(readPressure(A1) + pbias[1]);
-  p[2] = prev_weight*p[2] + sensor_weight*(readPressure(A2) + pbias[2]);
-  p[3] = prev_weight*p[3] + sensor_weight*(readPressure(A3) + pbias[3]); 
+  p[0] = prev_weight*p[0] + sensor_weight*(readPressure(A0) - pbias[0]);
+  p[1] = prev_weight*p[1] + sensor_weight*(readPressure(A1) - pbias[1]);
+  p[2] = prev_weight*p[2] + sensor_weight*(readPressure(A2) - pbias[2]);
+  p[3] = prev_weight*p[3] + sensor_weight*(readPressure(A3) - pbias[3]); 
 
   // CONTROL
   float kp = 1.;
@@ -104,10 +107,11 @@ void loop(void)
       valve_cmd[i] = (pcmd[i]-p[i])*kp; 
     }
     
-//    if (i==0){
+    if (i==0){
 //        Serial.print(valve_cmd[i],8);
-//        Serial.println();
-//    }
+        Serial.print(p[0]/psi2kpa,8);
+        Serial.println();
+    }
 
     move_valve(digital_pins[i],pwm_pins[i],valve_cmd[i]);
   }
@@ -137,11 +141,11 @@ void move_valve(int digital_pin, int pwm_pin, int speed)
   if(speed>255){speed=255;}
   if(speed<-255){speed=-255;}
 
-  if (digital_pin==2)
-  {
-    Serial.print(speed);
-    Serial.println();
-  }
+//  if (digital_pin==2)
+//  {
+//    Serial.print(speed);
+//    Serial.println();
+//  }
 
 //  Serial.print(speed);
 //  Serial.println();
@@ -254,9 +258,9 @@ double readPressure(int analogPin)
    // convert bin number to a voltage
    double v_out = analogRead(analogPin) * 5.0/1024.0;
 
-   //just for prototyping with pot, comment out with real sensor
-   if (v_out>4.5){v_out=4.5;}
-   if (v_out<0.5){v_out=0.5;}
+//   //just for prototyping with pot, comment out with real sensor
+//   if (v_out>4.5){v_out=4.5;}
+//   if (v_out<0.5){v_out=0.5;}
 
    if (analogPin == A0){
     //Serial.print(v_out);
@@ -301,11 +305,11 @@ void calibrateSensors(float *pbias)
    //valves have been opened,but wait to make sure everything is done
    delay(5000);
 
-   int N = 1000; //number of data points to average
+   int N = 5000; //number of data points to average
 
-  for (int n=0; n<N; n++)
+  for (int n=1; n<N; n++)
   {
-    pbias[0] = pbias[0] + (readPressure(A0) - pbias[0])/n;
+    pbias[0] = pbias[0] + (readPressure(A0) - pbias[0])/n;    
     pbias[1] = pbias[1] + (readPressure(A1) - pbias[1])/n;
     pbias[2] = pbias[2] + (readPressure(A2) - pbias[2])/n;
     pbias[3] = pbias[3] + (readPressure(A3) - pbias[3])/n;
