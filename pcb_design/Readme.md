@@ -52,6 +52,8 @@ Additional random stuff:
 * 12 V power and ground wire. (20-26 AWG wire to fit in Phoenix connectors). Rated for at least 10 amps. We used the black and red versions here ([link](https://www.mcmaster.com/8054T14/)
 * Splicing connections are useful for getting 12V to each arudino board in a quick and clean way ([link](https://www.amazon.com/dp/B07XMJ5KTY/ref=sspa_dk_detail_0?spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUFPUFdLM1RZU1g4M0kmZW5jcnlwdGVkSWQ9QTAzODQzNDEyU1RMUVlGNVgwM1VNJmVuY3J5cHRlZEFkSWQ9QTAwNTA5MTUyWERMTFQ3TzBUUDNIJndpZGdldE5hbWU9c3BfZGV0YWlsMiZhY3Rpb249Y2xpY2tSZWRpcmVjdCZkb05vdExvZ0NsaWNrPXRydWU&th=1))
 * Digitally controlled power strip for controlling power to arduinos from BBB on e-stop. ([link](https://www.sparkfun.com/products/14236))
+* Plastic tubing that fits pressure sensors (2mm ID, rated for up to 100 psi). We use [this](https://www.mcmaster.com/8014N14/).
+* Barbed fittings that fit tubing (2mm, rated for up to 100 psi). We use [this](https://www.mcmaster.com/6220N78/).
 
 
 # Board and CAD File
