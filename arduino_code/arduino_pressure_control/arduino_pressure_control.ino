@@ -21,11 +21,11 @@ float valve_cmd[4] = {0,0,0,0};
 
 float myTime = 0;
 
-//// motor driver error pins
-//const int EF1_A = 10;
-//const int EF2_A = 11;
-//const int EF1_B = 20;
-//const int EF2_B = 21;
+// motor driver error pins
+const int EF1_A = 10;
+const int EF2_A = 11;
+const int EF1_B = 20;
+const int EF2_B = 21;
 
 // conversion factor from psi to kpa (ie kpa = psi * psi2kpa)
 double const psi2kpa = 6.8947572932;
@@ -41,11 +41,13 @@ void setup(void)
   int i2c_address;
   i2c_address = geti2caddress();
 
-//  //set up fault pins, input pullup bc no external pull is used.
-//  pinMode(EF1_A, INPUT_PULLUP);
-//  pinMode(EF2_A, INPUT_PULLUP);
-//  pinMode(EF1_B, INPUT_PULLUP);
-//  pinMode(EF2_B, INPUT_PULLUP);
+//  Serial.print(i2c_address, HEX);
+
+  //set up fault pins, input pullup bc no external pull is used.
+  pinMode(EF1_A, INPUT_PULLUP);
+  pinMode(EF2_A, INPUT_PULLUP);
+  pinMode(EF1_B, INPUT_PULLUP);
+  pinMode(EF2_B, INPUT_PULLUP);
 
   //set up I2C and register event handlers
   Wire.begin(i2c_address);
@@ -65,16 +67,6 @@ void setup(void)
     move_valve(digital_pins[i],pwm_pins[i],0);
   }
 
-  //calibrate sensors and serial print results
-  calibrateSensors(pbias);
-
-//  Serial.print("CALIBRATION BIAS (kPA)");
-//  Serial.println();
-//  for (int i=0; i<4; i++)
-//  {
-//    Serial.print(pbias[i],8);
-//    Serial.println();
-//  }
 }
 
 
@@ -92,10 +84,24 @@ void loop(void)
   double sensor_weight = 1.0-prev_weight;
 
   // moving weighted average of pressures, maybe not what we want long term?
-  p[0] = prev_weight*p[0] + sensor_weight*(readPressure(A0) - pbias[0]);
-  p[1] = prev_weight*p[1] + sensor_weight*(readPressure(A1) - pbias[1]);
-  p[2] = prev_weight*p[2] + sensor_weight*(readPressure(A2) - pbias[2]);
-  p[3] = prev_weight*p[3] + sensor_weight*(readPressure(A3) - pbias[3]); 
+  p[0] = filter(p[0], readPressure(A0));
+  p[1] = filter(p[1], readPressure(A1));
+  p[2] = filter(p[2], readPressure(A2));
+  p[3] = filter(p[3], readPressure(A3));
+
+// Uncomment to plot filtered data vs unfiltered data
+//  Serial.print(readPressure(A0));
+//  Serial.print("\t");
+//  Serial.print(p[0]);
+//  Serial.println();
+
+//  // Comment in to see all pressures plotted together on serial monitor
+//  for (int i = 0; i<4; i++){
+//    Serial.print(p[i]/psi2kpa);
+//    Serial.print("\t");
+//  }
+//  Serial.println();
+
 
   // CONTROL
   float kp = 1.;
@@ -106,25 +112,19 @@ void loop(void)
     {
       valve_cmd[i] = (pcmd[i]-p[i])*kp; 
     }
-    
-    if (i==0){
-//        Serial.print(valve_cmd[i],8);
-        Serial.print(p[0]/psi2kpa,8);
-        Serial.println();
-    }
 
     move_valve(digital_pins[i],pwm_pins[i],valve_cmd[i]);
   }
 
   //update p and pcmd in memory with new values of pchar and pcmdchar
-  for (int i = 0; i < 1; i++)
+  for (int i = 0; i < 4; i++)
   {
     float_to_two_bytes(p[i], &pchar[i * 2]);
     pcmd[i] = two_bytes_to_float(&pcmdchar[i * 2]); 
   }
   
-  //Serial.print(micros() - myTime);
-  //Serial.println();
+//  Serial.print(micros() - myTime);
+//  Serial.println();
 }
 
 
@@ -194,9 +194,21 @@ float two_bytes_to_float(unsigned char * pcmdchar_twobytes)
 
 void float_to_two_bytes(float myfloat, unsigned char * pchar_twobytes)
 {
+
+  /*
+   * We have an issue here, sometimes the sensors
+   * read negative pressure b/c of the error band. 
+   * We can calibrate, set limits in read pressure function, etc.
+   * Not sure what best thing to do is. 
+   */
   // convert float of kPa to bits to send over i2c
   // uint16_t can be 0 to 65535
-  uint16_t myint = (myfloat / (100.0 * psi2kpa)) * 65535.0 ;
+
+  if (myfloat < 0){
+    myfloat=0;
+  }
+  
+  uint16_t myint = (myfloat / (100.0 * psi2kpa)) * 65535.0;
   
   // memcpy(pointer to destination, pointer to source, # bytes to copy)
   // copy 2 bytes of data located @ myint to location of pchar_twobytes
@@ -222,9 +234,9 @@ int geti2caddress()
   // b/c we are using pin 13 as an input, the LED_BUILTIN cannot be used.
   pinMode(LED_BUILTIN, INPUT);
   pinMode(12, INPUT);
-  
-  one = digitalRead(LED_BUILTIN);
-  two = digitalRead(12);
+
+  one = digitalRead(12);
+  two = digitalRead(LED_BUILTIN);
 
   if (one == LOW && two == LOW){
     i2caddr = 0xA;
@@ -262,10 +274,10 @@ double readPressure(int analogPin)
 //   if (v_out>4.5){v_out=4.5;}
 //   if (v_out<0.5){v_out=0.5;}
 
-   if (analogPin == A0){
-    //Serial.print(v_out);
-    //Serial.println();
-   }
+//   if (analogPin == A1){
+//    Serial.print(v_out);
+//    Serial.println();
+//   }
 
    // return applied pressure in kPa
    return ((v_out - 0.1*v_sup)/(0.8*v_sup)) * p_max;
@@ -290,29 +302,18 @@ void vent(int digital_pin, int pwm_pin, int speed)
   analogWrite(pwm_pin,abs(speed));
 }
 
-void calibrateSensors(float *pbias)
+float filter(float prev, float input)
 {
-  /*
-   * Calibrate sensors by taking a time series of data,
-   * averaging them, and then zeroing out the bias because
-   * sensors should be reading atmospheric pressure = 0.
-   * 
-   * Recursively update average to reduce memory usage.
-   * 
-   * Input to function is an array of 4 floats, one for each pressure sensor bias
+  /* 
+   *  This function implements a first order low pass filter
+   *  with a cutoff frequency of 50 Hz. First order hold discrete implementation with dt=.001.
+   *  First order filter is of form:
+   *  a / (z - b)
    */
 
-   //valves have been opened,but wait to make sure everything is done
-   delay(5000);
+  float a = .4665;
+  float b = .5335;
 
-   int N = 5000; //number of data points to average
-
-  for (int n=1; n<N; n++)
-  {
-    pbias[0] = pbias[0] + (readPressure(A0) - pbias[0])/n;    
-    pbias[1] = pbias[1] + (readPressure(A1) - pbias[1])/n;
-    pbias[2] = pbias[2] + (readPressure(A2) - pbias[2])/n;
-    pbias[3] = pbias[3] + (readPressure(A3) - pbias[3])/n;
-  }
-
+  return b * prev + a * input;
+  
 }
