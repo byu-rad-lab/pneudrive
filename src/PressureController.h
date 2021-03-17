@@ -5,7 +5,9 @@
 #include <std_msgs/Float32MultiArray.h>
 #include<ros/ros.h>
 #include "I2CDevice.h"
+#include "GPIO.h"
 #include<ros/console.h>
+#include<unistd.h> //for delay function
 
 /**
  * @class PressureController
@@ -15,6 +17,8 @@ class PressureController{
 private:
   int numNodes;
   int numPressuresPerNode;
+  GPIO::GPIO estopOut{49};
+  GPIO::GPIO estopIn{115};
   std::vector<ros::Publisher> pressurePublishers;
   std::vector<ros::Subscriber> pressureCommandSubscribers;
   std::vector<I2CDevice> i2cDevices;
