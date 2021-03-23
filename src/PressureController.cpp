@@ -31,6 +31,9 @@ PressureController::PressureController(int bus=1, int firstAddress=10, int press
   for(int i=0; i<numNodes; i++)
     {
       std::string topicString = "/node_" + std::to_string(i) + "/pressure_commands";
+     /*
+      See https://answers.ros.org/question/63991/how-to-make-callback-function-called-by-several-subscriber/?answer=63998?answer=63998#post-id-63998 for more details on this trickery.
+     */
       ros::Subscriber sub = n.subscribe<std_msgs::Float32MultiArray>(topicString, 1000, boost::bind(&PressureController::pcmd_callback, this, _1, i));
       pressureCommandSubscribers.push_back(sub);
       ROS_INFO("/pressure_commands topic started for joint %d",i);
@@ -77,7 +80,7 @@ int PressureController::get_num_devices_on_bus(int bus, int firstAddress)
 
 void PressureController::do_pressure_control()
 {
-  ROS_INFO("STARTING PRESSURE CONTROL");
+  ROS_INFO("PRESSURE CONTROL STARTED");
   while(ros::ok())
     {
       // update memory values for  pressure commands and pressures
@@ -122,7 +125,7 @@ void PressureController::do_pressure_control()
 	  
 	  for(int p=0; p<numPressuresPerNode; p++)
 	    {
-	      msg.data[p] = pressures[node][p] /psi2kpa;
+	      msg.data[p] = pressures[node][p];
 	    }
 	  pressurePublishers[node].publish(msg);
 	}
@@ -162,7 +165,6 @@ void PressureController::float_to_two_bytes(float myfloat, unsigned char * twoby
 
 void PressureController::pcmd_callback(const std_msgs::Float32MultiArray::ConstPtr& msg, int node)
 {
-  std::cout << "pressure command recieved in callback function" << std::endl;
   for(int i=0; i < msg->data.size(); i++)
     {
       pressureCommands[node][i] = msg->data[i];
