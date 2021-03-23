@@ -14,12 +14,13 @@ char pchar[2 * 4];
 char pcmdchar[2 * 4];
 
 // pins used for driving valves
-int digital_pins [4] = {2,4,7,8};
-int pwm_pins [4] = {3,5,6,9};
+int digital_pins [4] = {8,7,4,2};
+int pwm_pins [4] = {9,6,5,3};
 
-float valve_cmd[4] = {0,0,0,0};
+int valve_cmd[4] = {0,0,0,0}; //valve commands [0, 255]
 
 float myTime = 0;
+float integrator = 0;
 
 // motor driver error pins
 const int EF1_A = 10;
@@ -27,12 +28,13 @@ const int EF2_A = 11;
 const int EF1_B = 20;
 const int EF2_B = 21;
 
-// conversion factor from psi to kpa (ie kpa = psi * psi2kpa)
-double const psi2kpa = 6.8947572932;
+// conversion factor from psi to kpa (ie kpa = psi * PSI2KPA)
+double const PSI2KPA = 6.8947572932;
+double const P_MAX = 100 * PSI2KPA; 
 
 void setup(void) 
 {
-    Serial.begin(9600);
+  Serial.begin(9600);
   // This speeds up reading from the Arduino's ADC
   // but generally gives worse data (more noisy)
   //bitClear(ADCSRA, ADPS0);
@@ -64,7 +66,7 @@ void setup(void)
   {
     pinMode(digital_pins[i],OUTPUT);
     pinMode(pwm_pins[i], OUTPUT);
-    move_valve(digital_pins[i],pwm_pins[i],0);
+    vent(digital_pins[i],pwm_pins[i],0);
   }
 
 }
@@ -72,7 +74,7 @@ void setup(void)
 
 void loop(void) 
 {
-  //myTime =micros();
+  myTime =micros();
   //double bias = 165*0;
   //double gain = 100.0/4095.0;
   //p[0] = (ads.readADC_SingleEnded(0)-bias)*gain; // Reading voltage from external ADC
@@ -80,41 +82,54 @@ void loop(void)
   //p[2] = (ads.readADC_SingleEnded(2)-bias)*gain;
   //p[3] = (ads.readADC_SingleEnded(3)-bias)*gain;
 
-  double prev_weight = .5;
-  double sensor_weight = 1.0-prev_weight;
-
-  // moving weighted average of pressures, maybe not what we want long term?
+  // digital filter pressure data
   p[0] = filter(p[0], readPressure(A0));
   p[1] = filter(p[1], readPressure(A1));
   p[2] = filter(p[2], readPressure(A2));
   p[3] = filter(p[3], readPressure(A3));
 
-// Uncomment to plot filtered data vs unfiltered data
+//  //Uncomment to plot filtered data vs unfiltered data
 //  Serial.print(readPressure(A0));
 //  Serial.print("\t");
 //  Serial.print(p[0]);
 //  Serial.println();
 
-//  // Comment in to see all pressures plotted together on serial monitor
+  // Comment in to see all pressures plotted together on serial monitor
 //  for (int i = 0; i<4; i++){
-//    Serial.print(p[i]/psi2kpa);
+//    Serial.print(p[i]/PSI2KPA);
 //    Serial.print("\t");
 //  }
 //  Serial.println();
 
 
   // CONTROL
-  float kp = 1.;
-  float deadband = .0;
+  float kp = 1.0;
+  float ki = 0.001;
+  float kd = 0.0;
+  float deadband = 5.0; // kpa
   for(int i=0; i<4; i++)
   { 
     if(abs(pcmd[i]-p[i])>=deadband)
     {
-      valve_cmd[i] = (pcmd[i]-p[i])*kp; 
+      float error = pcmd[i] - p[i];
+
+      integrator += error;
+      
+//      if (i==0){Serial.print(integrator);}
+      
+      float input_signal = error*kp + integrator*ki;
+
+      //map input signal to duty cycle percentage to fill (+) or vent (-)
+      valve_cmd[i] = map(input_signal, -P_MAX, P_MAX, -100, 100); 
+//      Serial.print(valve_cmd[i]);
     }
 
+//    Serial.print(p[i]);
+    //Serial.print("\t");
     move_valve(digital_pins[i],pwm_pins[i],valve_cmd[i]);
   }
+//  Serial.print(integrator);
+//  Serial.println();
 
   //update p and pcmd in memory with new values of pchar and pcmdchar
   for (int i = 0; i < 4; i++)
@@ -123,43 +138,79 @@ void loop(void)
     pcmd[i] = two_bytes_to_float(&pcmdchar[i * 2]); 
   }
   
-//  Serial.print(micros() - myTime);
-//  Serial.println();
+  Serial.print(micros() - myTime);
+  Serial.println();
 }
 
 
-void move_valve(int digital_pin, int pwm_pin, int speed)
+void move_valve(int digital_pin, int pwm_pin, int duty_cycle)
 {
   /*
-   * speed comes in as a number between -2*pmax*kp and 2*pmax*kp
+   * speed comes in as a number between -100% and +100%
    * Logic in this function is:
-   * if speed is negative -> measured pressure is above command -> vent
    * if speed is positive -> measured pressure is below command -> fill
+   * if speed is negative -> measured pressure is above command -> vent
+   * 
+   * 0% duty cycle means valve is closed.
    */
-  
-  //saturate
-  if(speed>255){speed=255;}
-  if(speed<-255){speed=-255;}
 
-//  if (digital_pin==2)
+//  if (digital_pin==8)
 //  {
 //    Serial.print(speed);
 //    Serial.println();
 //  }
-
-//  Serial.print(speed);
-//  Serial.println();
   
-  if(speed>0)
+  if(duty_cycle>0)
   { 
     //fill
-    fill(digital_pin, pwm_pin, speed);
+    fill(digital_pin, pwm_pin, duty_cycle);
   }
   else
   {
     //vent
-    vent(digital_pin, pwm_pin, speed);
+    vent(digital_pin, pwm_pin, duty_cycle);
   }
+}
+
+void fill(int digital_pin, int pwm_pin, int duty_cycle)
+{
+  /*
+   * speed is (0, 100], map range to (0, 255].
+   * NOTE: this cooresponds to direction that the valves are plugged in.
+   * Looking at the top of the connector (where the metal is),
+   * the brown wire should be on the left, and the blue on the right.
+   */
+
+
+  int speed = map(duty_cycle, 0, 100, 0, 255);
+  digitalWrite(digital_pin,HIGH);
+  analogWrite(pwm_pin,speed);
+}
+
+void vent(int digital_pin, int pwm_pin, int duty_cycle)
+{
+   /*
+   * speed is [-100, 0], map range to (0, 255].
+   */
+  int speed = map(abs(duty_cycle), 0, 100, 0, 255); 
+  digitalWrite(digital_pin,LOW);
+  analogWrite(pwm_pin,speed);
+}
+
+float filter(float prev, float input)
+{
+  /* 
+   *  This function implements a first order low pass filter
+   *  with a cutoff frequency of 50 Hz. First order hold discrete implementation with dt=.001.
+   *  First order filter is of form:
+   *  a / (z - b)
+   */
+
+  float a = .2696;
+  float b = .7304;
+
+  return b * prev + a * input;
+  
 }
 
 void receiveEvent(int howMany)
@@ -189,7 +240,7 @@ float two_bytes_to_float(unsigned char * pcmdchar_twobytes)
 {
   uint16_t myint;
   memcpy(&myint, pcmdchar_twobytes, 2);
-  return float((100.0 * psi2kpa) * myint / 65535.0);
+  return float((100.0 * PSI2KPA) * myint / 65535.0);
 }
 
 void float_to_two_bytes(float myfloat, unsigned char * pchar_twobytes)
@@ -208,7 +259,7 @@ void float_to_two_bytes(float myfloat, unsigned char * pchar_twobytes)
     myfloat=0;
   }
   
-  uint16_t myint = (myfloat / (100.0 * psi2kpa)) * 65535.0;
+  uint16_t myint = (myfloat / (100.0 * PSI2KPA)) * 65535.0;
   
   // memcpy(pointer to destination, pointer to source, # bytes to copy)
   // copy 2 bytes of data located @ myint to location of pchar_twobytes
@@ -263,8 +314,6 @@ double readPressure(int analogPin)
    * Conversion is taken from Fig. 3 (transfer function A) in pressure sensor datasheet
    * https://www.mouser.com/datasheet/2/187/honeywell-sensing-basic-board-mount-pressure-abp-s-1224358.pdf
    */
-   
-   double p_max = 100 * psi2kpa; //convert 100 psi sensor max to kPa
    double v_sup = 5;
    
    // convert bin number to a voltage
@@ -280,40 +329,6 @@ double readPressure(int analogPin)
 //   }
 
    // return applied pressure in kPa
-   return ((v_out - 0.1*v_sup)/(0.8*v_sup)) * p_max;
+   return ((v_out - 0.1*v_sup)/(0.8*v_sup)) * P_MAX;
  
-}
-
-void fill(int digital_pin, int pwm_pin, int speed)
-{
-  /*
-   * speed input is (0,255]
-   */
-  digitalWrite(digital_pin,LOW);
-  analogWrite(pwm_pin,255-speed);
-}
-
-void vent(int digital_pin, int pwm_pin, int speed)
-{
-  /*
-   * speed input is [-255,0]
-   */
-  digitalWrite(digital_pin,HIGH);
-  analogWrite(pwm_pin,abs(speed));
-}
-
-float filter(float prev, float input)
-{
-  /* 
-   *  This function implements a first order low pass filter
-   *  with a cutoff frequency of 50 Hz. First order hold discrete implementation with dt=.001.
-   *  First order filter is of form:
-   *  a / (z - b)
-   */
-
-  float a = .4665;
-  float b = .5335;
-
-  return b * prev + a * input;
-  
 }
