@@ -32,6 +32,7 @@
 #include<sys/ioctl.h>
 #include<linux/i2c.h>
 #include<linux/i2c-dev.h>
+
 using namespace std;
 
 #define HEX(x) setw(2) << setfill('0') << hex << (int)(x)
@@ -59,11 +60,11 @@ int I2CDevice::open(unsigned int bus, unsigned int device){
   else name = BBB_I2C_2;
   
   if((this->file=::open(name.c_str(), O_RDWR)) < 0){
-    perror("I2C: failed to open the bus\n");
+//    perror("I2C: failed to open the bus\n");
     return 1;
   }
   if(ioctl(this->file, I2C_SLAVE, this->device) < 0){
-    perror("I2C: Failed to connect to the device\n");
+//    perror("I2C: Failed to connect to the device\n");
     return 1;
   }
   return 0;
@@ -103,7 +104,7 @@ int I2CDevice::writeRegisters(unsigned int registerAddress, int numbytes, unsign
     }
 
    if(::write(this->file, buffer, numbytes+1)!=numbytes+1){
-      perror("I2C: Failed write to the device\n");
+//      perror("I2C: Failed write to the device\n");
       return 1;
    }
    return 0;
@@ -120,7 +121,7 @@ int I2CDevice::write(unsigned char value){
    unsigned char buffer[1];
    buffer[0]=value;
    if (::write(this->file, buffer, 1)!=1){
-      perror("I2C: Failed to write to the device\n");
+ //     perror("I2C: Failed to write to the device\n");
       return 1;
    }
    return 0;
@@ -135,7 +136,7 @@ unsigned char I2CDevice::readRegister(unsigned int registerAddress){
    this->write(registerAddress);
    unsigned char buffer[1];
    if(::read(this->file, buffer, 1)!=1){
-      perror("I2C: Failed to read in the value.\n");
+ //     perror("I2C: Failed to read in the value.\n");
       return 1;
    }
    return buffer[0];
@@ -154,7 +155,7 @@ int I2CDevice::readRegisters(unsigned int registerAddress, int numbytes, unsigne
   this->write(registerAddress);
   if(::read(this->file, data, numbytes)!=(int)numbytes)
     {
-      perror("I2C: Failed to read in the full buffer.\n");
+  //    perror("I2C: Failed to read in the full buffer.\n");
       return 1;
     }
   else
