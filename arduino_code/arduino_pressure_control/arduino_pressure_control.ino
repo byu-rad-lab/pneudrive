@@ -19,8 +19,17 @@ int pwm_pins [4] = {9,6,5,3};
 
 int valve_cmd[4] = {0,0,0,0}; //valve commands [0, 255]
 
-float myTime = 0;
-float integrator = 0;
+//'Global' variables that are important for control
+float myTime = 0.0;
+//float startTime = 0.0;
+float prevTime = 0.0; //Last time the loop was entered
+float integrator[4] = {0, 0, 0, 0};
+float derivative[4] = {0, 0, 0, 0};
+float prevError[4] = {0, 0, 0, 0}; //error at the previous timestep
+float errorDot[4] = {10000.0, 10000.0, 10000.0, 10000.0}; //Derivative of the error, initialized high so that the integrator
+                          //will start off the bat.
+float awl = 25.0; //Anti-Windup limit.  If the error is changing less than this value, the 
+                  //integrator won't continue to increase. 
 
 // motor driver error pins
 const int EF1_A = 10;
@@ -68,13 +77,15 @@ void setup(void)
     pinMode(pwm_pins[i], OUTPUT);
     vent(digital_pins[i],pwm_pins[i],0);
   }
-
+  prevTime = micros();
 }
 
 
 void loop(void) 
 {
-  myTime =micros();
+  myTime = micros(); //TODO: This overflows after an hour, should we switch to millis?
+                     //Also for strictest accuracy we may want to make this an array
+                     //and put it in the for loop down below.
   //double bias = 165*0;
   //double gain = 100.0/4095.0;
   //p[0] = (ads.readADC_SingleEnded(0)-bias)*gain; // Reading voltage from external ADC
@@ -103,21 +114,32 @@ void loop(void)
 
 
   // CONTROL
-  float kp = 1.0;
+  float kp = 1.0;  //TODO: Should each valve have a set of gains?
   float ki = 0.001;
-  float kd = 0.0;
+  float kd = 0.5;
+  float sigma = .002; // Dirty Derivative Gain, should take derivatives on signals with 
+                     // content less than 1/sigma rad/s. For more info see byu controlbook pg 147
   float deadband = 5.0; // kpa
+  float error = 0.0;
+  float Ts = myTime-prevTime; //calculate time between errors
+  prevTime = myTime; //update previous time. TODO:May want to make this an array and add
+                     //to the for loop. See myTime.
   for(int i=0; i<4; i++)
   { 
     if(abs(pcmd[i]-p[i])>=deadband)
     {
       float error = pcmd[i] - p[i];
-
-      integrator += error;
       
+      //integrator += error; Left Hand integration
+      if (errorDot[i]>awl) //Integrator anti-windup scheme
+      {
+        integrator[i] = integrator[i] + Ts/2*(error+prevError[i]); //Trapezoidal Integration
+      }
+      derivative[i] = ((2*sigma-Ts)/(2*sigma+Ts))*derivative[i]+(2/(2*sigma+Ts))*(error-prevError[i]);
+      prevError[i] = error;
 //      if (i==0){Serial.print(integrator);}
       
-      float input_signal = error*kp + integrator*ki;
+      float input_signal = error*kp + integrator[i]*ki + derivative[i]*kd;
 
       //map input signal to duty cycle percentage to fill (+) or vent (-)
       valve_cmd[i] = map(input_signal, -P_MAX, P_MAX, -100, 100); 
