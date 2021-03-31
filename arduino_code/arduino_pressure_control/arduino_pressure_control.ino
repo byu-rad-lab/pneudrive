@@ -1,8 +1,3 @@
-//#include <SoftwareWire.h>
-//SoftwareWire SoftWire(A3,A2);
-//#include <Adafruit_ADS1015_softwire.h>
-//Adafruit_ADS1015 ads(0x49);
-
 #include <Wire.h>
 
 float p[4] = {0, 0, 0, 0};
@@ -19,8 +14,23 @@ int pwm_pins [4] = {9,6,5,3};
 
 int valve_cmd[4] = {0,0,0,0}; //valve commands [0, 255]
 
-float myTime = 0;
-float integrator = 0;
+//'Global' variables that are important for control
+float myTime = 0.0;
+float prevTime = 0.0; //Last time the loop was entered
+float integrator[4] = {0, 0, 0, 0};
+float pdot[4] = {0, 0, 0, 0};
+float prevError[4] = {0, 0, 0, 0}; //error at the previous timestep
+float prevP[4] = {0,0,0,0};
+float errorDot[4] = {.0, .0, .0, .0}; //Derivative of the error
+float awl = 1.0; //Anti-Windup limit.
+float kp = 10.0;
+float ki = 0.000;
+float kd = 0.00;
+float sigma = .05; // Dirty Derivative Bandwidth = 1/sigma
+float deadband = 0.0; // kpa, controller will not act on error less than deadband
+ 
+float error = 0.0;
+float dt = 0;
 
 // motor driver error pins
 const int EF1_A = 10;
@@ -34,11 +44,7 @@ double const P_MAX = 100 * PSI2KPA;
 
 void setup(void) 
 {
-  Serial.begin(9600);
-  // This speeds up reading from the Arduino's ADC
-  // but generally gives worse data (more noisy)
-  //bitClear(ADCSRA, ADPS0);
-  // These two make little difference in speed
+  Serial.begin(115200);
 
   int i2c_address;
   i2c_address = geti2caddress();
@@ -56,12 +62,8 @@ void setup(void)
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
 
-  //SoftWire.setClock(3400000);
-  //ads.begin();
 
-  //set each digital/pwm pin as output and initialize valves at 0 speed
-//  Serial.print("Initializing valves");
-//  Serial.println();
+  //set each digital/pwm pin as output and vent all valves
   for(int i=0; i<4; i++)
   {
     pinMode(digital_pins[i],OUTPUT);
@@ -69,18 +71,17 @@ void setup(void)
     vent(digital_pins[i],pwm_pins[i],0);
   }
 
+  delay(5000);
+  prevTime = millis();
 }
 
 
 void loop(void) 
 {
-  myTime =micros();
-  //double bias = 165*0;
-  //double gain = 100.0/4095.0;
-  //p[0] = (ads.readADC_SingleEnded(0)-bias)*gain; // Reading voltage from external ADC
-  //p[1] = (ads.readADC_SingleEnded(1)-bias)*gain;
-  //p[2] = (ads.readADC_SingleEnded(2)-bias)*gain;
-  //p[3] = (ads.readADC_SingleEnded(3)-bias)*gain;
+  myTime = millis(); 
+  dt = (myTime-prevTime)*.001; //calculate time (s) between each loop
+  prevTime = myTime; //update previous time
+
 
   // digital filter pressure data
   p[0] = filter(p[0], readPressure(A0));
@@ -94,7 +95,7 @@ void loop(void)
 //  Serial.print(p[0]);
 //  Serial.println();
 
-  // Comment in to see all pressures plotted together on serial monitor
+//  // Comment in to see all pressures plotted together on serial monitor
 //  for (int i = 0; i<4; i++){
 //    Serial.print(p[i]/PSI2KPA);
 //    Serial.print("\t");
@@ -102,99 +103,125 @@ void loop(void)
 //  Serial.println();
 
 
-  // CONTROL
-  float kp = 1.0;
-  float ki = 0.001;
-  float kd = 0.0;
-  float deadband = 5.0; // kpa
+  // CONTROL  
   for(int i=0; i<4; i++)
   { 
+
     if(abs(pcmd[i]-p[i])>=deadband)
     {
-      float error = pcmd[i] - p[i];
-
-      integrator += error;
+      error = pcmd[i] - p[i];
       
-//      if (i==0){Serial.print(integrator);}
-      
-      float input_signal = error*kp + integrator*ki;
+//      if (errorDot[i] < awl) //Integrator anti-windup scheme
+//      {
+//        integrator[i] = integrator[i] + dt/2*(error+prevError[i]); //Trapezoidal Integration
+//      }
+//      pdot[i] = dirtyDifferentiate(p[i], prevP[i], pdot[i]);
+//      errorDot[i] = dirtyDifferentiate(error, prevError[i], errorDot[i]);
+//            
+//      float input_signal = error*kp + integrator[i]*ki - pdot[i]*kd;
+//      float input_signal = error*kp;
 
-      //map input signal to duty cycle percentage to fill (+) or vent (-)
-      valve_cmd[i] = map(input_signal, -P_MAX, P_MAX, -100, 100); 
+      valve_cmd[i] = error*kp;
+
+//      if (i==1){
 //      Serial.print(valve_cmd[i]);
-    }
+//      Serial.print('\t');
+//      }
 
-//    Serial.print(p[i]);
-    //Serial.print("\t");
-    move_valve(digital_pins[i],pwm_pins[i],valve_cmd[i]);
+      //update delayed variables
+      prevError[i] = error;
+      prevP[i] = p[i];
+ 
+      move_valve(digital_pins[i], pwm_pins[i], valve_cmd[i]);
+    }
+    else{
+      move_valve(digital_pins[i], pwm_pins[i], 0);
+    }
   }
-//  Serial.print(integrator);
 //  Serial.println();
 
-  //update p and pcmd in memory with new values of pchar and pcmdchar
+  //update p and pcmd in memory with new values of pchar and pcmdchar recieved on i2c
   for (int i = 0; i < 4; i++)
   {
     float_to_two_bytes(p[i], &pchar[i * 2]);
     pcmd[i] = two_bytes_to_float(&pcmdchar[i * 2]); 
   }
-  
-  Serial.print(micros() - myTime);
-  Serial.println();
 }
 
 
-void move_valve(int digital_pin, int pwm_pin, int duty_cycle)
+void move_valve(int digital_pin, int pwm_pin, int valve_cmd)
 {
   /*
-   * speed comes in as a number between -100% and +100%
    * Logic in this function is:
-   * if speed is positive -> measured pressure is below command -> fill
-   * if speed is negative -> measured pressure is above command -> vent
+   * if valve_cmd is positive -> measured pressure is below command -> fill
+   * if valve_cmd is negative -> measured pressure is above command -> vent
    * 
-   * 0% duty cycle means valve is closed.
    */
 
-//  if (digital_pin==8)
-//  {
-//    Serial.print(speed);
-//    Serial.println();
-//  }
   
-  if(duty_cycle>0)
+  if(valve_cmd>0)
   { 
     //fill
-    fill(digital_pin, pwm_pin, duty_cycle);
+    fill(digital_pin, pwm_pin, valve_cmd);
   }
-  else
+  else if (valve_cmd<0)
   {
     //vent
-    vent(digital_pin, pwm_pin, duty_cycle);
+    vent(digital_pin, pwm_pin, valve_cmd);
   }
 }
 
-void fill(int digital_pin, int pwm_pin, int duty_cycle)
+void fill(int digital_pin, int pwm_pin, int valve_cmd)
 {
   /*
-   * speed is (0, 100], map range to (0, 255].
+   * valve_cmd is positive, map valve_cmd to (0, 255].
    * NOTE: this cooresponds to direction that the valves are plugged in.
    * Looking at the top of the connector (where the metal is),
    * the brown wire should be on the left, and the blue on the right.
    */
 
 
-  int speed = map(duty_cycle, 0, 100, 0, 255);
+
+  if(valve_cmd>255){valve_cmd=255;}
+  
   digitalWrite(digital_pin,HIGH);
-  analogWrite(pwm_pin,speed);
+  analogWrite(pwm_pin,valve_cmd);
+  if(digital_pin==7){
+    Serial.print(valve_cmd);
+    Serial.println();
+   }
 }
 
-void vent(int digital_pin, int pwm_pin, int duty_cycle)
+void vent(int digital_pin, int pwm_pin, int valve_cmd)
 {
    /*
-   * speed is [-100, 0], map range to (0, 255].
+   * valve_cmd is negative, map range to (0, 255].
+   * very negative means lots of effort, which driver board needs lots of effort to be low
+   * map [-255,0] --> [0,255]
    */
-  int speed = map(abs(duty_cycle), 0, 100, 0, 255); 
+
+  if (valve_cmd<-255){
+    valve_cmd=-255;
+    }
   digitalWrite(digital_pin,LOW);
-  analogWrite(pwm_pin,speed);
+  analogWrite(pwm_pin, valve_cmd+255);
+    if(digital_pin==7){
+    Serial.print(valve_cmd);
+    Serial.println();
+   }
+}
+
+float dirtyDifferentiate(float input, float prev_input, float input_dot)
+{
+  /*
+   * This function takes a dirty derivative of input. BROKEN.
+   */
+
+   float beta = (2*sigma-dt)/(2*sigma+dt);
+   
+   return beta*input_dot + ((1 - beta)/dt) * (input-prev_input);
+
+//  return (input - prev_input)/(dt*.000001);
 }
 
 float filter(float prev, float input)
@@ -318,15 +345,6 @@ double readPressure(int analogPin)
    
    // convert bin number to a voltage
    double v_out = analogRead(analogPin) * 5.0/1024.0;
-
-//   //just for prototyping with pot, comment out with real sensor
-//   if (v_out>4.5){v_out=4.5;}
-//   if (v_out<0.5){v_out=0.5;}
-
-//   if (analogPin == A1){
-//    Serial.print(v_out);
-//    Serial.println();
-//   }
 
    // return applied pressure in kPa
    return ((v_out - 0.1*v_sup)/(0.8*v_sup)) * P_MAX;
