@@ -5487,21 +5487,6 @@ a lower impedance path back to the power source.</text>
 <label x="2.54" y="77.216" size="1.778" layer="95"/>
 </segment>
 </bus>
-<bus name="D[6..9]">
-<segment>
-<wire x1="53.34" y1="104.14" x2="53.34" y2="96.52" width="0.762" layer="92"/>
-<wire x1="53.34" y1="96.52" x2="121.92" y2="96.52" width="0.762" layer="92"/>
-<wire x1="121.92" y1="96.52" x2="121.92" y2="106.68" width="0.762" layer="92"/>
-<label x="71.12" y="99.06" size="1.778" layer="95"/>
-</segment>
-</bus>
-<bus name="D[2..5]">
-<segment>
-<wire x1="53.34" y1="106.68" x2="53.34" y2="116.84" width="0.762" layer="92"/>
-<wire x1="53.34" y1="116.84" x2="101.6" y2="116.84" width="0.762" layer="92"/>
-<label x="63.5" y="116.84" size="1.778" layer="95"/>
-</segment>
-</bus>
 </busses>
 <nets>
 <net name="GND" class="0">
@@ -5879,82 +5864,64 @@ a lower impedance path back to the power source.</text>
 </net>
 <net name="D6" class="0">
 <segment>
-<wire x1="149.86" y1="104.14" x2="121.92" y2="104.14" width="0.1524" layer="91"/>
-<pinref part="DRIVER_A" gate="G$1" pin="IN1"/>
-</segment>
-<segment>
-<wire x1="48.26" y1="104.14" x2="53.34" y2="104.14" width="0.1524" layer="91"/>
 <pinref part="NANO1" gate="NANO_EVERY" pin="D6"/>
+<pinref part="DRIVER_A" gate="G$1" pin="IN1"/>
+<wire x1="48.26" y1="104.14" x2="149.86" y2="104.14" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="D7" class="0">
 <segment>
-<wire x1="149.86" y1="101.6" x2="121.92" y2="101.6" width="0.1524" layer="91"/>
-<pinref part="DRIVER_A" gate="G$1" pin="IN2"/>
-</segment>
-<segment>
-<wire x1="48.26" y1="101.6" x2="53.34" y2="101.6" width="0.1524" layer="91"/>
 <pinref part="NANO1" gate="NANO_EVERY" pin="D7"/>
+<pinref part="DRIVER_A" gate="G$1" pin="IN2"/>
+<wire x1="48.26" y1="101.6" x2="149.86" y2="101.6" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="D8" class="0">
 <segment>
-<wire x1="149.86" y1="99.06" x2="121.92" y2="99.06" width="0.1524" layer="91"/>
-<pinref part="DRIVER_A" gate="G$1" pin="IN3"/>
-</segment>
-<segment>
-<wire x1="48.26" y1="99.06" x2="53.34" y2="99.06" width="0.1524" layer="91"/>
 <pinref part="NANO1" gate="NANO_EVERY" pin="D8"/>
+<wire x1="149.86" y1="99.06" x2="124.46" y2="99.06" width="0.1524" layer="91"/>
+<pinref part="DRIVER_A" gate="G$1" pin="IN3"/>
+<wire x1="124.46" y1="99.06" x2="121.92" y2="99.06" width="0.1524" layer="91"/>
+<wire x1="48.26" y1="99.06" x2="121.92" y2="99.06" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="D9" class="0">
 <segment>
-<wire x1="149.86" y1="96.52" x2="121.92" y2="96.52" width="0.1524" layer="91"/>
-<pinref part="DRIVER_A" gate="G$1" pin="IN4"/>
-</segment>
-<segment>
-<wire x1="48.26" y1="96.52" x2="53.34" y2="96.52" width="0.1524" layer="91"/>
 <pinref part="NANO1" gate="NANO_EVERY" pin="D9"/>
+<pinref part="DRIVER_A" gate="G$1" pin="IN4"/>
+<wire x1="48.26" y1="96.52" x2="149.86" y2="96.52" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="D2" class="0">
 <segment>
-<wire x1="86.36" y1="134.62" x2="86.36" y2="116.84" width="0.1524" layer="91"/>
-<pinref part="DRIVER_B" gate="G$1" pin="IN1"/>
-</segment>
-<segment>
-<wire x1="48.26" y1="114.3" x2="53.34" y2="114.3" width="0.1524" layer="91"/>
 <pinref part="NANO1" gate="NANO_EVERY" pin="D2"/>
+<wire x1="86.36" y1="134.62" x2="86.36" y2="114.3" width="0.1524" layer="91"/>
+<pinref part="DRIVER_B" gate="G$1" pin="IN1"/>
+<wire x1="48.26" y1="114.3" x2="86.36" y2="114.3" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="D3" class="0">
 <segment>
-<wire x1="88.9" y1="134.62" x2="88.9" y2="116.84" width="0.1524" layer="91"/>
-<pinref part="DRIVER_B" gate="G$1" pin="IN2"/>
-</segment>
-<segment>
-<wire x1="48.26" y1="111.76" x2="53.34" y2="111.76" width="0.1524" layer="91"/>
 <pinref part="NANO1" gate="NANO_EVERY" pin="D3"/>
+<wire x1="88.9" y1="134.62" x2="88.9" y2="111.76" width="0.1524" layer="91"/>
+<pinref part="DRIVER_B" gate="G$1" pin="IN2"/>
+<wire x1="48.26" y1="111.76" x2="88.9" y2="111.76" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="D4" class="0">
 <segment>
-<wire x1="91.44" y1="134.62" x2="91.44" y2="116.84" width="0.1524" layer="91"/>
-<pinref part="DRIVER_B" gate="G$1" pin="IN3"/>
-</segment>
-<segment>
-<wire x1="48.26" y1="109.22" x2="53.34" y2="109.22" width="0.1524" layer="91"/>
 <pinref part="NANO1" gate="NANO_EVERY" pin="D4"/>
+<wire x1="91.44" y1="134.62" x2="91.44" y2="109.22" width="0.1524" layer="91"/>
+<pinref part="DRIVER_B" gate="G$1" pin="IN3"/>
+<wire x1="48.26" y1="109.22" x2="91.44" y2="109.22" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="D5" class="0">
 <segment>
-<wire x1="93.98" y1="134.62" x2="93.98" y2="116.84" width="0.1524" layer="91"/>
-<pinref part="DRIVER_B" gate="G$1" pin="IN4"/>
-</segment>
-<segment>
-<wire x1="48.26" y1="106.68" x2="53.34" y2="106.68" width="0.1524" layer="91"/>
 <pinref part="NANO1" gate="NANO_EVERY" pin="D5"/>
+<wire x1="93.98" y1="134.62" x2="93.98" y2="106.68" width="0.1524" layer="91"/>
+<pinref part="DRIVER_B" gate="G$1" pin="IN4"/>
+<wire x1="48.26" y1="106.68" x2="93.98" y2="106.68" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="EF1_B" class="0">

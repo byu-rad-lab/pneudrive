@@ -19,7 +19,7 @@ The max for I2C fast mode is 400 pF according to Table 1. Since we don't have th
 * There are two ground planes in this PCB. The top plane is for the signal ground and the bottom plane is the motor power ground. This was done in an attempt to minimize noise from the motors on the analog pressure sensors. These ground are connected through the GND pins on the driver boards so that the both ground planes are connected to each other when it is running. But by only connecting the ground planes through the driver boards, it encourages any noisy currents to follow the path of least impedance (the ground plane) back to source instead of going through the signal ground. We used [this](https://www.nxp.com/docs/en/application-note/AN1259.pdf) and [this](https://electronics.stackexchange.com/questions/112508/ground-vs-power-ground) as resources as to why we chose to do this. We also did our best to separate the two areas of the board (i.e. the drivers from the pressure sensors) as much as possible without making the board too big. 
 
 # PCB Schematic
-![Schematic](schematic_v5.png)
+![Schematic](schematic_v6.png)
 
 # Places to order parts
 
@@ -30,7 +30,7 @@ For *each* board you will need these things. For each item a link is included wh
 * 2 Pin Dip Switch ([link](https://www.digikey.com/en/products/detail/cui-devices/DS01-254-S-02BE/11310829))
 * 1 Arduino Nano Every ([link](https://store.arduino.cc/usa/nano-every))
 	* Note that these also come in packs of 3 or 6, and then they are cheaper ([link](https://store.arduino.cc/usa/nano-every-pack))
-* 7 Phoenix PTSM connectors ([link](https://www.digikey.com/en/products/detail/phoenix-contact/1778625/2625578) to female part, [link](https://www.digikey.com/en/products/detail/phoenix-contact/1778832/2625556) to male part. In previous iterations, we used [these screw terminals](https://www.amazon.com/Simpo-Terminal-Optional-300v10a-Drawing/dp/B018ORUVTU/ref=sr_1_4?dchild=1&keywords=2.54%2Bmm%2Bscrew%2Bterminal&qid=1587763307&s=industrial&sr=1-4&th=1).)
+* 7 Phoenix Contact connectors ([link](https://www.digikey.com/en/products/detail/phoenix-contact/1759017/260463) to female part, [link](https://www.digikey.com/en/products/detail/phoenix-contact/1757019/260379) to male part. NOTE: there are also 'sets' of these for much cheaper on [Amazon](https://www.amazon.com/Willwin-Pitch-Pluggable-Terminal-Connectors/dp/B077GTYZVM/ref=sr_1_15?dchild=1&keywords=PCB%2BMount%2BScrew%2BTerminal%2BBlock%2C%2Bright%2Banlge%2BPlug-in%2B2-Pin%2B(2%2BPole)%2BScrew%2BTerminal%2BBlock%2BConnector%2C%2BPluggable%2BMale%2BFemale%2BPhoenix%2BType%2BConnector&qid=1619925723&s=hi&sr=1-15&th=1)
 * 4 12 kOhm resistors ([link](https://www.amazon.com/EDGELEC-Resistor-Tolerance-Resistance-Optional/dp/B07HDGQRSR/ref=sr_1_2?dchild=1&keywords=12k+resistor&qid=1587767472&sr=8-2))
 * 2 4.7 kOhm resistors ([link](https://www.amazon.com/4-7-kOhm-Resistor/s?k=4.7+kOhm+Resistor))
 * ~62 Female header pins (really only 58, but each cut destroys one) ([link](https://www.amazon.com/Qunqi-2-54mm-Straight-Connector-Arduino/dp/B07CGGSDWF/ref=sr_1_3?dchild=1&keywords=female+header+pins&qid=1587769954&sr=8-3))
@@ -40,9 +40,17 @@ For *each* board you will need these things. For each item a link is included wh
 And for *each* BBB cape, you'll need:
 
 * 1 Logic Level Shifter, 4-Channel, Bidirectional ([link](https://www.pololu.com/product/2595))
-* 2 2.2k resistors
-* 1 Phoenix PTSM connector ([link](https://www.digikey.com/en/products/detail/phoenix-contact/1778625/2625578) to female part, [link](https://www.digikey.com/en/products/detail/phoenix-contact/1778832/2625556) to male part. In previous iterations, we used [these screw terminals](https://www.amazon.com/Simpo-Terminal-Optional-300v10a-Drawing/dp/B018ORUVTU/ref=sr_1_4?dchild=1&keywords=2.54%2Bmm%2Bscrew%2Bterminal&qid=1587763307&s=industrial&sr=1-4&th=1).)
-* BBB protocape ([link](https://www.adafruit.com/product/572)). This is what we are using for now. The plan is to eventually design a pcb to replace this.
+* 4 1.8k/2.2k resistors
+* 5 Phoenix Contact connectors (vertical). We chose to use vertical so that it would be easier to access in an enclosure. ([link](https://www.digikey.com/en/products/detail/phoenix-contact/1758018/260496) to female part, [link](https://www.digikey.com/en/products/detail/phoenix-contact/1757019/260379) to male part. NOTE: there are also 'sets' of these for much cheaper on [Amazon](https://www.amazon.com/Willwin-2-Pin-5-08mm-Female-Terminal/dp/B077979RZR/ref=pd_di_sccai_3?pd_rd_w=A5pho&pf_rd_p=c9443270-b914-4430-a90b-72e3e7e784e0&pf_rd_r=5PEX8D4W251F0MR04JT6&pd_rd_r=e4559510-59fe-4a1b-9aaf-c49878303df9&pd_rd_wg=2cx5U&pd_rd_i=B077979RZR&th=1)
+* NOTE: BBB protocape ([link](https://www.adafruit.com/product/572)) was useful in prototyping. This has been replaced by our own custom pcb. 
+
+Enclosure Stuff:
+
+* [Enclosure](https://www.amazon.com/12-2-115mm-Metal-Enclosure-Project/dp/B07G95V7YC/ref=pd_di_sccai_1?pd_rd_w=I5rdI&pf_rd_p=c9443270-b914-4430-a90b-72e3e7e784e0&pf_rd_r=7QFJZRAB7NJ2AP8N4YB6&pd_rd_r=0771ee2a-d3c7-4df1-b478-44d31392f34c&pd_rd_wg=qigFo&pd_rd_i=B07G95V7YC&th=1) on amazon fits everything nicely. 
+* [Panel mount ethernet extension](https://www.adafruit.com/product/4215?gclid=Cj0KCQjw-LOEBhDCARIsABrC0TlaVVkPRgYQnkOMLTnrQEoghTae29z3SAouX9LPYDEf6-AYeaxEKM8aAt0_EALw_wcB)
+* [Panel mount usb extension](https://www.adafruit.com/product/4055?gclid=Cj0KCQjw-LOEBhDCARIsABrC0Tl8-U2JYnmXrtTfUWt_J1TNg8gNP91sTYFdloDnbkfO0Z6vgGVJUYgaArRYEALw_wcB)
+* [Panel mount Phoenix contact connectors](https://www.digikey.com/en/products/detail/phoenix-contact/0707248/348291?utm_adgroup=Terminal%20Blocks%20-%20Panel%20Mount&utm_source=google&utm_medium=cpc&utm_campaign=Shopping_Product_Connectors%2C%20Interconnects&utm_term=&utm_content=Terminal%20Blocks%20-%20Panel%20Mount&gclid=Cj0KCQjw-LOEBhDCARIsABrC0Tki_DSLXojhLEQjRhTL7HOXp9duJyBKhw32B4YBV-cMwi0aZF9Q28caAgXcEALw_wcB). These are used for the Estop in, i2c out, and power out connections.
+* [Panel mount power button](https://www.adafruit.com/product/1505)
 
 
 Additional random stuff:
@@ -56,15 +64,13 @@ Additional random stuff:
 * Barbed fittings that fit tubing (2mm, rated for up to 100 psi). We use [this](https://www.mcmaster.com/6220N78/).
 
 
-# Board and CAD File
 
-Note that the female connectors are prone to bending when plugging things in. So be careful with them. It is a good idea to put a dab of hot glue under each connector when populating the board to make them more robust. Just make sure to not cover any conductive surfaces with the glue.
+# Board and CAD File
 
 See [here](https://a360.co/2NUtMc7) to see the 3d version of the board. You can download a step file too if you want to design a case, for example.
 
 # Things to consider for a future revision of the board
 
 * Find a robust way to plug the pressure sensors into the board. Right now they're soldered directly to the board, but it would be convenient to be able to unplug and replace them.
-* Possibly use a different connector. The female connectors are prone to bending if you're not careful plugging them in. We really like the male spring loaded connectors though because they don't require crimping. Currently, we put a dab of hot glue under the female connector to keep it more secure on the board.
 * Do something with the EF pins on the driver boards. Right now they are connected to the arduino, but not doing anything with them. 
 * We are using shielded cable for the i2c bus. Technically, the cable shield should be grounded somewhere. It isn't currently. Could add a screw terminal to the board to ground the bare ground wire possibly.
