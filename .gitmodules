@@ -1,0 +1,3 @@
+[submodule "msg/rad_msgs"]
+	path = msg/rad_msgs
+	url = https://cjohns94@bitbucket.org/byu_rad_lab/rad_msgs.git

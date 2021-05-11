@@ -6,7 +6,12 @@ int main(int argc, char **argv)
   int bus = 2;
   int firstAddress = 10;
   int pressuresPerNode = 4;
-  PressureController controller(bus, firstAddress, pressuresPerNode);
+  
+  // start up node
+  ros::init(argc, argv, "PressureController");
+  ros::NodeHandle n;
+
+  PressureController controller(n, bus, firstAddress, pressuresPerNode);
 
   controller.do_pressure_control();
 

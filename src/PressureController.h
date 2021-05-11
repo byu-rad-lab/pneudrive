@@ -2,12 +2,13 @@
 #define PCONTROL_H_
 
 #include <vector>
-#include <std_msgs/Float32MultiArray.h>
-#include<ros/ros.h>
+#include <sensor_msgs/FluidPressure.h>
+#include <std_msgs/Header.h>
+#include <ros/ros.h>
 #include "I2CDevice.h"
 #include "GPIO.h"
-#include<ros/console.h>
-#include<unistd.h> //for delay function
+#include <ros/console.h>
+#include <unistd.h> //for delay function
 
 /**
  * @class PressureController
@@ -17,8 +18,7 @@ class PressureController{
 private:
   int numNodes;
   int numPressuresPerNode;
-  GPIO::GPIO estopOut{49};
-  GPIO::GPIO estopIn{115};
+  GPIO::GPIO estopOut{49}; //P9_23
   std::vector<ros::Publisher> pressurePublishers;
   std::vector<ros::Subscriber> pressureCommandSubscribers;
   std::vector<I2CDevice> i2cDevices;
@@ -26,12 +26,12 @@ private:
   std::vector<std::vector<float>> pressureCommands;
   
 public:
-  PressureController(int bus, int firstAddress, int pressuresPerNode);
+  PressureController(ros::NodeHandle n, int bus, int firstAddress, int pressuresPerNode);
   void do_pressure_control();
   int get_num_devices_on_bus(int bus, int firstAddress);
   float two_bytes_to_float(unsigned char * twobytes);
   void float_to_two_bytes(float myfloat, unsigned char * twobytes);
-  void pcmd_callback(const std_msgs::Float32MultiArray::ConstPtr& msg, int node);
+  void pcmd_callback(const sensor_msgs::FluidPressure::ConstPtr& msg, int node);
 };
 
 #endif /* PCONTROL_H_ */

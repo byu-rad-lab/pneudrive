@@ -25,6 +25,10 @@ catkin_package(
  INCLUDE_DIRS
 )
 
+#For profilling
+add_compile_options(-pg)
+set(catkin_LIBRARIES ${catkin_LIBRARIES} -pg)
+
 ###########
 ## Build ##
 ###########
