@@ -2,7 +2,7 @@
 #define PCONTROL_H_
 
 #include <vector>
-#include <sensor_msgs/FluidPressure.h>
+#include <byu_pressure_control/Pressure.h>
 #include <std_msgs/Header.h>
 #include <ros/ros.h>
 #include "I2CDevice.h"
@@ -31,7 +31,7 @@ public:
   int get_num_devices_on_bus(int bus, int firstAddress);
   float two_bytes_to_float(unsigned char * twobytes);
   void float_to_two_bytes(float myfloat, unsigned char * twobytes);
-  void pcmd_callback(const sensor_msgs::FluidPressure::ConstPtr& msg, int node);
+  void pcmd_callback(const byu_pressure_control::Pressure::ConstPtr& msg, int node);
 };
 
 #endif /* PCONTROL_H_ */
