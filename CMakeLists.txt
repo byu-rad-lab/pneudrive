@@ -21,7 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 add_message_files(
   FILES
-  rad_msgs/bellows/Pressure.msg
+  PressureStamped.msg
 )
 
 generate_messages(
