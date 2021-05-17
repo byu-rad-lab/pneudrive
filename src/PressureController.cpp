@@ -4,7 +4,7 @@
 // conversion factor from psi to kpa (ie kpa = psi * psi2kpa)
 const double psi2kpa = 6.8947572932;
 
-PressureController::PressureController(ros::NodeHandle n, int bus = 1, int firstAddress = 10, int pressuresPerNode = 4)
+PressureController::PressureController(ros::NodeHandle n, int bus, std::map<std::string, int> expected_i2c_addresses)
 {
   /* 
   * Set up GPIO pins. One digital input is needed for checking if estop has been hit.  
@@ -12,32 +12,29 @@ PressureController::PressureController(ros::NodeHandle n, int bus = 1, int first
   * Power to arduinos is normally off, so need to set output high to enable them. 
   */
 
-  estopOut.setDirection(GPIO::OUTPUT);
-  estopOut.setValue(GPIO::HIGH);
+  pwrEnable.setDirection(GPIO::OUTPUT);
+  pwrEnable.setValue(GPIO::HIGH);
   ROS_INFO_STREAM("ENABLED ARDUINO POWER");
   usleep(1000000); //sleep for 1 second to allow arduinos to turn on fully.
 
-  numNodes = get_num_devices_on_bus(bus, firstAddress);
+  //check to make sure expected devices are found on i2c bus
+  check_devices_on_bus(bus, expected_i2c_addresses);
 
-  // check to make sure there is at least one node to start, otherwise shut down
-  if (numNodes == 0)
+  n.getParam("/hardware/pressure_sensors/count", numJoints);
+
+  i2cDevices.resize(numJoints);
+  pressures.resize(numJoints);
+  pressureCommands.resize(numJoints);
+
+  for (int i = 0; i < numJoints; i++)
   {
-    ros::shutdown();
-  }
-  numPressuresPerNode = pressuresPerNode;
-
-  i2cDevices.resize(numNodes);
-  pressures.resize(numNodes);
-  pressureCommands.resize(numNodes);
-
-  for (int i = 0; i < numNodes; i++)
-  {
-    i2cDevices[i].open(bus, i + firstAddress);
-    pressures[i].resize(numPressuresPerNode);
-    pressureCommands[i].resize(numPressuresPerNode);
+    std::string joint_name = "joint_" + std::to_string(i);
+    i2cDevices[i].open(bus, expected_i2c_addresses[joint_name]);
+    pressures[i].resize(numPressuresPerJoint);
+    pressureCommands[i].resize(numPressuresPerJoint);
   }
 
-  for (int i = 0; i < numNodes; i++)
+  for (int i = 0; i < numJoints; i++)
   {
     std::string topicString = "/robo_" + std::to_string(i) + "/joint_" + std::to_string(i) + "/pressure_command";
     /*
@@ -48,7 +45,7 @@ PressureController::PressureController(ros::NodeHandle n, int bus = 1, int first
     ROS_INFO("/pressure_command topic started for joint %d", i);
   }
 
-  for (int i = 0; i < numNodes; i++)
+  for (int i = 0; i < numJoints; i++)
   {
     std::string topic_string = "/robo_" + std::to_string(i) + "/joint_" + std::to_string(i) + "/pressure_state";
     ros::Publisher pub = n.advertise<byu_pressure_control::PressureStamped>(topic_string, 1000);
@@ -57,15 +54,17 @@ PressureController::PressureController(ros::NodeHandle n, int bus = 1, int first
   }
 }
 
-int PressureController::get_num_devices_on_bus(int bus, int firstAddress)
+void PressureController::check_devices_on_bus(int bus, std::map<std::string, int> expected_i2c_addresses)
 {
   ROS_INFO_STREAM("Scanning for i2c devices on bus " << bus << "...");
-  int numDevices = 0;
-  bool done = false;
-  while (!done)
+
+  std::vector<bool> found_i2c_device;
+
+  for (int i = 0; i < expected_i2c_addresses.size(); i++)
   {
     I2CDevice device;
-    int addr = numDevices + firstAddress;
+    std::string joint_name = "joint_" + std::to_string(i);
+    int addr = expected_i2c_addresses[joint_name];
     unsigned char testchar;
 
     device.open(bus, addr);
@@ -73,17 +72,23 @@ int PressureController::get_num_devices_on_bus(int bus, int firstAddress)
 
     if (!error)
     {
-      numDevices++;
+      found_i2c_device.push_back(true);
       ROS_INFO_STREAM("Found device 0x" << std::hex << addr << " on bus " << bus);
     }
     else
     {
-      done = true;
+      found_i2c_device.push_back(false);
+      ROS_INFO_STREAM("Could not find device 0x" << std::hex << addr << " on bus " << bus);
     }
   }
 
-  ROS_INFO_STREAM("Found " << numDevices << " devices on bus " << bus);
-  return numDevices;
+  int checksum = std::accumulate(found_i2c_device.begin(), found_i2c_device.end(), 0);
+
+  if (checksum != expected_i2c_addresses.size())
+  {
+    ROS_ERROR_ONCE("Not all i2c devices found. Shutting down node.");
+    ros::shutdown();
+  }
 }
 
 void PressureController::do_pressure_control()
@@ -94,27 +99,27 @@ void PressureController::do_pressure_control()
     ROS_INFO_STREAM_ONCE("PRESSURE CONTROL STARTED");
 
     // update memory values for  pressure commands and pressures
-    for (int node = 0; node < numNodes; node++)
+    for (int joint = 0; joint < numJoints; joint++)
     {
-      unsigned char pchar[numPressuresPerNode * 2];
-      for (int p = 0; p < numPressuresPerNode; p++)
+      unsigned char pchar[numPressuresPerJoint * 2];
+      for (int p = 0; p < numPressuresPerJoint; p++)
       {
-        float_to_two_bytes(pressureCommands[node][p], &pchar[p * 2]);
+        float_to_two_bytes(pressureCommands[joint][p], &pchar[p * 2]);
       }
 
-      i2cDevices[node].writeRegisters(0, sizeof(pchar), &pchar[0]);
+      i2cDevices[joint].writeRegisters(0, sizeof(pchar), &pchar[0]);
 
-      bool error = i2cDevices[node].readRegisters(0, sizeof(pchar), &pchar[0]);
+      bool error = i2cDevices[joint].readRegisters(0, sizeof(pchar), &pchar[0]);
 
       if (error)
       {
         // send error message over ROS once per second on i2c failure
-        ROS_ERROR_STREAM_THROTTLE(1, "I2C Failure on node " << node);
+        ROS_ERROR_STREAM_THROTTLE(1, "I2C Failure on node " << joint);
       }
 
-      for (int p = 0; p < numPressuresPerNode; p++)
+      for (int p = 0; p < numPressuresPerJoint; p++)
       {
-        pressures[node][p] = two_bytes_to_float(&pchar[p * 2]);
+        pressures[joint][p] = two_bytes_to_float(&pchar[p * 2]);
       }
 
       //This section just prints things out the cout for debugging purposes.
@@ -131,26 +136,26 @@ void PressureController::do_pressure_control()
     }
 
     // publish pressures
-    for (int node = 0; node < numNodes; node++)
+    for (int joint = 0; joint < numJoints; joint++)
     {
       byu_pressure_control::PressureStamped msg;
       msg.header = std_msgs::Header();
       msg.header.stamp = ros::Time::now();
 
-      msg.pressure.resize(numPressuresPerNode);
+      msg.pressure.resize(numPressuresPerJoint);
 
-      for (int p = 0; p < numPressuresPerNode; p++)
+      for (int p = 0; p < numPressuresPerJoint; p++)
       {
-        msg.pressure[p] = pressures[node][p];
+        msg.pressure[p] = pressures[joint][p];
       }
-      pressurePublishers[node].publish(msg);
+      pressurePublishers[joint].publish(msg);
     }
 
     ros::spinOnce();
   }
 
   //disable power to arduinos
-  estopOut.setValue(GPIO::LOW);
+  pwrEnable.setValue(GPIO::LOW);
 }
 
 float PressureController::two_bytes_to_float(unsigned char *twobytes)
@@ -170,11 +175,11 @@ void PressureController::float_to_two_bytes(float myfloat, unsigned char *twobyt
   memcpy(twobytes, &myint, 2);
 }
 
-void PressureController::pcmd_callback(const byu_pressure_control::PressureStamped::ConstPtr &msg, int node)
+void PressureController::pcmd_callback(const byu_pressure_control::PressureStamped::ConstPtr &msg, int joint)
 {
   for (int i = 0; i < msg->pressure.size(); i++)
   {
     float temp = (float)msg->pressure[i]; // cast double/float64 to float/float32 to send over i2c
-    pressureCommands[node][i] = temp;
+    pressureCommands[joint][i] = temp;
   }
 }

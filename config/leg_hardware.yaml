@@ -1,0 +1,9 @@
+hardware/pressure_sensors/name: "Honeywell ABPDRNN100PGAA5"
+hardware/pressure_sensors/count: 2
+
+hardware/pressure_sensors/i2c_info/i2c_bus: 2
+hardware/pressure_sensors/i2c_info/addresses: {
+  joint_0: 0xa,
+  joint_1: 0xb
+}
+

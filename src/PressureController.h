@@ -9,6 +9,7 @@
 #include "GPIO.h"
 #include <ros/console.h>
 #include <unistd.h> //for delay function
+#include <numeric>
 
 /**
  * @class PressureController
@@ -17,9 +18,9 @@
 class PressureController
 {
 private:
-  int numNodes;
-  int numPressuresPerNode;
-  GPIO::GPIO estopOut{49}; //P9_23
+  int numJoints;
+  int numPressuresPerJoint = 4;
+  GPIO::GPIO pwrEnable{49}; //P9_23, output to enable power to arduinos and valves
   std::vector<ros::Publisher> pressurePublishers;
   std::vector<ros::Subscriber> pressureCommandSubscribers;
   std::vector<I2CDevice> i2cDevices;
@@ -27,12 +28,12 @@ private:
   std::vector<std::vector<float>> pressureCommands;
 
 public:
-  PressureController(ros::NodeHandle n, int bus, int firstAddress, int pressuresPerNode);
+  PressureController(ros::NodeHandle n, int bus, std::map<std::string, int> expected_i2c_addresses);
   void do_pressure_control();
-  int get_num_devices_on_bus(int bus, int firstAddress);
+  void check_devices_on_bus(int bus, std::map<std::string, int> expected_i2c_addresses);
   float two_bytes_to_float(unsigned char *twobytes);
   void float_to_two_bytes(float myfloat, unsigned char *twobytes);
-  void pcmd_callback(const byu_pressure_control::PressureStamped::ConstPtr &msg, int node);
+  void pcmd_callback(const byu_pressure_control::PressureStamped::ConstPtr &msg, int joint);
 };
 
 #endif /* PCONTROL_H_ */
