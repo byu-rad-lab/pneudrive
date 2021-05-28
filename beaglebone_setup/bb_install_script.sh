@@ -13,7 +13,7 @@ sudo apt install ros-melodic-ros-base -y
 echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
 source /opt/ros/melodic/setup.bash
 
-sudo apt-get install nano ros-melodic-robot-upstart ros-melodic-tf -y
+sudo apt-get install nano ros-melodic-tf -y
 
 # Set IP Address on boot
 sudo cp set_ip_on_startup /etc/init.d/
@@ -24,7 +24,7 @@ sudo update-rc.d set_ip_on_startup enable
 cd ~/
 mkdir -p ~/ros_ws/src
 cd ros_ws/src
-git clone https://bitbucket.org/byu_rad_lab/byu_pressure_control.git
+git clone --recurse-submodules https://bitbucket.org/byu_rad_lab/byu_pressure_control.git
 cd ~/ros_ws
 catkin_make
 source devel/setup.bash
@@ -42,6 +42,6 @@ echo "uboot_overlay_addr7=/lib/firmware/BB-I2C2-FAST-00A0.dtbo" >> /boot/uEnv.tx
 #sudo systemctl start imu_publisher
 
 
-rosrun robot_upstart install byu_pressure_control/launch/i2c_pressure.launch --user root --job pressurecontrol
-sudo systemctl daemon-reload 
-sudo systemctl start pressurecontrol
+#rosrun robot_upstart install byu_pressure_control/launch/i2c_pressure.launch --user root --job pressurecontrol
+#sudo systemctl daemon-reload 
+#sudo systemctl start pressurecontrol
