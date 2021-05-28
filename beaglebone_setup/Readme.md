@@ -16,9 +16,9 @@ The BBB comes with Debian Linux installed, however we need an OS which is suppor
 
 3. Insert a MicroSD card through a USB adapter into your computer
 
-4. Use startup disk creator to specify that you want the file you just downloaded and extracted on the MicroSD card you inserted
+4. Use startup disk creator to specify that you want the file you just downloaded and extracted on the MicroSD card you inserted ```usb-creator-gtk```
 
-5. Insert the MicroSD card into the BBB, then connect power while holding the S2 button. Keep holding the S2 button until you see the lights on the BBB start to move left and right. This means that the EMMC memory on the BBB is being written to. After it is done it will power off. This usually takes 5-6 minutes.
+5. Insert the MicroSD card into the BBB, then connect power while holding the S2 (as labeled on beaglebone black silkscreen) button. Keep holding the S2 button until you see the lights on the BBB start to move left and right. This means that the EMMC memory on the BBB is being written to (should take 30-60 seconds) Note that the lights will flash several times before the led moves left and right while it boots. After it is done it will power off. This usually takes 2-3 minutes.
 
 The BBB now has Ubuntu installed. Remove the SD card.
 
