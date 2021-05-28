@@ -28,9 +28,17 @@ Now that Ubuntu has been installed you can plug in a keyboard, HDMI, and an ethe
 
 ```git clone https://bitbucket.org/byu_rad_lab/byu_pressure_control.git```.
 
+IMPORTANT NOTES: 
+
+* I've noticed some issues where you can't type anything with the keyboard plugged in. Not sure why. It usually works to switch keyboards, unplug it and plug it back in, or reboot.
+
+* Apparently there is an issue where the ethernet port doesn't boot properly (see [here](https://wp.josh.com/2018/06/04/a-software-only-solution-to-the-vexing-beagle-bone-black-phy-issue/) for way more details than you want). If you can't connect to the internet (i.e. ping 8.8.8.8 or ping google.com) then just reboot.
+
 Navigate to beaglebone_setup and execute the install script using
 
 ```./bb_install_script.sh```.
+
+This will take a while (10-15 minutes). 
 
 This should:
 
