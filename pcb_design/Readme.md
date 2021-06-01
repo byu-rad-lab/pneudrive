@@ -1,4 +1,6 @@
-# Files
+# Overview
+
+This project was made by members of the Robotics and Dynamics Lab at Brigham Young University. This directory contains all of the necessary instructions and files for the custom PCB we designed to implement pressure control for 4 different pressure chambers. This board, in combination with our beaglebone black cape, enables the use of ROS to send and receive pressure data/commands to the lower level controller located on the arduino.
 
 These PCBs were designed using Autodesk EAGLE. The corresponding project, board, and schematic files are found in this directory, as well as the CAM outputs.
 
@@ -7,6 +9,11 @@ We used OSHPARK to print out PCBs. For convenience, their design rules are also 
 We have also created a custom part library which includes footprints, schematics, and 3d models for each major component used in this design. To use the library, simply add the filepath of the .lbr file to Eagle's search path in the Control Panel. For more info see [here](https://www.instructables.com/Adding-a-Library-to-Eagle-CAD/).
 
 There are two pcbs in this directory: a beaglebone black cape and the pressure control board.
+
+Here are some renderings of the pressure control pcb:
+![render1](pressure_control_v6 v1.png)
+![render2](pressure_control_v6 v2.png)
+
 
 ---
 # Pressure Control Board
