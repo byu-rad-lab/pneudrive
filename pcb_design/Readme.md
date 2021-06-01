@@ -55,7 +55,7 @@ The max for I2C fast mode is 400 pF according to Table 1. Since we don't have th
 
 ## Board and CAD File
 
-See [here](https://a360.co/2NUtMc7) to see the 3d version of the board. You can download a step file too if you want to design a case, for example.
+See [here](https://a360.co/3wIiBnY) to see the 3d version of the board. You can download the included step file too if you want to design a case, for example.
 
 ## Things to consider for a future revision of the board
 
