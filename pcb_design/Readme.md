@@ -98,6 +98,9 @@ Total cost of this board is about $50. (parts are about $10 and Oshpark charges 
 * [Panel mount usb extension](https://www.adafruit.com/product/4055?gclid=Cj0KCQjw-LOEBhDCARIsABrC0Tl8-U2JYnmXrtTfUWt_J1TNg8gNP91sTYFdloDnbkfO0Z6vgGVJUYgaArRYEALw_wcB)
 * [Panel mount Phoenix contact connectors](https://www.digikey.com/en/products/detail/phoenix-contact/0707248/348291?utm_adgroup=Terminal%20Blocks%20-%20Panel%20Mount&utm_source=google&utm_medium=cpc&utm_campaign=Shopping_Product_Connectors%2C%20Interconnects&utm_term=&utm_content=Terminal%20Blocks%20-%20Panel%20Mount&gclid=Cj0KCQjw-LOEBhDCARIsABrC0Tki_DSLXojhLEQjRhTL7HOXp9duJyBKhw32B4YBV-cMwi0aZF9Q28caAgXcEALw_wcB). These are used for the Estop in, i2c out, and power out connections.
 * [Panel mount power button](https://www.adafruit.com/product/1505)
+* [Power connection module](https://www.amazon.com/gp/product/B082ZFRV1B/ref=ox_sc_act_title_3?smid=A3PXX08VVBPF5M&psc=1)
+
+TODO: add cad stuff of panel and template printout for cutting.
 
 
 ## Additional random stuff:
