@@ -1,7 +1,4 @@
 #include <Wire.h>
-//#include <FIR.h>
-
-//FIR<float, 67> fir_lp;
 
 float p[4] = {0, 0, 0, 0};
 float pcmd[4] = {0, 0, 0, 0};
@@ -48,11 +45,38 @@ double const P_MAX = 100 * PSI2KPA;
 
 void setup(void)
 {
-//  // comment out if not debugging
-//  Serial.begin(115200);
-  
+  Serial.begin(115200);
+
+  // check i2c address
   int i2c_address;
   i2c_address = geti2caddress();
+  Serial.print("I2C address: 0x");
+  Serial.print(i2c_address, HEX);
+  Serial.println();
+
+  //set up I2C and register event handlers
+  Wire.begin(i2c_address);
+  Wire.onReceive(receiveEvent);
+  Wire.onRequest(requestEvent);
+
+
+  // check data on pressure sensors
+  float startTime = millis();
+  float curTime = 0.0;
+  Serial.print("Checking sensors for 30 seconds. Apply a known pressure to each sensor. Make sure following readings make sense.");
+  Serial.println();
+  delay(2000);
+  while (curTime - startTime < 30 * 1000) {
+    Serial.print(readPressure(A0) / PSI2KPA);
+    Serial.print("\t");
+    Serial.print(readPressure(A1) / PSI2KPA);
+    Serial.print("\t");
+    Serial.print(readPressure(A2) / PSI2KPA);
+    Serial.print("\t");
+    Serial.print(readPressure(A3) / PSI2KPA);
+    Serial.println();
+    curTime = millis();
+  }
 
   //set up fault pins, input pullup bc no external pull is used.
   pinMode(EF1_A, INPUT_PULLUP);
@@ -60,11 +84,9 @@ void setup(void)
   pinMode(EF1_B, INPUT_PULLUP);
   pinMode(EF2_B, INPUT_PULLUP);
 
-  //set up I2C and register event handlers
-  Wire.begin(i2c_address);
-  Wire.onReceive(receiveEvent);
-  Wire.onRequest(requestEvent);
-
+  // check valve control connections
+  Serial.print("Venting each valve control connection for 10 seconds. Use a multimeter to check voltages on each connector. Make sure 12V supply is connected");
+  Serial.println();
   //set each digital/pwm pin as output and vent all valves
   for (int i = 0; i < 4; i++)
   {
@@ -73,90 +95,33 @@ void setup(void)
     move_valve(digital_pins[i], pwm_pins[i], -255);
   }
 
-  //set up filter
-  fir_lp.setFilterCoeffs(LP_COEFF);
-  // Set the gain
-  fir_lp.getGain();
+  delay(10000);
+  
+  Serial.print("Filling each valve control connection for 10 seconds. Use a multimeter to check voltages on each connector. Make sure 12V supply is connected");
+  Serial.println();
+  for (int i = 0; i < 4; i++)
+  {
+    move_valve(digital_pins[i], pwm_pins[i], 255);
+  }
 
-  // Wait for 5 seconds for everything to vent out.
-  delay(5000);
-  prevTime = millis();
-
-  // close all valves now that they have vented.
+  delay(10000);
+  
+  Serial.print("Closing each valve control connection for 10 seconds. Use a multimeter to check voltages on each connector. Make sure 12V supply is connected");
+  Serial.println();
   for (int i = 0; i < 4; i++)
   {
     move_valve(digital_pins[i], pwm_pins[i], 0);
   }
+  
+  //
+  //  delay(5000);
+  //  prevTime = millis();
 }
 
 
 void loop(void)
 {
-  myTime = millis();
-  dt = (myTime - prevTime) * .001; //calculate time (s) between each loop
-  prevTime = myTime; //update previous time
 
-  // digital filter pressure data
-  p[0] = filter(p[0], readPressure(A0));
-  p[1] = filter(p[1], readPressure(A1));
-  p[2] = filter(p[2], readPressure(A2));
-  p[3] = filter(p[3], readPressure(A3));
-
-//  //Uncomment to plot filtered data vs unfiltered data
-//  Serial.print(myTime);
-//  Serial.print("\t");
-//  Serial.print(readPressure(A0));
-//  Serial.print("\t");
-//  Serial.print(p[0]);
-//  Serial.print("\t");
-//  Serial.print(fir_lp.processReading(readPressure(A0)));
-//  Serial.println();
-
-//  // Uncomment to see all pressures plotted together on serial monitor
-//  for (int i = 0; i < 4; i++) {
-//    Serial.print(p[0]);
-//    Serial.print(",");
-//  }
-//  Serial.println();
-
-
-  // CONTROL
-  for (int i = 0; i < 4; i++)
-  {
-
-    if (abs(pcmd[i] - p[i]) >= deadband)
-    {
-      error = pcmd[i] - p[i];
-
-      //      if (errorDot[i] < awl) //Integrator anti-windup scheme
-      //      {
-      //        integrator[i] = integrator[i] + dt/2*(error+prevError[i]); //Trapezoidal Integration
-      //      }
-      //      pdot[i] = dirtyDifferentiate(p[i], prevP[i], pdot[i]);
-      //      errorDot[i] = dirtyDifferentiate(error, prevError[i], errorDot[i]);
-      //
-      //      float input_signal = error*kp + integrator[i]*ki - pdot[i]*kd;
-      //      float input_signal = error*kp;
-
-      valve_cmd[i] = error * kp;
-
-      //update delayed variables
-      prevError[i] = error;
-      prevP[i] = p[i];
-
-      move_valve(digital_pins[i], pwm_pins[i], valve_cmd[i]);
-    }
-    else {
-      move_valve(digital_pins[i], pwm_pins[i], 0);
-    }
-  }
-
-  //update p and pcmd in memory with new values of pchar and pcmdchar recieved on i2c
-  for (int i = 0; i < 4; i++)
-  {
-    float_to_two_bytes(p[i], &pchar[i * 2]);
-    pcmd[i] = two_bytes_to_float(&pcmdchar[i * 2]);
-  }
 }
 
 
@@ -169,6 +134,7 @@ void move_valve(int digital_pin, int pwm_pin, int valve_cmd)
 
   */
 
+
   if (valve_cmd > 0)
   {
     //fill
@@ -178,6 +144,9 @@ void move_valve(int digital_pin, int pwm_pin, int valve_cmd)
   {
     //vent
     vent(digital_pin, pwm_pin, valve_cmd);
+  }else if (valve_cmd == 0)
+  {
+    close(digital_pin, pwm_pin, valve_cmd);
   }
 }
 
@@ -189,12 +158,19 @@ void fill(int digital_pin, int pwm_pin, int valve_cmd)
      Looking at the top of the connector (where the metal is),
      the brown wire should be on the left, and the blue on the right.
   */
+
+
+
   if (valve_cmd > 255) {
     valve_cmd = 255;
   }
 
   digitalWrite(digital_pin, HIGH);
   analogWrite(pwm_pin, valve_cmd);
+  //  if(digital_pin==7){
+  //    Serial.print(valve_cmd);
+  //    Serial.println();
+  //   }
 }
 
 void vent(int digital_pin, int pwm_pin, int valve_cmd)
@@ -204,11 +180,23 @@ void vent(int digital_pin, int pwm_pin, int valve_cmd)
     very negative means lots of effort, which driver board needs lots of effort to be low
     map [-255,0] --> [0,255]
   */
+
   if (valve_cmd < -255) {
     valve_cmd = -255;
   }
   digitalWrite(digital_pin, LOW);
   analogWrite(pwm_pin, valve_cmd + 255);
+  //    if(digital_pin==7){
+  //    Serial.print(valve_cmd);
+  //    Serial.println();
+  //   }
+}
+
+void close(int digital_pin, int pwm_pin, int valve_cmd)
+{
+    // brake on a4990 data sheet is when IN1/3 is opposite of IN2/4.
+    digitalWrite(digital_pin, HIGH);
+    analogWrite(pwm_pin, 0);
 }
 
 float dirtyDifferentiate(float input, float prev_input, float input_dot)
@@ -272,10 +260,12 @@ float two_bytes_to_float(byte * pcmdchar_twobytes)
 
 void float_to_two_bytes(float myfloat, byte * pchar_twobytes)
 {
+
   /*
-     NOTE: sometimes the sensors read negative pressure
-     b/c of their calibration, especially at low pressures.
-     So here, we manually set the pressure to 0 if it is negative.
+     We have an issue here, sometimes the sensors
+     read negative pressure b/c of the error band.
+     We can calibrate, set limits in read pressure function, etc.
+     Not sure what best thing to do is.
   */
   // convert float of kPa to bits to send over i2c
   // uint16_t can be 0 to 65535
@@ -323,6 +313,11 @@ int geti2caddress()
   } else if (one == LOW && two == HIGH) {
     i2caddr = 0xD;
   }
+
+  //  Serial.print("I2C Address: ");
+  //  Serial.print(i2caddr);
+  //  Serial.println();
+
   return i2caddr;
 }
 
