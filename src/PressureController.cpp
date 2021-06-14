@@ -36,7 +36,7 @@ PressureController::PressureController(ros::NodeHandle n, int bus, std::map<std:
 
   for (int i = 0; i < numJoints; i++)
   {
-    std::string topicString = "/robo_" + std::to_string(i) + "/joint_" + std::to_string(i) + "/pressure_command";
+    std::string topicString = "/robo_0" + "/joint_" + std::to_string(i) + "/pressure_command";
     /*
       See https://answers.ros.org/question/63991/how-to-make-callback-function-called-by-several-subscriber/?answer=63998?answer=63998#post-id-63998 for more details on this trickery.
      */
@@ -47,7 +47,7 @@ PressureController::PressureController(ros::NodeHandle n, int bus, std::map<std:
 
   for (int i = 0; i < numJoints; i++)
   {
-    std::string topic_string = "/robo_" + std::to_string(i) + "/joint_" + std::to_string(i) + "/pressure_state";
+    std::string topic_string = "/robo_0" + "/joint_" + std::to_string(i) + "/pressure_state";
     ros::Publisher pub = n.advertise<byu_pressure_control::PressureStamped>(topic_string, 1000);
     pressurePublishers.push_back(pub);
     ROS_INFO("/pressure_state topic started for joint %d", i);
