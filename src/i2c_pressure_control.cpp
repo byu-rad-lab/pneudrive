@@ -19,7 +19,7 @@ int main(int argc, char **argv)
   }
   else
   {
-    ROS_ERROR("Failed to retrieve information from parameter server.");
+    ROS_ERROR("Failed to retrieve i2c information from parameter server.");
   }
 
   return 0;

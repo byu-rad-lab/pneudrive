@@ -11,7 +11,6 @@ PressureController::PressureController(ros::NodeHandle n, int bus, std::map<std:
   * One digital output is needed to control power to arduinos via power relay strip.  
   * Power to arduinos is normally off, so need to set output high to enable them. 
   */
-
   pwrEnable.setDirection(GPIO::OUTPUT);
   pwrEnable.setValue(GPIO::HIGH);
   ROS_INFO_STREAM("ENABLED ARDUINO POWER");
@@ -20,7 +19,8 @@ PressureController::PressureController(ros::NodeHandle n, int bus, std::map<std:
   //check to make sure expected devices are found on i2c bus
   check_devices_on_bus(bus, expected_i2c_addresses);
 
-  n.getParam("/hardware/pressure_sensors/count", numJoints);
+  // get number of expected devices to make vectors the right size
+  numJoints = expected_i2c_addresses.size();
 
   i2cDevices.resize(numJoints);
   pressures.resize(numJoints);

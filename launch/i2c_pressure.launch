@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 
 <launch>
-  <node name='i2c_pressure_node' pkg='byu_pressure_control' type='i2c_pressure_control_node' required='false' output='screen'/>
+  <node name='i2c_pressure_node' pkg='byu_pressure_control' type='i2c_pressure_control_node' required='false' output='screen' />
+  <!--Load hardware yaml file so controller knows what to look for-->
+  <rosparam command="load" file="$(find byu_pressure_control)/config/leg_hardware.yaml" />
 </launch>
