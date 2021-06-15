@@ -36,7 +36,7 @@ class A4990ValveInterface
     const static unsigned char _V1PWM;
     const static unsigned char _V2PWM;
     const static unsigned char _V3PWM;
-//    const static unsigned c/har _FAULT;
+//    const static unsigned char _FAULT;
 
     static boolean _flipV0;
     static boolean _flipV1;
