@@ -1,7 +1,7 @@
 #include <Wire.h>
-//#include <FIR.h>
+#include "A4990ValveInterface.h"
 
-//FIR<float, 67> fir_lp;
+A4990ValveInterface valves;
 
 float p[4] = {0, 0, 0, 0};
 float pcmd[4] = {0, 0, 0, 0};
@@ -11,11 +11,12 @@ float pbias[4] = {0, 0, 0, 0};
 byte pchar[2 * 4];
 byte pcmdchar[2 * 4];
 
-// pins used for driving valves
-int digital_pins [4] = {8, 7, 4, 2};
-int pwm_pins [4] = {9, 6, 5, 3};
+//// pins used for driving valves
+//int digital_pins [4] = {8, 7, 4, 2};
+//int pwm_pins [4] = {9, 6, 5, 3};
 
-int valve_cmd[4] = {0, 0, 0, 0}; //valve commands [0, 255]
+int valve_cmd[4] = {0, 0, 0, 0}; //valve commands [-400, 400]
+const int vent_cmd[4] = {-400,-400,-400,-400};
 
 //'Global' variables that are important for control
 float myTime = 0.0;
@@ -35,7 +36,6 @@ float deadband = 0.0; // kpa, controller will not act on error less than deadban
 float error = 0.0;
 float dt = 0;
 
-//float LP_COEFF[67] = {-0.0002852,0.0005758,0.0008177,0.001106,0.00122,0.0009859,0.0003053,-0.0007989,-0.002148,-0.003411,-0.004161,-0.003978,-0.002582,3.548e-05,0.003526,0.007179,0.01002,0.01102,0.009336,0.004626,-0.00275,-0.01163,-0.02014,-0.02595,-0.0267,-0.02049,-0.006382,0.0153,0.04285,0.07331,0.1029,0.1277,0.1442,0.1499,0.1442,0.1277,0.1029,0.07331,0.04285,0.0153,-0.006382,-0.02049,-0.0267,-0.02595,-0.02014,-0.01163,-0.00275,0.004626,0.009336,0.01102,0.01002,0.007179,0.003526,3.548e-05,-0.002582,-0.003978,-0.004161,-0.003411,-0.002148,-0.0007989,0.0003053,0.0009859,0.00122,0.001106,0.0008177,0.0005758,-0.0002852};
 // motor driver error pins
 const int EF1_A = 10;
 const int EF2_A = 11;
@@ -54,39 +54,26 @@ void setup(void)
   int i2c_address;
   i2c_address = geti2caddress();
 
-  //set up fault pins, input pullup bc no external pull is used.
-  pinMode(EF1_A, INPUT_PULLUP);
-  pinMode(EF2_A, INPUT_PULLUP);
-  pinMode(EF1_B, INPUT_PULLUP);
-  pinMode(EF2_B, INPUT_PULLUP);
+//  //set up fault pins, input pullup bc no external pull is used.
+//  pinMode(EF1_A, INPUT_PULLUP);
+//  pinMode(EF2_A, INPUT_PULLUP);
+//  pinMode(EF1_B, INPUT_PULLUP);
+//  pinMode(EF2_B, INPUT_PULLUP);
 
   //set up I2C and register event handlers
   Wire.begin(i2c_address);
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
 
-  //set each digital/pwm pin as output and vent all valves
-  for (int i = 0; i < 4; i++)
-  {
-    pinMode(digital_pins[i], OUTPUT);
-    pinMode(pwm_pins[i], OUTPUT);
-    move_valve(digital_pins[i], pwm_pins[i], -255);
-  }
-
-  //set up filter
-  fir_lp.setFilterCoeffs(LP_COEFF);
-  // Set the gain
-  fir_lp.getGain();
-
+  // vent all valves at first
+  valves.setSpeeds(vent_cmd);
+  
   // Wait for 5 seconds for everything to vent out.
   delay(5000);
   prevTime = millis();
 
   // close all valves now that they have vented.
-  for (int i = 0; i < 4; i++)
-  {
-    move_valve(digital_pins[i], pwm_pins[i], 0);
-  }
+  valves.setSpeeds(valve_cmd);
 }
 
 
@@ -123,7 +110,7 @@ void loop(void)
   // CONTROL
   for (int i = 0; i < 4; i++)
   {
-
+    // calculate control signals for each pressure
     if (abs(pcmd[i] - p[i]) >= deadband)
     {
       error = pcmd[i] - p[i];
@@ -143,13 +130,11 @@ void loop(void)
       //update delayed variables
       prevError[i] = error;
       prevP[i] = p[i];
-
-      move_valve(digital_pins[i], pwm_pins[i], valve_cmd[i]);
-    }
-    else {
-      move_valve(digital_pins[i], pwm_pins[i], 0);
     }
   }
+
+  // send updated control signals
+  valves.setSpeeds(valve_cmd);
 
   //update p and pcmd in memory with new values of pchar and pcmdchar recieved on i2c
   for (int i = 0; i < 4; i++)
@@ -157,58 +142,6 @@ void loop(void)
     float_to_two_bytes(p[i], &pchar[i * 2]);
     pcmd[i] = two_bytes_to_float(&pcmdchar[i * 2]);
   }
-}
-
-
-void move_valve(int digital_pin, int pwm_pin, int valve_cmd)
-{
-  /*
-     Logic in this function is:
-     if valve_cmd is positive -> measured pressure is below command -> fill
-     if valve_cmd is negative -> measured pressure is above command -> vent
-
-  */
-
-  if (valve_cmd > 0)
-  {
-    //fill
-    fill(digital_pin, pwm_pin, valve_cmd);
-  }
-  else if (valve_cmd < 0)
-  {
-    //vent
-    vent(digital_pin, pwm_pin, valve_cmd);
-  }
-}
-
-void fill(int digital_pin, int pwm_pin, int valve_cmd)
-{
-  /*
-     valve_cmd is positive, map valve_cmd to (0, 255].
-     NOTE: this cooresponds to direction that the valves are plugged in.
-     Looking at the top of the connector (where the metal is),
-     the brown wire should be on the left, and the blue on the right.
-  */
-  if (valve_cmd > 255) {
-    valve_cmd = 255;
-  }
-
-  digitalWrite(digital_pin, HIGH);
-  analogWrite(pwm_pin, valve_cmd);
-}
-
-void vent(int digital_pin, int pwm_pin, int valve_cmd)
-{
-  /*
-    valve_cmd is negative, map range to (0, 255].
-    very negative means lots of effort, which driver board needs lots of effort to be low
-    map [-255,0] --> [0,255]
-  */
-  if (valve_cmd < -255) {
-    valve_cmd = -255;
-  }
-  digitalWrite(digital_pin, LOW);
-  analogWrite(pwm_pin, valve_cmd + 255);
 }
 
 float dirtyDifferentiate(float input, float prev_input, float input_dot)
