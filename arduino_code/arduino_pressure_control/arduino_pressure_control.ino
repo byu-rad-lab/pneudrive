@@ -1,6 +1,37 @@
 #include <Wire.h>
 #include "A4990ValveInterface.h"
 
+/*
+  NOTE ON VALVE COMMAND SIGNALS
+  -----------------------------
+  Valve commands are on the interval [-400,400].
+  Negative numbers mean vent and positive mean fill.
+  If the valve is flipped, the wires need to be switched.
+
+*/
+
+/*
+  IMPORTANT NOTE ON TIMER FREQUENCIES
+  ------------------------------------
+  On the Arduino Nano Every (ATmega 4809 chipset), there are two timers related to the PWM pins we
+  using: TCA for D5 and D9 and TCB for D3 and D6.
+
+  The default pwm freq for these pins is 975 Hz = fclk_per/64 (where fclk_per is the peripheral clock,
+  and is set to 62.4kHz by default. This freq causes a really annoying hum when the valves are being
+  controlled. To get rid of this, we prescale the timers to 31.2kHz = fclk_per/2 in speedupPWM() because
+  31.2 kHz is well outside the range of what a human can hear.
+
+  TCB can be changed like this without causing any issues. TCA, on the other hand, is used by the
+  built-in delay() and millis() functions. Since we changed the freq by a factor of 32 (PRESCALER),
+  this means that millis() now reports 32 times the actual time passed (e.g. millis()/PRESCALER is the
+  actual number of milliseconds that have passed).
+
+  Another consequence of changing TCA is that delay() now (for some reason) can only delay up to
+  32,768 (2^16/2) which corresponds to an actual delay of 32768/32 = 1024 ms. So, there is a custom
+  delay function defined custom_delay() which allows you to delay for longer than 1024 ms. Since
+  delay() function isn't used in the control loop, this is adequate for our needs.
+*/
+
 A4990ValveInterface valves;
 
 float p[4] = {0, 0, 0, 0};
@@ -11,12 +42,9 @@ float pbias[4] = {0, 0, 0, 0};
 byte pchar[2 * 4];
 byte pcmdchar[2 * 4];
 
-//// pins used for driving valves
-//int digital_pins [4] = {8, 7, 4, 2};
-//int pwm_pins [4] = {9, 6, 5, 3};
-
-int valve_cmd[4] = {0, 0, 0, 0}; //valve commands [-400, 400]
-const int vent_cmd[4] = {-400,-400,-400,-400};
+int valve_cmd[4] = {0, 0, 0, 0};
+const int VENT_CMD[4] = { -400, -400, -400, -400};
+const int FILL_CMD[4] = { 400, 400, 400, 400};
 
 //'Global' variables that are important for control
 float myTime = 0.0;
@@ -46,41 +74,54 @@ const int EF2_B = 21;
 double const PSI2KPA = 6.8947572932;
 double const P_MAX = 100 * PSI2KPA;
 
+// timer stuff
+int const PRESCALER = 32;
+int const ONE_SECOND = 32000;
+
 void setup(void)
 {
-//  // comment out if not debugging
-//  Serial.begin(115200);
-  
+
+  speedupPWM();
+  // comment out if not debugging
+  Serial.begin(115200);
+
   int i2c_address;
   i2c_address = geti2caddress();
 
-//  //set up fault pins, input pullup bc no external pull is used.
-//  pinMode(EF1_A, INPUT_PULLUP);
-//  pinMode(EF2_A, INPUT_PULLUP);
-//  pinMode(EF1_B, INPUT_PULLUP);
-//  pinMode(EF2_B, INPUT_PULLUP);
+  //set up fault pins, input pullup bc no external pull is used.
+  pinMode(EF1_A, INPUT_PULLUP);
+  pinMode(EF2_A, INPUT_PULLUP);
+  pinMode(EF1_B, INPUT_PULLUP);
+  pinMode(EF2_B, INPUT_PULLUP);
 
   //set up I2C and register event handlers
   Wire.begin(i2c_address);
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
 
+  //  // uncomment to test valves
+  //  valves.setValve0Speed(-200);
+  //  valves.setValve1Speed(-200);
+  //  valves.setValve2Speed(-200);
+  //  valves.setValve3Speed(-200);
+
   // vent all valves at first
-  valves.setSpeeds(vent_cmd);
-  
+  valves.setSpeeds(VENT_CMD);
+
   // Wait for 5 seconds for everything to vent out.
-  delay(5000);
+  custom_delay(5);
   prevTime = millis();
 
   // close all valves now that they have vented.
-  valves.setSpeeds(valve_cmd);
+   valves.setSpeeds(valve_cmd);
 }
 
 
 void loop(void)
 {
+  
   myTime = millis();
-  dt = (myTime - prevTime) * .001; //calculate time (s) between each loop
+  dt = ((myTime - prevTime)/PRESCALER) * .001; //calculate time (s) between each loop
   prevTime = myTime; //update previous time
 
   // digital filter pressure data
@@ -89,22 +130,22 @@ void loop(void)
   p[2] = filter(p[2], readPressure(A2));
   p[3] = filter(p[3], readPressure(A3));
 
-//  //Uncomment to plot filtered data vs unfiltered data
-//  Serial.print(myTime);
-//  Serial.print("\t");
-//  Serial.print(readPressure(A0));
-//  Serial.print("\t");
-//  Serial.print(p[0]);
-//  Serial.print("\t");
-//  Serial.print(fir_lp.processReading(readPressure(A0)));
-//  Serial.println();
+  //  //Uncomment to plot filtered data vs unfiltered data
+  //  Serial.print(myTime);
+  //  Serial.print("\t");
+  //  Serial.print(readPressure(A0));
+  //  Serial.print("\t");
+  //  Serial.print(p[0]);
+  //  Serial.print("\t");
+  //  Serial.print(fir_lp.processReading(readPressure(A0)));
+  //  Serial.println();
 
-//  // Uncomment to see all pressures plotted together on serial monitor
-//  for (int i = 0; i < 4; i++) {
-//    Serial.print(p[0]);
-//    Serial.print(",");
-//  }
-//  Serial.println();
+  //  // Uncomment to see all pressures plotted together on serial monitor
+  //  for (int i = 0; i < 4; i++) {
+  //    Serial.print(p[0]);
+  //    Serial.print(",");
+  //  }
+  //  Serial.println();
 
 
   // CONTROL
@@ -125,7 +166,13 @@ void loop(void)
       //      float input_signal = error*kp + integrator[i]*ki - pdot[i]*kd;
       //      float input_signal = error*kp;
 
-      valve_cmd[i] = error * kp;
+      // TODO CURTIS: THIS SHOULD NOT BE NEGATIVE!! BUT IT IS BECAUSE OF THE WIRES ON THE LEG.
+      valve_cmd[i] = -(error * kp);
+
+      if (i == 0) {
+        Serial.print(valve_cmd[i]);
+        Serial.println();
+      }
 
       //update delayed variables
       prevError[i] = error;
@@ -133,7 +180,7 @@ void loop(void)
     }
   }
 
-  // send updated control signals
+  // send updated control signals [-400,400]
   valves.setSpeeds(valve_cmd);
 
   //update p and pcmd in memory with new values of pchar and pcmdchar recieved on i2c
@@ -142,6 +189,7 @@ void loop(void)
     float_to_two_bytes(p[i], &pchar[i * 2]);
     pcmd[i] = two_bytes_to_float(&pcmdchar[i * 2]);
   }
+  
 }
 
 float dirtyDifferentiate(float input, float prev_input, float input_dot)
@@ -275,4 +323,33 @@ double readPressure(int analogPin)
   // return applied pressure in kPa
   return ((v_out - 0.1 * v_sup) / (0.8 * v_sup)) * P_MAX;
 
+}
+
+
+
+void speedupPWM() {
+  cli();  // Disable Interrupts
+
+  /* see section 20.5.1 of http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega4808-4809-Data-Sheet-DS40002173A.pdf
+     for this register settings. Note that by default, fclk_per = 62.4 kHz.
+     Humans can hear 20 Hz to 20 kHz, so a 31.2kHz freq should be out of hearing range.
+     Also see section 5.4.1 for syntax used here.
+     | is "bitwise or" commonly used to set multiple bits at once in a register.
+     TCA_SINGLE_CLKSEL_DIV2_gc | TCA_SINGLE_ENABLE_bm --> 0,0,1,0 OR 0,0,0,1 = 0,0,1,1
+
+     READ TIMER FREQUENCY NOTE AT TOP
+  */
+
+  // TCB for D3 and D6
+  TCB0.CTRLA = (TCB_CLKSEL_CLKDIV2_gc) | (TCB_ENABLE_bm);
+  // TCA for D5 and D9
+  TCA0.SINGLE.CTRLA = TCA_SINGLE_CLKSEL_DIV2_gc | TCA_SINGLE_ENABLE_bm;
+
+  sei();  // Enable Interrupts
+}
+
+void custom_delay(int seconds) {
+  for (int s = 0; s < seconds; s++) {
+    delay(ONE_SECOND);
+  }
 }
