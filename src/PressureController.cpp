@@ -40,7 +40,7 @@ PressureController::PressureController(ros::NodeHandle n, int bus, std::map<std:
     /*
       See https://answers.ros.org/question/63991/how-to-make-callback-function-called-by-several-subscriber/?answer=63998?answer=63998#post-id-63998 for more details on this trickery.
      */
-    ros::Subscriber sub = n.subscribe<byu_pressure_control::PressureStamped>(topicString, 1000, boost::bind(&PressureController::pcmd_callback, this, _1, i));
+    ros::Subscriber sub = n.subscribe<rad_msgs::PressureStamped>(topicString, 1000, boost::bind(&PressureController::pcmd_callback, this, _1, i));
     pressureCommandSubscribers.push_back(sub);
     ROS_INFO("/pressure_command topic started for joint %d", i);
   }
@@ -48,7 +48,7 @@ PressureController::PressureController(ros::NodeHandle n, int bus, std::map<std:
   for (int i = 0; i < numJoints; i++)
   {
     std::string topic_string = "/robo_0/joint_" + std::to_string(i) + "/pressure_state";
-    ros::Publisher pub = n.advertise<byu_pressure_control::PressureStamped>(topic_string, 1000);
+    ros::Publisher pub = n.advertise<rad_msgs::PressureStamped>(topic_string, 1000);
     pressurePublishers.push_back(pub);
     ROS_INFO("/pressure_state topic started for joint %d", i);
   }
@@ -138,7 +138,7 @@ void PressureController::do_pressure_control()
     // publish pressures
     for (int joint = 0; joint < numJoints; joint++)
     {
-      byu_pressure_control::PressureStamped msg;
+      rad_msgs::PressureStamped msg;
       msg.header = std_msgs::Header();
       msg.header.stamp = ros::Time::now();
 
@@ -175,7 +175,7 @@ void PressureController::float_to_two_bytes(float myfloat, unsigned char *twobyt
   memcpy(twobytes, &myint, 2);
 }
 
-void PressureController::pcmd_callback(const byu_pressure_control::PressureStamped::ConstPtr &msg, int joint)
+void PressureController::pcmd_callback(const rad_msgs::PressureStamped::ConstPtr &msg, int joint)
 {
   for (int i = 0; i < msg->pressure.size(); i++)
   {

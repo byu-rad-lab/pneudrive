@@ -2,7 +2,7 @@
 #define PCONTROL_H_
 
 #include <vector>
-#include <byu_pressure_control/PressureStamped.h>
+#include <rad_msgs/PressureStamped.h>
 #include <std_msgs/Header.h>
 #include <ros/ros.h>
 #include "I2CDevice.h"
@@ -33,7 +33,7 @@ public:
   void check_devices_on_bus(int bus, std::map<std::string, int> expected_i2c_addresses);
   float two_bytes_to_float(unsigned char *twobytes);
   void float_to_two_bytes(float myfloat, unsigned char *twobytes);
-  void pcmd_callback(const byu_pressure_control::PressureStamped::ConstPtr &msg, int joint);
+  void pcmd_callback(const rad_msgs::PressureStamped::ConstPtr &msg, int joint);
 };
 
 #endif /* PCONTROL_H_ */

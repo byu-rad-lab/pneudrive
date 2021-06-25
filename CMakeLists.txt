@@ -16,19 +16,9 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+  rad_msgs
   message_generation
 )
-
-add_message_files(
-  FILES
-  PressureStamped.msg
-)
-
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-)
-
 
 ###################################
 ## catkin specific configuration ##
@@ -36,6 +26,7 @@ generate_messages(
 catkin_package(
  INCLUDE_DIRS
  CATKIN_DEPENDS message_runtime
+ rad_msgs
 )
 
 #For profilling
@@ -50,9 +41,14 @@ include
 ${catkin_INCLUDE_DIRS}
 )
 
+
 add_executable(i2c_pressure_control_node src/i2c_pressure_control.cpp src/I2CDevice.cpp src/GPIO.cpp src/PressureController.cpp)
 target_link_libraries(i2c_pressure_control_node ${catkin_LIBRARIES})
-add_dependencies(i2c_pressure_control_node byu_pressure_control_gencpp)
+
+# add dependency on rad_msgs
+add_dependencies(i2c_pressure_control_node ${catkin_EXPORTED_TARGETS})
+
 
 #add_executable(i2c_imu_publisher_node src/i2c_imu_publisher.cpp src/I2CDevice.cpp src/IMUPublisher.cpp)
 #target_link_libraries(i2c_imu_publisher_node ${catkin_LIBRARIES})
+
