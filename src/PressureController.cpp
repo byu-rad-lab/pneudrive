@@ -4,6 +4,8 @@
 // conversion factor from psi to kpa (ie kpa = psi * psi2kpa)
 const double psi2kpa = 6.8947572932;
 
+const int BYTES_PER_PRESSURE = 1;
+
 PressureController::PressureController(ros::NodeHandle n, int bus, std::map<std::string, int> expected_i2c_addresses)
 {
   /* 
@@ -101,10 +103,10 @@ void PressureController::do_pressure_control()
     // update memory values for  pressure commands and pressures
     for (int joint = 0; joint < numJoints; joint++)
     {
-      unsigned char pchar[numPressuresPerJoint * 2];
+      unsigned char pchar[numPressuresPerJoint * BYTES_PER_PRESSURE];
       for (int p = 0; p < numPressuresPerJoint; p++)
       {
-        float_to_two_bytes(pressureCommands[joint][p], &pchar[p * 2]);
+        float_to_two_bytes(pressureCommands[joint][p], &pchar[p * BYTES_PER_PRESSURE]);
       }
 
       i2cDevices[joint].writeRegisters(0, sizeof(pchar), &pchar[0]);
@@ -119,7 +121,7 @@ void PressureController::do_pressure_control()
 
       for (int p = 0; p < numPressuresPerJoint; p++)
       {
-        pressures[joint][p] = two_bytes_to_float(&pchar[p * 2]);
+        pressures[joint][p] = two_bytes_to_float(&pchar[p * BYTES_PER_PRESSURE]);
       }
 
       //This section just prints things out the cout for debugging purposes.
@@ -158,21 +160,35 @@ void PressureController::do_pressure_control()
   pwrEnable.setValue(GPIO::LOW);
 }
 
-float PressureController::two_bytes_to_float(unsigned char *twobytes)
+float PressureController::two_bytes_to_float(unsigned char *data_bytes)
 {
-  uint16_t myint;
-  memcpy(&myint, twobytes, 2);
-  //std::cout <<  "myint: " << myint << std::endl;
-  float myfloat = (float)(100.0 * myint * psi2kpa / 65535.0);
+  float myfloat = 0;
+  if (BYTES_PER_PRESSURE==1){
+    uint8_t myint;
+    memcpy(&myint, data_bytes, BYTES_PER_PRESSURE);
+    myfloat = (float)(100.0 * myint * psi2kpa / 255.0);
+
+  }else if (BYTES_PER_PRESSURE==2){
+    uint16_t myint;
+    memcpy(&myint, data_bytes, BYTES_PER_PRESSURE);
+    myfloat = (float)(100.0 * myint * psi2kpa / 65535.0);
+  }
+
   //std::cout << "Pressure: " << myfloat << std::endl;
   return myfloat;
 }
 
-void PressureController::float_to_two_bytes(float myfloat, unsigned char *twobytes)
+void PressureController::float_to_two_bytes(float myfloat, unsigned char *data_bytes)
 {
   //std::cout << "Pressure command: " << myfloat << std::endl;
-  uint16_t myint = (myfloat / (100.0 * psi2kpa)) * 65535.0;
-  memcpy(twobytes, &myint, 2);
+  
+  if (BYTES_PER_PRESSURE ==1){
+    uint8_t myint= (myfloat / (100.0 * psi2kpa)) * 255.0;
+    memcpy(data_bytes, &myint, BYTES_PER_PRESSURE);
+  }else if (BYTES_PER_PRESSURE ==2){
+    uint16_t myint= (myfloat / (100.0 * psi2kpa)) * 65535.0;
+    memcpy(data_bytes, &myint, BYTES_PER_PRESSURE);
+  }
 }
 
 void PressureController::pcmd_callback(const rad_msgs::PressureStamped::ConstPtr &msg, int joint)

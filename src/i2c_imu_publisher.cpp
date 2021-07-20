@@ -3,8 +3,8 @@
 
 int main(int argc, char **argv)
 {
-  int bus = 2;
-  int firstAddress = 50;
+  int bus = 1;
+  int firstAddress = 10;
   ros::init(argc, argv, "IMUPublisher");
 
   IMUPublisher publisher(bus, firstAddress);

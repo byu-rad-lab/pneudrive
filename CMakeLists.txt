@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 2.8.3)
 project(byu_pressure_control)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11 -fno-stack-protector)
+add_compile_options(-std=c++11)
 
-#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
-#set(CMAKE_BUILD_TYPE Release)
+#optimize to -O2 for speed, but keep footprint it small
+set(CMAKE_CXX_FLAGS "-Os")
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -30,8 +30,8 @@ catkin_package(
 )
 
 #For profilling
-add_compile_options(-pg)
-set(catkin_LIBRARIES ${catkin_LIBRARIES} -pg)
+#add_compile_options(-pg)
+#set(catkin_LIBRARIES ${catkin_LIBRARIES} -pg)
 
 ###########
 ## Build ##
@@ -51,4 +51,4 @@ add_dependencies(i2c_pressure_control_node ${catkin_EXPORTED_TARGETS})
 
 #add_executable(i2c_imu_publisher_node src/i2c_imu_publisher.cpp src/I2CDevice.cpp src/IMUPublisher.cpp)
 #target_link_libraries(i2c_imu_publisher_node ${catkin_LIBRARIES})
-
+#add_dependencies(i2c_imu_publisher_node ${catkin_EXPORTED_TARGETS})

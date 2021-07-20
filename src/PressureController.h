@@ -31,8 +31,8 @@ public:
   PressureController(ros::NodeHandle n, int bus, std::map<std::string, int> expected_i2c_addresses);
   void do_pressure_control();
   void check_devices_on_bus(int bus, std::map<std::string, int> expected_i2c_addresses);
-  float two_bytes_to_float(unsigned char *twobytes);
-  void float_to_two_bytes(float myfloat, unsigned char *twobytes);
+  float two_bytes_to_float(unsigned char *data_bytes);
+  void float_to_two_bytes(float myfloat, unsigned char *data_bytes);
   void pcmd_callback(const rad_msgs::PressureStamped::ConstPtr &msg, int joint);
 };
 
