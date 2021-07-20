@@ -39,12 +39,13 @@ float pcmd[4] = {0, 0, 0, 0};
 float pbias[4] = {0, 0, 0, 0};
 
 // arrays of 8 bytes used for i2c comms. Each pressure uses 2 bytes (16 bits).
-byte pchar[2 * 4];
-byte pcmdchar[2 * 4];
+const int BYTES_PER_PRESSURE = 1;
+byte pchar[BYTES_PER_PRESSURE * 4];
+byte pcmdchar[BYTES_PER_PRESSURE * 4];
 
 int valve_cmd[4] = {0, 0, 0, 0};
-const int VENT_CMD[4] = { -400, -400, -400, -400};
-const int FILL_CMD[4] = { 400, 400, 400, 400};
+int VENT_CMD[4] = { -400, -400, -400, -400};
+int FILL_CMD[4] = { 400, 400, 400, 400};
 
 //'Global' variables that are important for control
 float myTime = 0.0;
@@ -83,7 +84,7 @@ void setup(void)
 
   speedupPWM();
   // comment out if not debugging
-  Serial.begin(115200);
+  //  Serial.begin(115200);
 
   int i2c_address;
   i2c_address = geti2caddress();
@@ -113,15 +114,15 @@ void setup(void)
   prevTime = millis();
 
   // close all valves now that they have vented.
-   valves.setSpeeds(valve_cmd);
+  valves.setSpeeds(valve_cmd);
 }
 
 
 void loop(void)
 {
-  
+
   myTime = millis();
-  dt = ((myTime - prevTime)/PRESCALER) * .001; //calculate time (s) between each loop
+  dt = ((myTime - prevTime) / PRESCALER) * .001; //calculate time (s) between each loop
   prevTime = myTime; //update previous time
 
   // digital filter pressure data
@@ -169,10 +170,10 @@ void loop(void)
       // TODO CURTIS: THIS SHOULD NOT BE NEGATIVE!! BUT IT IS BECAUSE OF THE WIRES ON THE LEG.
       valve_cmd[i] = -(error * kp);
 
-      if (i == 0) {
-        Serial.print(valve_cmd[i]);
-        Serial.println();
-      }
+      //      if (i == 0) {
+      //        Serial.print(valve_cmd[i]);
+      //        Serial.println();
+      //      }
 
       //update delayed variables
       prevError[i] = error;
@@ -186,10 +187,10 @@ void loop(void)
   //update p and pcmd in memory with new values of pchar and pcmdchar recieved on i2c
   for (int i = 0; i < 4; i++)
   {
-    float_to_two_bytes(p[i], &pchar[i * 2]);
-    pcmd[i] = two_bytes_to_float(&pcmdchar[i * 2]);
+    float_to_two_bytes(p[i], &pchar[i * BYTES_PER_PRESSURE]);
+    pcmd[i] = two_bytes_to_float(&pcmdchar[i * BYTES_PER_PRESSURE]);
   }
-  
+
 }
 
 float dirtyDifferentiate(float input, float prev_input, float input_dot)
@@ -225,13 +226,12 @@ void receiveEvent(int howMany)
 {
   if (howMany > 1)
   {
-    //first byte of data stream is register to write to, I think
-    Wire.read();
-    //extract 8 bytes of pressure command (2 bytes/chamber)
-    for (int j = 0; j < 4 * 2; j++)
+    //extract correct number of bytes of pressure command (2 bytes/chamber)
+    for (int j = 0; j < 4 * BYTES_PER_PRESSURE; j++)
     {
       pcmdchar[j] = Wire.read();
     }
+
   }
   else
   {
@@ -244,18 +244,26 @@ void requestEvent()
   Wire.write(pchar, sizeof(pchar));
 }
 
-float two_bytes_to_float(byte * pcmdchar_twobytes)
+float two_bytes_to_float(byte * pcmdchar)
 {
-  uint16_t myint;
-  memcpy(&myint, pcmdchar_twobytes, 2);
-  return float((100.0 * PSI2KPA) * myint / 65535.0);
+  if (BYTES_PER_PRESSURE == 1) {
+    uint8_t myint;
+    memcpy(&myint, pcmdchar, BYTES_PER_PRESSURE);
+    return float((100.0 * PSI2KPA) * myint / 255.0);
+    
+  } else if (BYTES_PER_PRESSURE == 2) {
+    uint16_t myint;
+    memcpy(&myint, pcmdchar, BYTES_PER_PRESSURE);
+    return float((100.0 * PSI2KPA) * myint / 65535.0);
+  }
+
 }
 
-void float_to_two_bytes(float myfloat, byte * pchar_twobytes)
+void float_to_two_bytes(float myfloat, byte * pchar)
 {
   /*
      NOTE: sometimes the sensors read negative pressure
-     b/c of their calibration, especially at low pressures.
+     b/c of noise, especially at low pressures.
      So here, we manually set the pressure to 0 if it is negative.
   */
   // convert float of kPa to bits to send over i2c
@@ -265,11 +273,16 @@ void float_to_two_bytes(float myfloat, byte * pchar_twobytes)
     myfloat = 0;
   }
 
-  uint16_t myint = (myfloat / (100.0 * PSI2KPA)) * 65535.0;
-
   // memcpy(pointer to destination, pointer to source, # bytes to copy)
-  // copy 2 bytes of data located @ myint to location of pchar_twobytes
-  memcpy(pchar_twobytes, &myint, 2);
+  // copy BYTES_PER_PRESSURE bytes of data located @ myint to location of pchar
+
+  if (BYTES_PER_PRESSURE==1){
+    uint8_t myint = (myfloat / (100.0 * PSI2KPA)) * 255.0;
+    memcpy(pchar, &myint, BYTES_PER_PRESSURE);
+  }else if (BYTES_PER_PRESSURE==2){
+    uint16_t myint = (myfloat / (100.0 * PSI2KPA)) * 65535.0;
+    memcpy(pchar, &myint, BYTES_PER_PRESSURE);
+  }
 }
 
 int geti2caddress()
