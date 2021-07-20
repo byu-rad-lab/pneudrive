@@ -4,7 +4,7 @@
 // conversion factor from psi to kpa (ie kpa = psi * psi2kpa)
 const double psi2kpa = 6.8947572932;
 
-const int BYTES_PER_PRESSURE = 1;
+const int BYTES_PER_PRESSURE = 2;
 
 PressureController::PressureController(ros::NodeHandle n, int bus, std::map<std::string, int> expected_i2c_addresses)
 {
@@ -125,10 +125,10 @@ void PressureController::do_pressure_control()
       }
 
       //This section just prints things out the cout for debugging purposes.
-      //	  std::cout<<"\n\nNode "<<node<<" commands:"<<std::endl;
-      //	   for(int p=0; p<numPressuresPerNode; p++)
+      //	  std::cout<<"\n\nNode "<<joint<<" commands:"<<std::endl;
+      //	   for(int p=0; p<numPressuresPerJoint; p++)
       //	     {
-      //	       std::cout<<pressureCommands[node][p]<<"  ";
+      //	       std::cout<<pressureCommands[joint][p]<<"  ";
       //	     }
       //	   std::cout<<"\nNode "<<node<<" pressures:"<<std::endl;
       //	   for(int p=0; p<numPressuresPerNode; p++)
@@ -192,7 +192,7 @@ void PressureController::float_to_two_bytes(float myfloat, unsigned char *data_b
 }
 
 void PressureController::pcmd_callback(const rad_msgs::PressureStamped::ConstPtr &msg, int joint)
-{
+{ 
   for (int i = 0; i < msg->pressure.size(); i++)
   {
     float temp = (float)msg->pressure[i]; // cast double/float64 to float/float32 to send over i2c
