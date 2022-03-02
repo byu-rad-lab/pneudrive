@@ -1,37 +1,37 @@
 /*
  * I2C.cpp  Created on: 17 May 2014
  * Copyright (c) 2014 Derek Molloy (www.derekmolloy.ie)
- * Made available for the book "Exploring BeagleBone" 
+ * Made available for the book "Exploring BeagleBone"
  * See: www.exploringbeaglebone.com
  * Licensed under the EUPL V.1.1
  *
- * This Software is provided to You under the terms of the European 
- * Union Public License (the "EUPL") version 1.1 as published by the 
- * European Union. Any use of this Software, other than as authorized 
- * under this License is strictly prohibited (to the extent such use 
+ * This Software is provided to You under the terms of the European
+ * Union Public License (the "EUPL") version 1.1 as published by the
+ * European Union. Any use of this Software, other than as authorized
+ * under this License is strictly prohibited (to the extent such use
  * is covered by a right of the copyright holder of this Software).
- * 
- * This Software is provided under the License on an "AS IS" basis and 
- * without warranties of any kind concerning the Software, including 
- * without limitation merchantability, fitness for a particular purpose, 
- * absence of defects or errors, accuracy, and non-infringement of 
- * intellectual property rights other than copyright. This disclaimer 
- * of warranty is an essential part of the License and a condition for 
+ *
+ * This Software is provided under the License on an "AS IS" basis and
+ * without warranties of any kind concerning the Software, including
+ * without limitation merchantability, fitness for a particular purpose,
+ * absence of defects or errors, accuracy, and non-infringement of
+ * intellectual property rights other than copyright. This disclaimer
+ * of warranty is an essential part of the License and a condition for
  * the grant of any rights to this Software.
- * 
+ *
  * For more details, see http://www.derekmolloy.ie/
  */
 
-#include"I2CDevice.h"
-#include<iostream>
-#include<sstream>
-#include<fcntl.h>
-#include<stdio.h>
-#include<iomanip>
-#include<unistd.h>
-#include<sys/ioctl.h>
-#include<linux/i2c.h>
-#include<linux/i2c-dev.h>
+#include "I2CDevice.h"
+#include <iostream>
+#include <sstream>
+#include <fcntl.h>
+#include <stdio.h>
+#include <iomanip>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <linux/i2c.h>
+#include <linux/i2c-dev.h>
 
 using namespace std;
 
@@ -39,32 +39,38 @@ using namespace std;
 
 I2CDevice::I2CDevice()
 {
-  this->file=-1;
+  this->file = -1;
 }
 
 I2CDevice::I2CDevice(unsigned int bus, unsigned int device)
 {
-  this->file=-1;
+  this->file = -1;
   this->bus = bus;
   this->device = device;
-  this->open(bus,device);
+  this->open(bus, device);
 }
 
-int I2CDevice::open(unsigned int bus, unsigned int device){
+int I2CDevice::open(unsigned int bus, unsigned int device)
+{
   this->bus = bus;
   this->device = device;
 
   string name;
-  if(this->bus==0) name = BBB_I2C_0;
-  else if(this->bus==1) name = BBB_I2C_1;   
-  else name = BBB_I2C_2;
-  
-  if((this->file=::open(name.c_str(), O_RDWR)) < 0){
-//    perror("I2C: failed to open the bus\n");
+  if (this->bus == 0)
+    name = BBB_I2C_0;
+  else if (this->bus == 1)
+    name = BBB_I2C_1;
+  else
+    name = BBB_I2C_2;
+
+  if ((this->file = ::open(name.c_str(), O_RDWR)) < 0)
+  {
+    //    perror("I2C: failed to open the bus\n");
     return 1;
   }
-  if(ioctl(this->file, I2C_SLAVE, this->device) < 0){
-//    perror("I2C: Failed to connect to the device\n");
+  if (ioctl(this->file, I2C_SLAVE, this->device) < 0)
+  {
+    //    perror("I2C: Failed to connect to the device\n");
     return 1;
   }
   return 0;
@@ -77,15 +83,17 @@ int I2CDevice::open(unsigned int bus, unsigned int device){
  * @return 1 on failure to write, 0 on success.
  */
 
-int I2CDevice::writeRegister(unsigned int registerAddress, unsigned char value){
-   unsigned char buffer[2];
-   buffer[0] = registerAddress;
-   buffer[1] = value;
-   if(::write(this->file, buffer, 2)!=2){
-      perror("I2C: Failed write to the device\n");
-      return 1;
-   }
-   return 0;
+int I2CDevice::writeRegister(unsigned int registerAddress, unsigned char value)
+{
+  unsigned char buffer[2];
+  buffer[0] = registerAddress;
+  buffer[1] = value;
+  if (::write(this->file, buffer, 2) != 2)
+  {
+    perror("I2C: Failed write to the device\n");
+    return 1;
+  }
+  return 0;
 }
 
 /**
@@ -95,20 +103,21 @@ int I2CDevice::writeRegister(unsigned int registerAddress, unsigned char value){
  * @return 1 on failure to write, 0 on success.
  */
 
-int I2CDevice::writeRegisters(unsigned int registerAddress, int numbytes, unsigned char * values){
+int I2CDevice::writeRegisters(unsigned int registerAddress, int numbytes, unsigned char *values)
+{
   unsigned char buffer[numbytes];
-  for(int i=0; i<numbytes; i++)
-    {
-	buffer[i] = values[i];
-    }
+  for (int i = 0; i < numbytes; i++)
+  {
+    buffer[i] = values[i];
+  }
 
-    if(::write(this->file, buffer, numbytes)!=numbytes){
-//      perror("I2C: Failed write to the device\n");
-      return 1;
-   }
-   return 0;
+  if (::write(this->file, buffer, numbytes) != numbytes)
+  {
+    //      perror("I2C: Failed write to the device\n");
+    return 1;
+  }
+  return 0;
 }
-
 
 /**
  * Write a single value to the I2C device. Used to set up the device to read from a
@@ -116,14 +125,16 @@ int I2CDevice::writeRegisters(unsigned int registerAddress, int numbytes, unsign
  * @param value the value to write to the device
  * @return 1 on failure to write, 0 on success.
  */
-int I2CDevice::write(unsigned char value){
-   unsigned char buffer[1];
-   buffer[0]=value;
-   if (::write(this->file, buffer, 1)!=1){
- //     perror("I2C: Failed to write to the device\n");
-      return 1;
-   }
-   return 0;
+int I2CDevice::write(unsigned char value)
+{
+  unsigned char buffer[1];
+  buffer[0] = value;
+  if (::write(this->file, buffer, 1) != 1)
+  {
+    //     perror("I2C: Failed to write to the device\n");
+    return 1;
+  }
+  return 0;
 }
 
 /**
@@ -131,14 +142,16 @@ int I2CDevice::write(unsigned char value){
  * @param registerAddress the address to read from
  * @return the byte value at the register address.
  */
-unsigned char I2CDevice::readRegister(unsigned int registerAddress){
-   this->write(registerAddress);
-   unsigned char buffer[1];
-   if(::read(this->file, buffer, 1)!=1){
- //     perror("I2C: Failed to read in the value.\n");
-      return 1;
-   }
-   return buffer[0];
+unsigned char I2CDevice::readRegister(unsigned int registerAddress)
+{
+  this->write(registerAddress);
+  unsigned char buffer[1];
+  if (::read(this->file, buffer, 1) != 1)
+  {
+    //     perror("I2C: Failed to read in the value.\n");
+    return 1;
+  }
+  return buffer[0];
 }
 
 /**
@@ -149,17 +162,17 @@ unsigned char I2CDevice::readRegister(unsigned int registerAddress){
  * @param fromAddress the starting address to read from
  * @return a pointer of type unsigned char* that points to the first element in the block of registers
  */
-int I2CDevice::readRegisters(unsigned int registerAddress, int numbytes, unsigned char * data)
+int I2CDevice::readRegisters(unsigned int registerAddress, int numbytes, unsigned char *data)
 {
-  if(::read(this->file, data, numbytes)!=(int)numbytes)
-    {
-  //    perror("I2C: Failed to read in the full buffer.\n");
-      return 1;
-    }
+  if (::read(this->file, data, numbytes) != (int)numbytes)
+  {
+    //    perror("I2C: Failed to read in the full buffer.\n");
+    return 1;
+  }
   else
-    {
-      return 0;	
-    }
+  {
+    return 0;
+  }
 }
 
 /**
@@ -183,14 +196,17 @@ int I2CDevice::readRegisters(unsigned int registerAddress, int numbytes, unsigne
 /**
  * Close the file handles and sets a temporary state to -1.
  */
-void I2CDevice::close(){
-	::close(this->file);
-	this->file = -1;
+void I2CDevice::close()
+{
+  ::close(this->file);
+  this->file = -1;
 }
 
 /**
  * Closes the file on destruction, provided that it has not already been closed.
  */
-I2CDevice::~I2CDevice() {
-	if(file!=-1) this->close();
+I2CDevice::~I2CDevice()
+{
+  if (file != -1)
+    this->close();
 }
