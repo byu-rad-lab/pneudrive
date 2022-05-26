@@ -42,7 +42,7 @@ PressureController::PressureController(ros::NodeHandle n, int bus, std::map<std:
     /*
       See https://answers.ros.org/question/63991/how-to-make-callback-function-called-by-several-subscriber/?answer=63998?answer=63998#post-id-63998 for more details on this trickery.
      */
-    ros::Subscriber sub = n.subscribe<rad_msgs::PressureStamped>(topicString, 1000, boost::bind(&PressureController::pcmd_callback, this, _1, i));
+    ros::Subscriber sub = n.subscribe<rad_msgs::PressureStamped>(topicString, 1, boost::bind(&PressureController::pcmd_callback, this, _1, i),ros::VoidConstPtr(),ros::TransportHints().tcpNoDelay());
     pressureCommandSubscribers.push_back(sub);
     ROS_INFO("/pressure_command topic started for joint %d", i);
   }
