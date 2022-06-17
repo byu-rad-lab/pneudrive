@@ -61,7 +61,20 @@ double const P_MAX = 100 * PSI2KPA;
 // want to add a destabilizing integrator on this low level control
 float myTime = 0.0;
 float prevTime = 0.0; // Last time the loop was entered
-float kp = 0.7 / (10 * PSI2KPA); //this kp means desired current will rail at .7 amps at a pressure error of >= 10 psi.
+
+/*
+ * Notes on tuning proportional controller:
+ * 
+ * Sensors in this configuration have noise magnitude of about 0.5 psi. 
+ * Making railPSI < 2 made the arm very jittery. 
+ * railPSI=2 seems to track well.
+ * railPSI>5 was pretty sluggish tracking and seemed to exacerbate valve nonlinearities with small commands.
+ *  
+ */
+float railPSI = 2
+float kp = 0.7 / (railPSI * PSI2KPA); //this kp means desired current will rail at .7 amps at a pressure error of >= railPSI.
+
+
 // denominator is set by the pressure error which will cause the input to saturate.
 float deadband = 0.0; // kpa, controller will not act on error less than deadband
 float error = 0.0;
@@ -118,9 +131,9 @@ void setup(void)
 void loop(void)
 {
 
-  myTime = micros();
-  dt = ((myTime - prevTime) / PRESCALER) * .000001; // calculate time (s) between each loop
-  prevTime = myTime;                             // update previous time
+//  myTime = micros();
+//  dt = ((myTime - prevTime) / PRESCALER) * .000001; // calculate time (s) between each loop
+//  prevTime = myTime;                             // update previous time
 
 
   // digital filter pressure data
