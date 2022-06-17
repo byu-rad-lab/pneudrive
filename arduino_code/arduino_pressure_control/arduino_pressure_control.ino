@@ -4,7 +4,12 @@
 /*
   NOTE ON VALVE COMMAND SIGNALS
   -----------------------------
-  Valve commands are on the interval [-400,400].
+  Valve PWM commands are on the interval [-400,400].
+
+  -400 corresponds to commanding -1 amp (vent) and 400 corresponds to +1 amp (fill).
+  The driver boards actively limit current to 0.7 amps however,
+  so any command above 0.7 amps will result in 0.7 amps on the hardware. See current2PWM() function below.
+
   Negative numbers mean vent and positive mean fill.
   If the valve is flipped, the wires need to be switched.
 
@@ -36,32 +41,29 @@ A4990ValveInterface valves;
 
 float p[4] = {0, 0, 0, 0};
 float pcmd[4] = {0, 0, 0, 0};
-float pbias[4] = {0, 0, 0, 0};
 
 // arrays of 8 bytes used for i2c comms. Each pressure uses 2 bytes (16 bits).
+// NOTE: all pressures sent over i2c are in kPa (gauge).
 const int BYTES_PER_PRESSURE = 2;
 byte pchar[BYTES_PER_PRESSURE * 4];
 byte pcmdchar[BYTES_PER_PRESSURE * 4];
 
 int valve_cmd[4] = {0, 0, 0, 0};
-int VENT_CMD[4] = {-400, -400, -400, -400};
+int VENT_CMD[4] = { -400, -400, -400, -400};
 int FILL_CMD[4] = {400, 400, 400, 400};
 
+// conversion factor from psi to kpa (ie kpa = psi * PSI2KPA)
+double const PSI2KPA = 6.8947572932;
+double const P_MAX = 100 * PSI2KPA;
+
 //'Global' variables that are important for control
+// only proportional control b/c these dynamics are essentially a stable first order system and I don't
+// want to add a destabilizing integrator on this low level control
 float myTime = 0.0;
 float prevTime = 0.0; // Last time the loop was entered
-float integrator[4] = {0, 0, 0, 0};
-float pdot[4] = {0, 0, 0, 0};
-float prevError[4] = {0, 0, 0, 0}; // error at the previous timestep
-float prevP[4] = {0, 0, 0, 0};
-float errorDot[4] = {.0, .0, .0, .0}; // Derivative of the error
-float awl = 1.0;                      // Anti-Windup limit.
-float kp = 10.0;
-float ki = 0.000;
-float kd = 0.00;
-float sigma = .05;    // Dirty Derivative Bandwidth = 1/sigma
+float kp = 0.7 / (10 * PSI2KPA); //this kp means desired current will rail at .7 amps at a pressure error of 10 psi.
+// denominator is set by the pressure error which will cause the input to saturate.
 float deadband = 0.0; // kpa, controller will not act on error less than deadband
-
 float error = 0.0;
 float dt = 0;
 
@@ -70,10 +72,6 @@ const int EF1_A = 10;
 const int EF2_A = 11;
 const int EF1_B = 20;
 const int EF2_B = 21;
-
-// conversion factor from psi to kpa (ie kpa = psi * PSI2KPA)
-double const PSI2KPA = 6.8947572932;
-double const P_MAX = 100 * PSI2KPA;
 
 // timer stuff
 int const PRESCALER = 32;
@@ -84,7 +82,7 @@ void setup(void)
 
   speedupPWM();
   // comment out if not debugging
-  //  Serial.begin(115200);
+//  Serial.begin(1000000);
 
   int i2c_address;
   i2c_address = geti2caddress();
@@ -111,7 +109,7 @@ void setup(void)
 
   // Wait for 5 seconds for everything to vent out.
   custom_delay(5);
-  prevTime = millis();
+  prevTime = micros();
 
   // close all valves now that they have vented.
   valves.setSpeeds(valve_cmd);
@@ -120,9 +118,10 @@ void setup(void)
 void loop(void)
 {
 
-  myTime = millis();
-  dt = ((myTime - prevTime) / PRESCALER) * .001; // calculate time (s) between each loop
+  myTime = micros();
+  dt = ((myTime - prevTime) / PRESCALER) * .000001; // calculate time (s) between each loop
   prevTime = myTime;                             // update previous time
+
 
   // digital filter pressure data
   p[0] = filter(p[0], readPressure(A0));
@@ -147,7 +146,7 @@ void loop(void)
   //  }
   //  Serial.println();
 
-  // CONTROL
+  // PROPORTIONAL CONTROL on each valve
   for (int i = 0; i < 4; i++)
   {
     // calculate control signals for each pressure
@@ -155,26 +154,12 @@ void loop(void)
     {
       error = pcmd[i] - p[i];
 
-      //      if (errorDot[i] < awl) //Integrator anti-windup scheme
-      //      {
-      //        integrator[i] = integrator[i] + dt/2*(error+prevError[i]); //Trapezoidal Integration
-      //      }
-      //      pdot[i] = dirtyDifferentiate(p[i], prevP[i], pdot[i]);
-      //      errorDot[i] = dirtyDifferentiate(error, prevError[i], errorDot[i]);
-      //
-      //      float input_signal = error*kp + integrator[i]*ki - pdot[i]*kd;
-      //      float input_signal = error*kp;
-
-      valve_cmd[i] = (error * kp);
+      valve_cmd[i] = current2PWM(kp * error);
 
       //      if (i == 0) {
       //        Serial.print(valve_cmd[i]);
       //        Serial.println();
       //      }
-
-      // update delayed variables
-      prevError[i] = error;
-      prevP[i] = p[i];
     }
   }
 
@@ -189,18 +174,6 @@ void loop(void)
   }
 }
 
-float dirtyDifferentiate(float input, float prev_input, float input_dot)
-{
-  /*
-     This function takes a dirty derivative of input. BROKEN.
-  */
-
-  float beta = (2 * sigma - dt) / (2 * sigma + dt);
-
-  return beta * input_dot + ((1 - beta) / dt) * (input - prev_input);
-
-  //  return (input - prev_input)/(dt*.000001);
-}
 
 float filter(float prev, float input)
 {
@@ -238,7 +211,7 @@ void requestEvent()
   Wire.write(pchar, sizeof(pchar));
 }
 
-float two_bytes_to_float(byte *pcmdchar)
+float two_bytes_to_float(byte * pcmdchar)
 {
   if (BYTES_PER_PRESSURE == 1)
   {
@@ -254,7 +227,7 @@ float two_bytes_to_float(byte *pcmdchar)
   }
 }
 
-void float_to_two_bytes(float myfloat, byte *pchar)
+void float_to_two_bytes(float myfloat, byte * pchar)
 {
   /*
      NOTE: sometimes the sensors read negative pressure
@@ -341,6 +314,19 @@ double readPressure(int analogPin)
 
   // return applied pressure in kPa
   return ((v_out - 0.1 * v_sup) / (0.8 * v_sup)) * P_MAX;
+}
+
+int current2PWM(double current)
+{
+  /*
+    From enfield valve measurements: current = .004*PWM
+
+    Note, this model is only valid in the linear regime which is PWM=[-175,175].
+    Outside of this, the current is maxed out by the driver boards at ~0.7 amps.
+    That is, any PWM command outside of [-175,175] will be saturated at .7 amps.
+  */
+  int PWM = int(current / .004);
+  return PWM;
 }
 
 void speedupPWM()
