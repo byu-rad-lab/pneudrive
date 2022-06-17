@@ -34,9 +34,11 @@ where xxx is the chosen IP address you chose when setting up the beaglebone. Not
 
 Once you ssh into the BBB, you can launch the pressure control ROS node (along with a roscore) using 
 
-``` roslaunch byu_pressure_control i2c_pressure.launch ```
+``` roslaunch byu_pressure_control i2c_pressure.launch numjoints:=[number of joints]```
 
-This creates a ROS node called "PressureController". This launch file looks in the /config directory for a .yaml file describing the hardware configuration of whatever platform you are using. The node creates publishers and subscribers for every joint (with it cooresponding I2C address) that is specified in the yaml file. If the BBB cannot find all of the specified addresses, the node throw an error and shut down. If this happens, here are some common fixes:
+where the ```numjoints``` command line argument is required and tells the node how many joints to look for on the i2c bus. 
+
+This creates a ROS node called "PressureController". This launch file looks in the /config directory for a .yaml file describing the hardware configuration corresponding to how many joints you specified with ```numjoints```. The node creates publishers and subscribers for every joint (with it cooresponding I2C address) that is specified in the yaml file. If the BBB cannot find all of the specified addresses, the node throw an error and shut down. If this happens, here are some common fixes:
 
 * Make sure your wires are all connected securely.
 * Make sure that each pressure control board dip switch is set to the proper I2C address. The dip switch positions are printed on the pcb and they should match what is specified in the yaml file. For example, if I have a 3 joint arm, I would make sure that the first joint is set to 0xa then the next as 0xb and the last as 0xc, with those same addresses specified in the yaml file. 
