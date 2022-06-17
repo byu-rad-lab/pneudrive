@@ -61,7 +61,7 @@ double const P_MAX = 100 * PSI2KPA;
 // want to add a destabilizing integrator on this low level control
 float myTime = 0.0;
 float prevTime = 0.0; // Last time the loop was entered
-float kp = 0.7 / (10 * PSI2KPA); //this kp means desired current will rail at .7 amps at a pressure error of 10 psi.
+float kp = 0.7 / (10 * PSI2KPA); //this kp means desired current will rail at .7 amps at a pressure error of >= 10 psi.
 // denominator is set by the pressure error which will cause the input to saturate.
 float deadband = 0.0; // kpa, controller will not act on error less than deadband
 float error = 0.0;
@@ -82,7 +82,7 @@ void setup(void)
 
   speedupPWM();
   // comment out if not debugging
-//  Serial.begin(1000000);
+  //  Serial.begin(1000000);
 
   int i2c_address;
   i2c_address = geti2caddress();
