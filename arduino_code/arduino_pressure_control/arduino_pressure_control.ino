@@ -71,7 +71,7 @@ float prevTime = 0.0; // Last time the loop was entered
  * railPSI>5 was pretty sluggish tracking and seemed to exacerbate valve nonlinearities with small commands.
  *  
  */
-float railPSI = 2
+float railPSI = 2;
 float kp = 0.7 / (railPSI * PSI2KPA); //this kp means desired current will rail at .7 amps at a pressure error of >= railPSI.
 
 
