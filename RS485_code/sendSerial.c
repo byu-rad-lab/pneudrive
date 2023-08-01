@@ -49,18 +49,19 @@ int main()
     serialFlush(fd); // clear the current serial buffer before doing anything with it
 
     printf("\n\nInput Which arduino to write to: ");
-    char arduino_address;
+    char arduino_address_write;
+    char arduino_address_read;
     unsigned short pressure_cmd[4] = {123, 456, 789, 1011}; // unsigned short size is 2 bytes and can go from 0 to 65535
     unsigned char msg_array[9];
 
     unsigned char response_array[8];
     unsigned short arduino_state[4];
 
-    scanf(" %c", &arduino_address);
+    scanf(" %c", &arduino_address_write);
     // printf("Writing to arduino %c", arduino_address);
 
     // Construct a byte message to send to the arduino
-    msg_array[0] = arduino_address;
+    msg_array[0] = arduino_address_write;
     shortToBytes(pressure_cmd, msg_array);
 
     // printf("\n");
@@ -97,7 +98,10 @@ int main()
     // }
 
     byteToShorts(arduino_state, response_array);
+    arduino_address_read = response_array[0];
+
     printf("\n");
+    printf("%c ", arduino_address_read);
     for (int i = 0; i < 4; i++)
     {
       printf("%hu ", arduino_state[i]);
