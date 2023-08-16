@@ -51,7 +51,7 @@ int main()
     printf("\n\nInput Which arduino to write to: ");
     char arduino_address_write;
     char arduino_address_read;
-    unsigned short pressure_cmd[4] = {123, 456, 789, 1011}; // unsigned short size is 2 bytes and can go from 0 to 65535
+    unsigned short pressure_cmd[4] = {43690, 43690, 43690, 43690}; // unsigned short size is 2 bytes and can go from 0 to 65535
     unsigned char msg_array[9];
 
     unsigned char response_array[8];
@@ -73,9 +73,11 @@ int main()
     for (int i = 0; i < 9; i++)
     {
       serialPutchar(fd, msg_array[i]); // write one byte at a time
+      //delayMicroseconds(20);
     }
+    //delayMicroseconds(500);
+    while (serialDataAvail(fd) != 9); // wait for arduino to respond with 9 bytes
 
-    delayMicroseconds(500);
     // Read the response from the arduino
     // printf("\nReceived Arduino Response:");
     int pos = 0;
@@ -92,10 +94,10 @@ int main()
       printf("\nGot %i bytes. Expected 9.", pos);
     }
 
-    // printf("\n");
-    // for (int i = 0; i < pos; i++) {
-    //   printf("%02x ", response_array[i]);
-    // }
+     printf("\n");
+     for (int i = 0; i < pos; i++) {
+       printf("%02x ", response_array[i]);
+     }
 
     byteToShorts(arduino_state, response_array);
     arduino_address_read = response_array[0];
