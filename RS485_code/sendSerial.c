@@ -43,6 +43,7 @@ int main()
     fprintf(stdout, "Unable to start wiringPi: %s\n", strerror(errno));
     return 1;
   }
+  // throw this in the constructor.
 
   while (1)
   {
@@ -53,6 +54,7 @@ int main()
     char arduino_address_read;
     unsigned short pressure_cmd[4] = {43690, 43690, 43690, 43690}; // unsigned short size is 2 bytes and can go from 0 to 65535
     unsigned char msg_array[9];
+    // assumed to already be done
 
     unsigned char response_array[8];
     unsigned short arduino_state[4];
@@ -61,7 +63,7 @@ int main()
     // printf("Writing to arduino %c", arduino_address);
 
     // Construct a byte message to send to the arduino
-    msg_array[0] = arduino_address_write;
+    msg_array[0] = arduino_address_write; // msg_array[0] = joint
     shortToBytes(pressure_cmd, msg_array);
 
     // printf("\n");
@@ -78,7 +80,7 @@ int main()
     //delayMicroseconds(500);
     while (serialDataAvail(fd) != 9); // wait for arduino to respond with 9 bytes
 
-    // Read the response from the arduino
+    // READ the response from the arduino
     // printf("\nReceived Arduino Response:");
     int pos = 0;
     while (serialDataAvail(fd))

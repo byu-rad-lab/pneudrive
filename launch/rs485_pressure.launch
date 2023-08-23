@@ -2,10 +2,10 @@
 
 <launch>
   <!-- declare argument to be passed in via command line -->
-  <arg name="numjoints" doc="numJoints specifies the number of i2c devices which should be included for pressure control." />
+  <arg name="numjoints" doc="numJoints specifies the number of rs485 devices which should be included for pressure control." />
 
   <!-- start pressure control node -->
-  <node name='i2c_pressure_node' pkg='byu_pressure_control' type='i2c_pressure_control_node' required='false' output='screen' />
+  <node name='rs485_pressure_node' pkg='byu_pressure_control' type='rs485_pressure_control_node' required='false' output='screen' />
 
   <!--Load hardware yaml file according to numjoints so controller knows what to look for-->
   <rosparam if="$(eval numjoints==1)" command="load" file="$(find byu_pressure_control)/config/one_joint.yaml" />

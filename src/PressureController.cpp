@@ -1,41 +1,49 @@
+#include <stdio.h>
+#include <errno.h>
+#include <string.h>
 #include <sstream>
 #include "PressureController.h"
+
+#include <wiringPi.h>
+#include <wiringSerial.h>
 
 // conversion factor from psi to kpa (ie kpa = psi * psi2kpa)
 const double psi2kpa = 6.8947572932;
 
 const int BYTES_PER_PRESSURE = 2;
 
-PressureController::PressureController(ros::NodeHandle n, int bus, std::map<std::string, int> expected_i2c_addresses)
+PressureController::PressureController(ros::NodeHandle n, std::map<std::string, int> expected_rs485_addresses)
 {
-  /* 
-  * Set up GPIO pins. One digital input is needed for checking if estop has been hit.  
-  * One digital output is needed to control power to arduinos via power relay strip.  
-  * Power to arduinos is normally off, so need to set output high to enable them. 
-  */
-  pwrEnable.setDirection(GPIO::OUTPUT);
-  pwrEnable.setValue(GPIO::HIGH);
-  ROS_INFO_STREAM("ENABLED ARDUINO POWER");
-  usleep(1000000); //sleep for 1 second to allow arduinos to turn on fully.
+  
+  int fd; // file descriptor for the serial port
 
-  //check to make sure expected devices are found on i2c bus
-  check_devices_on_bus(bus, expected_i2c_addresses);
+  if ((fd = serialOpen("/dev/ttyS1", 1000000)) < 0)
+  {
+    fprintf(stderr, "Unable to open serial device: %s\n", strerror(errno));
+    return 1;
+  }
+
+  if (wiringPiSetup() == -1)
+  {
+    fprintf(stdout, "Unable to start wiringPi: %s\n", strerror(errno));
+    return 1;
+  }
+  
 
   // get number of expected devices to make vectors the right size
-  numJoints = expected_i2c_addresses.size();
+  numJoints = expected_rs485_addresses.size();
 
-  i2cDevices.resize(numJoints);
   pressures.resize(numJoints);
   pressureCommands.resize(numJoints);
 
   for (int i = 0; i < numJoints; i++)
   {
-    std::string joint_name = "joint_" + std::to_string(i);
-    i2cDevices[i].open(bus, expected_i2c_addresses[joint_name]);
+    // std::string joint_name = "joint_" + std::to_string(i);
     pressures[i].resize(numPressuresPerJoint);
     pressureCommands[i].resize(numPressuresPerJoint);
   }
 
+  // Create pressure command subscribers
   for (int i = 0; i < numJoints; i++)
   {
     std::string topicString = "/robo_0/joint_" + std::to_string(i) + "/pressure_command";
@@ -47,6 +55,7 @@ PressureController::PressureController(ros::NodeHandle n, int bus, std::map<std:
     ROS_INFO("/pressure_command topic started for joint %d", i);
   }
 
+  // Create pressure data publisheers
   for (int i = 0; i < numJoints; i++)
   {
     std::string topic_string = "/robo_0/joint_" + std::to_string(i) + "/pressure_state";
@@ -56,41 +65,44 @@ PressureController::PressureController(ros::NodeHandle n, int bus, std::map<std:
   }
 }
 
-void PressureController::check_devices_on_bus(int bus, std::map<std::string, int> expected_i2c_addresses)
+void PressureController::check_devices_on_bus(int bus, std::map<std::string, int> expected_rs485_addresses)
 {
-  ROS_INFO_STREAM("Scanning for i2c devices on bus " << bus << "...");
+  // ===*Some sort of code here to verify everything is connected properly and ready to start communication*===
 
-  std::vector<bool> found_i2c_device;
 
-  for (int i = 0; i < expected_i2c_addresses.size(); i++)
-  {
-    I2CDevice device;
-    std::string joint_name = "joint_" + std::to_string(i);
-    int addr = expected_i2c_addresses[joint_name];
-    unsigned char testchar;
+    // ROS_INFO_STREAM("Scanning for rs485 devices on bus " << bus << "...");
 
-    device.open(bus, addr);
-    bool error = device.readRegisters(0, sizeof(testchar), &testchar);
+    // std::vector<bool> found_rs485_device;
 
-    if (!error)
-    {
-      found_i2c_device.push_back(true);
-      ROS_INFO_STREAM("Found device 0x" << std::hex << addr << " on bus " << bus);
-    }
-    else
-    {
-      found_i2c_device.push_back(false);
-      ROS_INFO_STREAM("Could not find device 0x" << std::hex << addr << " on bus " << bus);
-    }
-  }
+    // for (int i = 0; i < expected_rs485_addresses.size(); i++)
+    // {
+    //   rs485Device device;
+    //   std::string joint_name = "joint_" + std::to_string(i);
+    //   int addr = expected_rs485_addresses[joint_name];
+    //   unsigned char testchar;
 
-  int checksum = std::accumulate(found_i2c_device.begin(), found_i2c_device.end(), 0);
+    //   device.open(bus, addr);
+    //   bool error = device.readRegisters(0, sizeof(testchar), &testchar);
 
-  if (checksum != expected_i2c_addresses.size())
-  {
-    ROS_ERROR_ONCE("Not all i2c devices found. Shutting down node.");
-    ros::shutdown();
-  }
+    //   if (!error)
+    //   {
+    //     found_rs485_device.push_back(true);
+    //     ROS_INFO_STREAM("Found device 0x" << std::hex << addr << " on bus " << bus);
+    //   }
+    //   else
+    //   {
+    //     found_rs485_device.push_back(false);
+    //     ROS_INFO_STREAM("Could not find device 0x" << std::hex << addr << " on bus " << bus);
+    //   }
+    // }
+
+    // int checksum = std::accumulate(found_rs485_device.begin(), found_rs485_device.end(), 0);
+
+    // if (checksum != expected_rs485_addresses.size())
+    // {
+    //   ROS_ERROR_ONCE("Not all rs485 devices found. Shutting down node.");
+    //   ros::shutdown();
+    // }
 }
 
 void PressureController::do_pressure_control()
@@ -100,28 +112,82 @@ void PressureController::do_pressure_control()
 
     ROS_INFO_STREAM_ONCE("PRESSURE CONTROL STARTED");
 
-    // update memory values for  pressure commands and pressures
+    serialFlush(fd); // clear the current serial buffer before doing anything with it
+
     for (int joint = 0; joint < numJoints; joint++)
     {
-      unsigned char pchar[numPressuresPerJoint * BYTES_PER_PRESSURE];
-      for (int p = 0; p < numPressuresPerJoint; p++)
+      // Not entirely sure if these are in the right spot.
+      unsigned char pressure_msg_write[9];
+      unsigned char pressure_msg_read[9];
+      unsigned short analog_short_write;
+      unsigned short analog_short_read;
+      char arduino_address_write;
+      char arduino_address_read;
+      
+      // Convert pressureCommands to analog bin values
+      analog_short_write = kpaToAnalog(pressureCommands)
+      
+      // Construct a byte message to send to the arduino
+      pressure_msg_write[0] = arduino_address_write;  // first byte dictates which joint
+      shortToBytes(analog_short_write, pressure_msg_write); // converts pressureCommands (shorts) to pressure_msg_write (bytes)
+      
+      // Write byte message to the arduino
+      for (int i = 0; i < 9; i++)
       {
-        float_to_two_bytes(pressureCommands[joint][p], &pchar[p * BYTES_PER_PRESSURE]);
+        serialPutchar(fd, pressure_msg_write[i]); // write one byte at a time
+        //delayMicroseconds(20);
       }
 
-      i2cDevices[joint].writeRegisters(0, sizeof(pchar), &pchar[0]);
+      // Wait for arduino to respond with 9 bytes
+      while (serialDataAvail(fd) != 9);
 
-      bool error = i2cDevices[joint].readRegisters(0, sizeof(pchar), &pchar[0]);
+      // READ the response from the arduino
+      // printf("\nReceived Arduino Response:");
+      int pos = 0;
+      while (serialDataAvail(fd))
+      {
+        pressure_msg_read[pos] = serialGetchar(fd);
+        pos++;
+        fflush(stdout);
+      }
+      
+      // Error if didn't read correct arduino response
+      if (pos != 9)
+      {
+        printf("\nGot %i bytes. Expected 9.", pos);
+        // send error message over ROS once per second on rs485 failure
+        ROS_ERROR_STREAM_THROTTLE(1, "rs485 Failure on node " << joint);
+      }
+
+      // Print the arduino response in bytes
+      printf("\n");
+      for (int i = 0; i < pos; i++) 
+      {
+        printf("%02x ", pressure_msg_read[i]);
+      }
+
+      // Convert the response from the arduino (bytes) into short array
+      byteToShorts(analog_short_read, pressure_msg_read);
+      arduino_address_read = pressure_msg_read[0];
+
+      // Convert response data (in analog voltage readings) to kPa
+      pressures[joint] = analogToKPA(analog_short_read)
+
+      // Print the arduino address and corresponding pressure commands as unsigned short integers
+      printf("\n");
+      printf("%c ", arduino_address_read);
+      for (int i = 0; i < 4; i++)
+      {
+        printf("%hu ", pressures[joint][i]);
+      }
+
+      // What remains of this for-loop is whats left after the necessary changes.
+      // Probably should confirm if what follows is useful.
 
       if (error)
       {
-        // send error message over ROS once per second on i2c failure
-        ROS_ERROR_STREAM_THROTTLE(1, "I2C Failure on node " << joint);
-      }
-
-      for (int p = 0; p < numPressuresPerJoint; p++)
-      {
-        pressures[joint][p] = two_bytes_to_float(&pchar[p * BYTES_PER_PRESSURE]);
+        // send error message over ROS once per second on rs485 failure
+        ROS_ERROR_STREAM_THROTTLE(1, "rs485 Failure on node " << joint);
       }
 
       //This section just prints things out the cout for debugging purposes.
@@ -156,39 +222,72 @@ void PressureController::do_pressure_control()
     ros::spinOnce();
   }
 
-  //disable power to arduinos
-  pwrEnable.setValue(GPIO::LOW);
 }
 
-float PressureController::two_bytes_to_float(unsigned char *data_bytes)
+void PressureController::shortToBytes(unsigned short *short_array, unsigned char *byte_array)
 {
-  float myfloat = 0;
-  if (BYTES_PER_PRESSURE==1){
-    uint8_t myint;
-    memcpy(&myint, data_bytes, BYTES_PER_PRESSURE);
-    myfloat = (float)(100.0 * myint * psi2kpa / 255.0);
-
-  }else if (BYTES_PER_PRESSURE==2){
-    uint16_t myint;
-    memcpy(&myint, data_bytes, BYTES_PER_PRESSURE);
-    myfloat = (float)(100.0 * myint * psi2kpa / 65535.0);
+  // Function to convert array of 4 shorts to array of 8 bytes (doesn't change first byte because of address byte)
+  int shortLength = 4;
+  for (int i = 0; i < shortLength; i++)
+  {
+    int byteIndex = i * 2 + 1;
+    unsigned char *bytePtr = (unsigned char *)&short_array[i];
+    byte_array[byteIndex] = bytePtr[1];     // Most significant byte
+    byte_array[byteIndex + 1] = bytePtr[0]; // Least significant byte
   }
-
-  //std::cout << "Pressure: " << myfloat << std::endl;
-  return myfloat;
 }
 
-void PressureController::float_to_two_bytes(float myfloat, unsigned char *data_bytes)
+void PressureController::byteToShorts(unsigned short *short_array, unsigned char *byte_array)
 {
-  //std::cout << "Pressure command: " << myfloat << std::endl;
+  // Function to convert array of 8 bytes to array of 4 shorts (states start at i=1)
+  unsigned int byteLength = 8;
+  for (unsigned int i = 0; i < byteLength; i += 2)
+  {
+    short_array[i / 2] = ((short)byte_array[i + 1] << 8) | byte_array[i + 2];
+  }
+}
+
+void PressureController::analogToKpa(unsigned short *analog)
+{
+  /*
+     Function to convert an analog pressure reading into kPa
+     ADC is 10 bit, so voltage is read as bin numbers ranging between 0 and 1023
+     Analog reference is 5V, so 0=0v and 1023=5v
+     Conversion is taken from Fig. 3 (transfer function A) in pressure sensor datasheet
+     https://www.mouser.com/datasheet/2/187/honeywell-sensing-basic-board-mount-pressure-abp-s-1224358.pdf
+  */
+  // conversion factor from psi to kpa (ie kpa = psi * PSI2KPA)
+  double const PSI2KPA = 6.8947572932;
+  double const P_MAX = 100 * PSI2KPA;
   
-  if (BYTES_PER_PRESSURE ==1){
-    uint8_t myint= (myfloat / (100.0 * psi2kpa)) * 255.0;
-    memcpy(data_bytes, &myint, BYTES_PER_PRESSURE);
-  }else if (BYTES_PER_PRESSURE ==2){
-    uint16_t myint= (myfloat / (100.0 * psi2kpa)) * 65535.0;
-    memcpy(data_bytes, &myint, BYTES_PER_PRESSURE);
-  }
+  double v_sup = 5;
+
+  // convert bin number to a voltage
+  double v_out = analog * 5.0 / 1024.0;
+
+  // return applied pressure in kPa
+  return ((v_out - 0.1 * v_sup) / (0.8 * v_sup)) * P_MAX;
+}
+
+void PressureController::kpaToAnalog(unsigned short *kPa)
+{
+  /*
+     Function to convert a kPa pressure reading into an analog pressure
+     ADC is 10 bit, so voltage is read as bin numbers ranging between 0 and 1023
+     Analog reference is 5V, so 0=0v and 1023=5v
+     This is the inverse of the function "analogToKpa" directly above.
+  */
+  // conversion factor from psi to kpa (ie kpa = psi * PSI2KPA)
+  double const PSI2KPA = 6.8947572932;
+  double const P_MAX = 100 * PSI2KPA;
+  
+  double v_sup = 5;
+
+  // convert kPa to a voltage
+  double v_out = v_sup * ((0.8 * kPa / P_MAX) + 0.1)
+
+  // convert voltage to a bin number
+  return v_out * 1024.0 / 5.0
 }
 
 void PressureController::pcmd_callback(const rad_msgs::PressureStamped::ConstPtr &msg, int joint)

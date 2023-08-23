@@ -5,8 +5,6 @@
 #include <rad_msgs/PressureStamped.h>
 #include <std_msgs/Header.h>
 #include <ros/ros.h>
-#include "I2CDevice.h"
-#include "GPIO.h"
 #include <ros/console.h>
 #include <unistd.h> //for delay function
 #include <numeric>
@@ -20,19 +18,17 @@ class PressureController
 private:
   int numJoints;
   int numPressuresPerJoint = 4;
-  GPIO::GPIO pwrEnable{49}; //P9_23, output to enable power to arduinos and valves
   std::vector<ros::Publisher> pressurePublishers;
   std::vector<ros::Subscriber> pressureCommandSubscribers;
-  std::vector<I2CDevice> i2cDevices;
   std::vector<std::vector<float>> pressures;
   std::vector<std::vector<float>> pressureCommands;
 
 public:
-  PressureController(ros::NodeHandle n, int bus, std::map<std::string, int> expected_i2c_addresses);
+  PressureController(ros::NodeHandle n, std::map<std::string, int> expected_rs485_addresses);
   void do_pressure_control();
-  void check_devices_on_bus(int bus, std::map<std::string, int> expected_i2c_addresses);
-  float two_bytes_to_float(unsigned char *data_bytes);
-  void float_to_two_bytes(float myfloat, unsigned char *data_bytes);
+  void check_devices_on_bus(int bus, std::map<std::string, int> expected_rs485_addresses);
+  void shortToBytes(unsigned short *short_array, unsigned char *byte_array);
+  void byteToShorts(unsigned short *short_array, unsigned char *byte_array);
   void pcmd_callback(const rad_msgs::PressureStamped::ConstPtr &msg, int joint);
 };
 

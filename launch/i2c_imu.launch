@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-
-<launch>
-  <node name='i2c_imu_node' pkg='byu_pressure_control' type='i2c_imu_publisher_node' output='screen'/>
-</launch>
