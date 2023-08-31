@@ -81,6 +81,8 @@ short error = 0;
 int const PRESCALER = 32;
 int const ONE_SECOND = 32000;
 
+byte outgoing_bytes[9] = {0,0,0,0,0,0,0,0,0};
+
 //===============================================================================
 //  Initialization
 //===============================================================================
@@ -89,13 +91,14 @@ void setup()
 
   speedupPWM();
   // comment out if not debugging
-  //  Serial.begin(1000000);
+    Serial.begin(9600);
 
   int rs485_address;
   rs485_address = getrs485address();
+  Serial.println(rs485_address);
 
   Serial1.begin(1000000);  // RS485 Serial port
-  pressure_state_bytes[0] = ADDRESS;
+  outgoing_bytes[0] = rs485_address;
   pinMode(LED_BUILTIN, OUTPUT);
 
   //  // uncomment to test valves
@@ -120,105 +123,108 @@ void setup()
 void loop()
 {
 
-  // KEEP, WILL CHANGE LATER, CHECK INTS, MOVE READ PRESSURE STUFF TO ODROID
-  // digital filter pressure data
-  p[0] = filter(p[0], A0);
-  p[1] = filter(p[1], A1);
-  p[2] = filter(p[2], A2);
-  p[3] = filter(p[3], A3);
-
-  //  //Uncomment to plot filtered data vs unfiltered data
-  //  Serial.print(myTime);
-  //  Serial.print("\t");
-  //  Serial.print(readPressure(A0));
-  //  Serial.print("\t");
-  //  Serial.print(p[0]);
-  //  Serial.print("\t");
-  //  Serial.print(fir_lp.processReading(readPressure(A0)));
-  //  Serial.println();
-
-  //  // Uncomment to see all pressures plotted together on serial monitor
-  //  for (int i = 0; i < 4; i++) {
-  //    Serial.print(p[0]);
-  //    Serial.print(",");
-  //  }
-  //  Serial.println();
-
-  // KEEP THIS FOR NOW
-  // PROPORTIONAL CONTROL on each valve
-  for (int i = 0; i < 4; i++)
-  {
-    // calculate control signals for each pressure
-    if (abs(pcmd[i] - p[i]) >= deadband)
-    {
-      error = pcmd[i] - p[i];
-
-      valve_cmd[i] = current2PWM(kp * error); 
-
-      //      if (i == 0) {
-      //        Serial.print(valve_cmd[i]);
-      //        Serial.println();
-      //      }
-    }
-  }
-
-  // send updated control signals [-400,400]
-  valves.setSpeeds(valve_cmd);
-
-  // update p and pcmd in memory with new values of pchar and pcmdchar recieved on rs485
-  for (int i = 0; i < 4; i++)
-  {
-    shortToBytes(p[i], &pchar[i * BYTES_PER_PRESSURE]);
-    byteToShorts(pcmd[i], &pcmdchar[i * BYTES_PER_PRESSURE]);
-  }
+//  // KEEP, WILL CHANGE LATER, CHECK INTS, MOVE READ PRESSURE STUFF TO ODROID
+//  // digital filter pressure data
+//  p[0] = filter(p[0], A0);
+//  p[1] = filter(p[1], A1);
+//  p[2] = filter(p[2], A2);
+//  p[3] = filter(p[3], A3);
+//
+//  //  //Uncomment to plot filtered data vs unfiltered data
+//  //  Serial.print(myTime);
+//  //  Serial.print("\t");
+//  //  Serial.print(readPressure(A0));
+//  //  Serial.print("\t");
+//  //  Serial.print(p[0]);
+//  //  Serial.print("\t");
+//  //  Serial.print(fir_lp.processReading(readPressure(A0)));
+//  //  Serial.println();
+//
+//  //  // Uncomment to see all pressures plotted together on serial monitor
+//  //  for (int i = 0; i < 4; i++) {
+//  //    Serial.print(p[0]);
+//  //    Serial.print(",");
+//  //  }
+//  //  Serial.println();
+//
+//  // KEEP THIS FOR NOW
+//  // PROPORTIONAL CONTROL on each valve
+//  for (int i = 0; i < 4; i++)
+//  {
+//    // calculate control signals for each pressure
+//    if (abs(pcmd[i] - p[i]) >= deadband)
+//    {
+//      error = pcmd[i] - p[i];
+//
+//      valve_cmd[i] = current2PWM(kp * error); 
+//
+//      //      if (i == 0) {
+//      //        Serial.print(valve_cmd[i]);
+//      //        Serial.println();
+//      //      }
+//    }
+//  }
+//
+//  // send updated control signals [-400,400]
+//  valves.setSpeeds(valve_cmd);
+//
+//  // update p and pcmd in memory with new values of pchar and pcmdchar recieved on rs485
+//  for (int i = 0; i < 4; i++)
+//  {
+//    shortToBytes(p[i], &pchar[i * BYTES_PER_PRESSURE]);
+//    byteToShorts(pcmd[i], &pcmdchar[i * BYTES_PER_PRESSURE]);
+//  }
 }
 
 
-void byteToShorts(unsigned short *short_array, unsigned char *byte_array) {
-  //Function to convert array of 8 bytes to array of 4 shorts
-  unsigned int byteLength = 8;
-  for (unsigned int i=0; i<byteLength; i+=2) {
-    short_array[i/2] = ((short)byte_array[i] << 8) | byte_array[i+1];
-  }
-}
-
-void shortToBytes(unsigned short *short_array, unsigned char *byte_array) {
-  // Function to convert array of 4 shorts to array of 8 bytes (doesn't change first byte because of address byte)
-  int shortLength = 4;
-  for (int i=0; i<shortLength; i++) {
-    int byteIndex = i*2+1;
-    unsigned char *bytePtr = (unsigned char *)&short_array[i];
-    byte_array[byteIndex] = bytePtr[1]; // Most significant byte
-    byte_array[byteIndex+1] = bytePtr[0]; // Least significant byte
-  }
-}
-
-float filter(float prev, float input)
-{
-  /*
-      This function implements a first order low pass filter
-      with a cutoff frequency of 50 Hz. First order hold discrete implementation with dt=.001.
-      First order filter is of form:
-      a / (z - b)
-  */
-
-  float a = .2696;
-  float b = .7304;
-
-  return b * prev + a * input(v_out - 0.1 * v_sup) / (0.8 * v_sup)) * P_MAX;
-}
+//void byteToShorts(unsigned short *short_array, unsigned char *byte_array) {
+//  //Function to convert array of 8 bytes to array of 4 shorts
+//  unsigned int byteLength = 8;
+//  for (unsigned int i=0; i<byteLength; i+=2) {
+//    short_array[i/2] = ((short)byte_array[i] << 8) | byte_array[i+1];
+//  }
+//}
+//
+//void shortToBytes(unsigned short *short_array, unsigned char *byte_array) {
+//  // Function to convert array of 4 shorts to array of 8 bytes (doesn't change first byte because of address byte)
+//  int shortLength = 4;
+//  for (int i=0; i<shortLength; i++) {
+//    int byteIndex = i*2+1;
+//    unsigned char *bytePtr = (unsigned char *)&short_array[i];
+//    byte_array[byteIndex] = bytePtr[1]; // Most significant byte
+//    byte_array[byteIndex+1] = bytePtr[0]; // Least significant byte
+//  }
+//}
+//
+//float filter(float prev, float input)
+//{
+//  /*
+//      This function implements a first order low pass filter
+//      with a cutoff frequency of 50 Hz. First order hold discrete implementation with dt=.001.
+//      First order filter is of form:
+//      a / (z - b)
+//  */
+//
+//  float a = .2696;
+//  float b = .7304;
+//
+//  return b * prev + a * input(v_out - 0.1 * v_sup) / (0.8 * v_sup)) * P_MAX;
+//}
 
 
 int getrs485address()
 {
   /* Addresses from dip switch
-      a number indicates a HIGH value, _ is LOW
-     PIN | Addr
+      a number indicates a DIP switch flipped ON
+     PIN |Addr
      ---------
-     _ _ = 0xA
-     1 _ = 0xB
-     1 2 = 0xC
-     _ 2 = 0xD
+     _ _ = 0
+     1 _ = 1
+     _ 1 = 2
+     1 1 = 3
+
+     Note that when the DIP switch is on, the actual voltage is LOW. When it is OFF,
+     the voltage is pulled HIGH.
   */
 
   int rs485addr;
@@ -226,27 +232,27 @@ int getrs485address()
   int two;
 
   // b/c we are using pin 13 as an input, the LED_BUILTIN cannot be used.
-  pinMode(LED_BUILTIN, INPUT);
-  pinMode(12, INPUT);
+  pinMode(10, INPUT_PULLUP);
+  pinMode(11, INPUT_PULLUP);
 
-  one = digitalRead(12);
-  two = digitalRead(LED_BUILTIN);
+  one = digitalRead(10);
+  two = digitalRead(11);
 
-  if (one == LOW && two == LOW)
+  if (one == HIGH && two == HIGH)
   {
-    rs485addr = 0xA;
-  }
-  else if (one == HIGH && two == LOW)
-  {
-    rs485addr = 0xB;
-  }
-  else if (one == HIGH && two == HIGH)
-  {
-    rs485addr = 0xC;
+    rs485addr = 0;
   }
   else if (one == LOW && two == HIGH)
   {
-    rs485addr = 0xD;
+    rs485addr = 1;
+  }
+  else if (one == HIGH && two == LOW)
+  {
+    rs485addr = 2;
+  }
+  else if (one == LOW && two == LOW)
+  {
+    rs485addr = 3;
   }
   return rs485addr;
 }
