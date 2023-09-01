@@ -39,7 +39,15 @@
 
 // ANYWHERE WE SEE FLOAT, CHANGE IT
 
+
 A4990ValveInterface valves;
+
+int rs485_address = getrs485address();
+
+unsigned char pressure_command_bytes[8]; //comes from odroid
+unsigned short pressure_command_shorts[4];
+unsigned short pressure_state_shorts[4] = {666, 777, 888, 999};
+unsigned char pressure_state_bytes[9] = {rs485_address, 0x02, 0x9A, 0x03, 0x09, 0x03, 0x78, 0x03, 0xE7}; // sends to odroid
 
 unsigned short p[4] = {0, 0, 0, 0};
 unsigned short pcmd[4] = {0, 0, 0, 0};
@@ -122,58 +130,76 @@ void setup()
 //===============================================================================
 void loop()
 {
+  if (Serial1.available() == 9) // If data has come in from Odroid
+  {
+    if (Serial1.read() == rs485_address) 
+    {
+      // if address is correct, read in the rest of the message (8 bytes)
+      for (int i=0; i<8; i++) {
+        pressure_command_bytes[i] = Serial1.read();
+      }
 
-//  // KEEP, WILL CHANGE LATER, CHECK INTS, MOVE READ PRESSURE STUFF TO ODROID
-//  // digital filter pressure data
-//  p[0] = filter(p[0], A0);
-//  p[1] = filter(p[1], A1);
-//  p[2] = filter(p[2], A2);
-//  p[3] = filter(p[3], A3);
-//
-//  //  //Uncomment to plot filtered data vs unfiltered data
-//  //  Serial.print(myTime);
-//  //  Serial.print("\t");
-//  //  Serial.print(readPressure(A0));
-//  //  Serial.print("\t");
-//  //  Serial.print(p[0]);
-//  //  Serial.print("\t");
-//  //  Serial.print(fir_lp.processReading(readPressure(A0)));
-//  //  Serial.println();
-//
-//  //  // Uncomment to see all pressures plotted together on serial monitor
-//  //  for (int i = 0; i < 4; i++) {
-//  //    Serial.print(p[0]);
-//  //    Serial.print(",");
-//  //  }
-//  //  Serial.println();
-//
-//  // KEEP THIS FOR NOW
-//  // PROPORTIONAL CONTROL on each valve
-//  for (int i = 0; i < 4; i++)
-//  {
-//    // calculate control signals for each pressure
-//    if (abs(pcmd[i] - p[i]) >= deadband)
-//    {
-//      error = pcmd[i] - p[i];
-//
-//      valve_cmd[i] = current2PWM(kp * error); 
-//
-//      //      if (i == 0) {
-//      //        Serial.print(valve_cmd[i]);
-//      //        Serial.println();
-//      //      }
-//    }
-//  }
-//
-//  // send updated control signals [-400,400]
-//  valves.setSpeeds(valve_cmd);
-//
-//  // update p and pcmd in memory with new values of pchar and pcmdchar recieved on rs485
-//  for (int i = 0; i < 4; i++)
-//  {
-//    shortToBytes(p[i], &pchar[i * BYTES_PER_PRESSURE]);
-//    byteToShorts(pcmd[i], &pcmdchar[i * BYTES_PER_PRESSURE]);
-//  }
+      //convert the bytes to shorts to be used by the arduino
+      byteToShorts(pressure_command_shorts, pressure_command_bytes);
+
+      // do something with the pressure commands here
+      for (int i = 0; i < pressure_command_shorts.size(); i++)
+      {
+        // calculate control signals for each pressure
+        if (abs(pressure_command_shorts[i] - pressure_state_shorts[i]) >= deadband)
+        {
+          error = pressure_command_shorts[i] - pressure_state_shorts[i];
+
+          valve_cmd[i] = current2PWM(kp * error); 
+        }
+      }
+
+      // send updated control signals [-400,400]
+      valves.setSpeeds(valve_cmd);
+
+      // update current pressure_state
+      pressure_state_shorts[0] = filter(pressure_state_shorts[0], A0);
+      pressure_state_shorts[1] = filter(pressure_state_shorts[1], A1);
+      pressure_state_shorts[2] = filter(pressure_state_shorts[2], A2);
+      pressure_state_shorts[3] = filter(pressure_state_shorts[3], A3);
+
+      //  //Uncomment to plot filtered data vs unfiltered data
+      //  Serial.print(myTime);
+      //  Serial.print("\t");
+      //  Serial.print(readPressure(A0));
+      //  Serial.print("\t");
+      //  Serial.print(p[0]);
+      //  Serial.print("\t");
+      //  Serial.print(fir_lp.processReading(readPressure(A0)));
+      //  Serial.println();
+
+      //  // Uncomment to see all pressures plotted together on serial monitor
+      //  for (int i = 0; i < 4; i++) {
+      //    Serial.print(p[0]);
+      //    Serial.print(",");
+      //  }
+      //  Serial.println();
+      
+      // convert the current state into bytes
+      shortToBytes(pressure_state_shorts, pressure_state_bytes);
+
+      // still not sure why, but this is the smallest delay that allows the odroid to receive data
+      // delay from rs485 boards is 120 us, and packet takes 90 us (120-90 = 30 us), but sending to RX buffer takes about 30 us. so add just a bit.
+      delayMicroseconds(5);
+
+      // Send current state back to odroid
+      for (int i=0; i<9; i++) {
+        Serial1.write(pressure_state_bytes[i]);
+      }
+    }
+    else
+    {
+      while (Serial1.available())
+      {
+        Serial1.read();
+      }
+    }
+  }
 }
 
 

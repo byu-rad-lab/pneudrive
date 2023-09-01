@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sstream>
+#include <chrono>
 #include "PressureController.h"
 
 #include <wiringPi.h>
@@ -65,44 +66,74 @@ PressureController::PressureController(ros::NodeHandle n, std::map<std::string, 
   }
 }
 
-void PressureController::check_devices_on_bus(int bus, std::map<std::string, int> expected_rs485_addresses)
+void PressureController::check_devices(td::map<std::string, int> expected_rs485_addresses)
 {
-  // ===*Some sort of code here to verify everything is connected properly and ready to start communication*===
+  ROS_INFO("Checking communication with devices");
 
+  bool error_flag = false;
 
-    // ROS_INFO_STREAM("Scanning for rs485 devices on bus " << bus << "...");
+  for (int joint = 0; joint < numJoints; joint++)
+    {
+      ROS_INFO("Joint %d: Checking communication", joint);
+      // specify target arduino
+      int arduino_address_write = expected_rs485_addresses["joint_" + std::to_string(joint)]
+      
+      // specify target message (gives each joint a unique msg if we want to check if arduino can mirror it)
+      unsigned short test_short_write[4] = {static_cast<unsigned short>(joint * 1000)};
 
-    // std::vector<bool> found_rs485_device;
+      // Construct a byte message to send to the arduino
+      check_msg_write[0] = arduino_address_write;       // first byte dictates which joint
+      shortToBytes(test_short_write, check_msg_write);  // converts test_short_write (shorts) to check_msg_write (bytes)
 
-    // for (int i = 0; i < expected_rs485_addresses.size(); i++)
-    // {
-    //   rs485Device device;
-    //   std::string joint_name = "joint_" + std::to_string(i);
-    //   int addr = expected_rs485_addresses[joint_name];
-    //   unsigned char testchar;
+      // Write byte message to the arduino
+      for (int i = 0; i < 9; i++)
+      {
+        serialPutchar(fd, check_msg_write[i]); // write one byte at a time
+      }
 
-    //   device.open(bus, addr);
-    //   bool error = device.readRegisters(0, sizeof(testchar), &testchar);
+      // Capture the start time
+      auto start = std::chrono::steady_clock::now();
+      // Wait for arduino to respond with 9 bytes
+      while (serialDataAvail(fd) != 9)
+      {
+        // Add time check error here
+        if (std::chrono::steady_clock::now() - start > std::chrono::milliseconds(200))
+        {
+          ROS_ERROR("Joint %d: Communication response timeout", joint)
+          error_flag = true;
+          break;
+        }
+        // For checking if chrono was implemented correctly:
+        // std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Adjust to your needs
+      }
 
-    //   if (!error)
-    //   {
-    //     found_rs485_device.push_back(true);
-    //     ROS_INFO_STREAM("Found device 0x" << std::hex << addr << " on bus " << bus);
-    //   }
-    //   else
-    //   {
-    //     found_rs485_device.push_back(false);
-    //     ROS_INFO_STREAM("Could not find device 0x" << std::hex << addr << " on bus " << bus);
-    //   }
-    // }
+      // READ the response from the arduino
+      int pos = 0;
+      while (serialDataAvail(fd))
+      {
+        check_msg_read[pos] = serialGetchar(fd);
+        pos++;
+        fflush(stdout);
+      }
 
-    // int checksum = std::accumulate(found_rs485_device.begin(), found_rs485_device.end(), 0);
-
-    // if (checksum != expected_rs485_addresses.size())
-    // {
-    //   ROS_ERROR_ONCE("Not all rs485 devices found. Shutting down node.");
-    //   ros::shutdown();
-    // }
+      // Check if the read address matches the write address
+      arduino_address_read = check_msg_read[0];
+      if (arduino_address_read == arduino_address_write)
+      {
+        ROS_INFO("Joint %d: Communication successful", joint);
+      }
+      else
+      {
+        ROS_ERROR_STREAM("Joint " << joint << ": Received communication from incorrect device "\
+                        "(expected: " << joint << ", received: " << arduino_address_read << ")");
+        error_flag = true;
+      }
+    }
+    if (error_flag)
+    {
+      ROS_ERROR_ONCE("Error with communication, check previous messages.")
+      ros::shutdown();
+    }
 }
 
 void PressureController::do_pressure_control()
@@ -121,8 +152,8 @@ void PressureController::do_pressure_control()
       unsigned char pressure_msg_read[9];
       unsigned short analog_short_write;
       unsigned short analog_short_read;
-      char arduino_address_write;
-      char arduino_address_read;
+      int arduino_address_write = expected_rs485_addresses["joint_" + std::to_string(joint)]
+      int arduino_address_read;
       
       // Convert pressureCommands to analog bin values
       analog_short_write = kpaToAnalog(pressureCommands)
@@ -139,7 +170,17 @@ void PressureController::do_pressure_control()
       }
 
       // Wait for arduino to respond with 9 bytes
-      while (serialDataAvail(fd) != 9);
+      while (serialDataAvail(fd) != 9)
+      {
+        // Add time check error here
+        if (std::chrono::steady_clock::now() - start > std::chrono::milliseconds(200))
+        {
+          ROS_ERROR_THROTTLE(1, "Joint %d: Communication response timeout", joint)
+          break;
+        }
+        // For checking if chrono was implemented correctly:
+        // std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Adjust to your needs
+      }
 
       // READ the response from the arduino
       // printf("\nReceived Arduino Response:");

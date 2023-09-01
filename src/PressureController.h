@@ -26,7 +26,7 @@ private:
 public:
   PressureController(ros::NodeHandle n, std::map<std::string, int> expected_rs485_addresses);
   void do_pressure_control();
-  void check_devices_on_bus(int bus, std::map<std::string, int> expected_rs485_addresses);
+  void check_devices(std::map<std::string, int> expected_rs485_addresses);
   void shortToBytes(unsigned short *short_array, unsigned char *byte_array);
   void byteToShorts(unsigned short *short_array, unsigned char *byte_array);
   void pcmd_callback(const rad_msgs::PressureStamped::ConstPtr &msg, int joint);
