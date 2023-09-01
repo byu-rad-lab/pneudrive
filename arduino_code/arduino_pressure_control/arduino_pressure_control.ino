@@ -1,4 +1,3 @@
-#include <Wire.h>
 #include "A4990ValveInterface.h"
 
 /*
@@ -70,26 +69,36 @@ float myTime = 0.0;
 float prevTime = 0.0; // Last time the loop was entered
 
 /*  int bus;
- * Sensors in this configuration have noise magnitude of about 0.5 psi. 
- * Making railPSI < 2 made the arm very jittery. 
- * railPSI=2 seems to track well.
- * railPSI>5 was pretty sluggish tracking and seemed to exacerbate valve nonlinearities with small commands.
- *  
- */
+   Sensors in this configuration have noise magnitude of about 0.5 psi.
+   Making railPSI < 2 made the arm very jittery.
+   railPSI=2 seems to track well.
+   railPSI>5 was pretty sluggish tracking and seemed to exacerbate valve nonlinearities with small commands.
+
+*/
 float railPSI = 2;
 float kp = 0.7 / (railPSI * PSI2KPA); //this kp means desired current will rail at .7 amps at a pressure error of >= railPSI.
 
 
 // denominator is set by the pressure error which will cause the input to saturate.
 // KEEP DEADBAND
-short deadband = 0; // kpa, controller will not act on error less than deadband 
+short deadband = 0; // kpa, controller will not act on error less than deadband
 short error = 0;
 
 // timer stuff (KEEP)
-int const PRESCALER = 32;
-int const ONE_SECOND = 32000;
+#define PRESCALER 32
+#define ONE_SECOND 32000
 
-byte outgoing_bytes[9] = {0,0,0,0,0,0,0,0,0};
+#define BYTES_IN_PACKET 9
+
+byte outgoing_bytes[BYTES_IN_PACKET] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+byte incoming_bytes[BYTES_IN_PACKET] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+char rs485_address = 'z';
+unsigned short pressure_commands[4] = {0, 0, 0, 0};
+unsigned short pressure_data[4] = {1, 2, 3, 4};
+
+
+
+
 
 //===============================================================================
 //  Initialization
@@ -97,17 +106,28 @@ byte outgoing_bytes[9] = {0,0,0,0,0,0,0,0,0};
 void setup()
 {
 
-  speedupPWM();
-  // comment out if not debugging
-    Serial.begin(9600);
+  // b/c we are using pin 13 as an input, the LED_BUILTIN cannot be used.
+  pinMode(10, INPUT_PULLUP);
+  pinMode(11, INPUT_PULLUP);
 
-  int rs485_address;
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+  pinMode(A3, INPUT);
+
+  speedupPWM();
+  analogReference(EXTERNAL);
+
+  // comment out if not debugging
+  //  Serial.begin(9600);
+
+
   rs485_address = getrs485address();
-  Serial.println(rs485_address);
+  //  Serial.println(rs485_address);
+  pinMode(LED_BUILTIN, OUTPUT);
 
   Serial1.begin(1000000);  // RS485 Serial port
   outgoing_bytes[0] = rs485_address;
-  pinMode(LED_BUILTIN, OUTPUT);
 
   //  // uncomment to test valves
   //  valves.setValve0Speed(-200);
@@ -130,97 +150,116 @@ void setup()
 //===============================================================================
 void loop()
 {
-  if (Serial1.available() == 9) // If data has come in from Odroid
+
+  readPressureData(); //expensive?
+  shortToBytes(pressure_data, outgoing_bytes);
+  handleIncomingBytes();
+
+  //  // KEEP, WILL CHANGE LATER, CHECK INTS, MOVE READ PRESSURE STUFF TO ODROID
+  //  // digital filter pressure data
+  //  p[0] = filter(p[0], A0);
+  //  p[1] = filter(p[1], A1);
+  //  p[2] = filter(p[2], A2);
+  //  p[3] = filter(p[3], A3);
+  //
+  //  //  //Uncomment to plot filtered data vs unfiltered data
+  //  //  Serial.print(myTime);
+  //  //  Serial.print("\t");
+  //  //  Serial.print(readPressure(A0));
+  //  //  Serial.print("\t");
+  //  //  Serial.print(p[0]);
+  //  //  Serial.print("\t");
+  //  //  Serial.print(fir_lp.processReading(readPressure(A0)));
+  //  //  Serial.println();
+  //
+  //  //  // Uncomment to see all pressures plotted together on serial monitor
+  //  //  for (int i = 0; i < 4; i++) {
+  //  //    Serial.print(p[0]);
+  //  //    Serial.print(",");
+  //  //  }
+  //  //  Serial.println();
+  //
+  //  // KEEP THIS FOR NOW
+  //  // PROPORTIONAL CONTROL on each valve
+  //  for (int i = 0; i < 4; i++)
+  //  {
+  //    // calculate control signals for each pressure
+  //    if (abs(pcmd[i] - p[i]) >= deadband)
+  //    {
+  //      error = pcmd[i] - p[i];
+  //
+  //      valve_cmd[i] = current2PWM(kp * error);
+  //
+  //      //      if (i == 0) {
+  //      //        Serial.print(valve_cmd[i]);
+  //      //        Serial.println();
+  //      //      }
+  //    }
+  //  }
+  //
+  //  // send updated control signals [-400,400]
+  //  valves.setSpeeds(valve_cmd);
+  //
+  //  // update p and pcmd in memory with new values of pchar and pcmdchar recieved on rs485
+  //  for (int i = 0; i < 4; i++)
+  //  {
+  //    shortToBytes(p[i], &pchar[i * BYTES_PER_PRESSURE]);
+  //    byteToShorts(pcmd[i], &pcmdchar[i * BYTES_PER_PRESSURE]);
+  //  }
+}
+
+void handleIncomingBytes()
+{
+  //  digitalToggleFast(LED_BUILTIN);
+  if (Serial1.available() == 9) //specifically wait for correct amount before trying to read
   {
-    if (Serial1.read() == rs485_address) 
+
+    Serial1.readBytes(incoming_bytes, BYTES_IN_PACKET);
+
+    if (static_cast<char>(incoming_bytes[0]) == rs485_address)
     {
-      // if address is correct, read in the rest of the message (8 bytes)
-      for (int i=0; i<8; i++) {
-        pressure_command_bytes[i] = Serial1.read();
-      }
+      digitalWrite(LED_BUILTIN, HIGH);
+      //respond with pressure data
 
-      //convert the bytes to shorts to be used by the arduino
-      byteToShorts(pressure_command_shorts, pressure_command_bytes);
+      Serial1.write(outgoing_bytes, BYTES_IN_PACKET);
 
-      // do something with the pressure commands here
-      for (int i = 0; i < pressure_command_shorts.size(); i++)
-      {
-        // calculate control signals for each pressure
-        if (abs(pressure_command_shorts[i] - pressure_state_shorts[i]) >= deadband)
-        {
-          error = pressure_command_shorts[i] - pressure_state_shorts[i];
-
-          valve_cmd[i] = current2PWM(kp * error); 
-        }
-      }
-
-      // send updated control signals [-400,400]
-      valves.setSpeeds(valve_cmd);
-
-      // update current pressure_state
-      pressure_state_shorts[0] = filter(pressure_state_shorts[0], A0);
-      pressure_state_shorts[1] = filter(pressure_state_shorts[1], A1);
-      pressure_state_shorts[2] = filter(pressure_state_shorts[2], A2);
-      pressure_state_shorts[3] = filter(pressure_state_shorts[3], A3);
-
-      //  //Uncomment to plot filtered data vs unfiltered data
-      //  Serial.print(myTime);
-      //  Serial.print("\t");
-      //  Serial.print(readPressure(A0));
-      //  Serial.print("\t");
-      //  Serial.print(p[0]);
-      //  Serial.print("\t");
-      //  Serial.print(fir_lp.processReading(readPressure(A0)));
-      //  Serial.println();
-
-      //  // Uncomment to see all pressures plotted together on serial monitor
-      //  for (int i = 0; i < 4; i++) {
-      //    Serial.print(p[0]);
-      //    Serial.print(",");
-      //  }
-      //  Serial.println();
-      
-      // convert the current state into bytes
-      shortToBytes(pressure_state_shorts, pressure_state_bytes);
-
-      // still not sure why, but this is the smallest delay that allows the odroid to receive data
-      // delay from rs485 boards is 120 us, and packet takes 90 us (120-90 = 30 us), but sending to RX buffer takes about 30 us. so add just a bit.
-      delayMicroseconds(5);
-
-      // Send current state back to odroid
-      for (int i=0; i<9; i++) {
-        Serial1.write(pressure_state_bytes[i]);
-      }
-    }
-    else
-    {
-      while (Serial1.available())
-      {
-        Serial1.read();
-      }
+      //if the incoming array was meant for this device, save it for use in control
+      byteToShorts(pressure_commands, incoming_bytes);
     }
   }
 }
 
+void readPressureData()
+{
+  pressure_data[0] = analogRead(A0);
+  pressure_data[1] = analogRead(A1);
+  pressure_data[2] = analogRead(A2);
+  pressure_data[3] = analogRead(A3);
+}
 
-//void byteToShorts(unsigned short *short_array, unsigned char *byte_array) {
-//  //Function to convert array of 8 bytes to array of 4 shorts
-//  unsigned int byteLength = 8;
-//  for (unsigned int i=0; i<byteLength; i+=2) {
-//    short_array[i/2] = ((short)byte_array[i] << 8) | byte_array[i+1];
-//  }
-//}
-//
-//void shortToBytes(unsigned short *short_array, unsigned char *byte_array) {
-//  // Function to convert array of 4 shorts to array of 8 bytes (doesn't change first byte because of address byte)
-//  int shortLength = 4;
-//  for (int i=0; i<shortLength; i++) {
-//    int byteIndex = i*2+1;
-//    unsigned char *bytePtr = (unsigned char *)&short_array[i];
-//    byte_array[byteIndex] = bytePtr[1]; // Most significant byte
-//    byte_array[byteIndex+1] = bytePtr[0]; // Least significant byte
-//  }
-//}
+
+void byteToShorts(unsigned short *short_array, const byte *byte_array)
+{
+  //Function to convert array of 8 bytes to array of 4 shorts, ignoring first byte
+  unsigned int byteLength = 8;
+  for (size_t i = 0; i < byteLength; i += 2) {
+    int byteIndex = i + 1;
+    short_array[i / 2] = ((short)byte_array[byteIndex] << 8) | byte_array[byteIndex + 1];
+  }
+}
+
+void shortToBytes(const unsigned short* short_array, byte* byte_array)
+{
+  // Function to convert array of 4 shorts to array of 8 bytes (doesn't change first byte because of address byte)
+  int shortLength = 4;
+  for (size_t i = 0; i < shortLength; i++) {
+    int byteIndex = i * 2 + 1;
+    unsigned char* bytePtr = (unsigned char *)&short_array[i];
+    byte_array[byteIndex] = bytePtr[1]; // Most significant byte
+    byte_array[byteIndex + 1] = bytePtr[0]; // Least significant byte
+  }
+}
+
 //
 //float filter(float prev, float input)
 //{
@@ -257,28 +296,25 @@ int getrs485address()
   int one;
   int two;
 
-  // b/c we are using pin 13 as an input, the LED_BUILTIN cannot be used.
-  pinMode(10, INPUT_PULLUP);
-  pinMode(11, INPUT_PULLUP);
 
   one = digitalRead(10);
   two = digitalRead(11);
 
   if (one == HIGH && two == HIGH)
   {
-    rs485addr = 0;
+    rs485addr = 'a';
   }
   else if (one == LOW && two == HIGH)
   {
-    rs485addr = 1;
+    rs485addr = 'b';
   }
   else if (one == HIGH && two == LOW)
   {
-    rs485addr = 2;
+    rs485addr = 'c';
   }
   else if (one == LOW && two == LOW)
   {
-    rs485addr = 3;
+    rs485addr = 'd';
   }
   return rs485addr;
 }

@@ -50,10 +50,10 @@ const unsigned char A4990ValveInterface::_V3PWM = 3;
 
 //const unsigned char A4990ValveInterface::_FAULT = 6;/
 
-boolean A4990ValveInterface::_flipV0 = false;
-boolean A4990ValveInterface::_flipV1 = false;
-boolean A4990ValveInterface::_flipV2 = false;
-boolean A4990ValveInterface::_flipV3 = false;
+bool A4990ValveInterface::_flipV0 = false;
+bool A4990ValveInterface::_flipV1 = false;
+bool A4990ValveInterface::_flipV2 = false;
+bool A4990ValveInterface::_flipV3 = false;
 
 A4990ValveInterface::A4990ValveInterface()
 {

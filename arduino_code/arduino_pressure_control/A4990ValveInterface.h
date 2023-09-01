@@ -6,7 +6,8 @@
 #ifndef A4990ValveInterface_h
 #define A4990ValveInterface_h
 
-#include <Arduino.h>
+#include "Arduino.h"
+
 
 class A4990ValveInterface
 {
@@ -30,9 +31,9 @@ class A4990ValveInterface
     const static unsigned char _V3PWM;
 //    const static unsigned char _FAULT;
 
-    static boolean _flipV0;
-    static boolean _flipV1;
-    static boolean _flipV2;
-    static boolean _flipV3;
+    static bool _flipV0;
+    static bool _flipV1;
+    static bool _flipV2;
+    static bool _flipV3;
 };
 #endif
