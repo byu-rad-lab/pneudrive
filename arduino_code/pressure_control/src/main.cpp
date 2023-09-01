@@ -36,8 +36,6 @@
   delay() function isn't used in the control loop, this is adequate for our needs.
 */
 
-// ANYWHERE WE SEE FLOAT, CHANGE IT
-
 A4990ValveInterface valves;
 
 unsigned short p[4] = {0, 0, 0, 0};
@@ -48,18 +46,6 @@ short valve_cmd[4] = {0, 0, 0, 0};
 short VENT_CMD[4] = {-400, -400, -400, -400};
 short FILL_CMD[4] = {400, 400, 400, 400};
 
-// Probably move to odroid. We just want integer math
-// conversion factor from psi to kpa (ie kpa = psi * PSI2KPA)
-double const PSI2KPA = 6.8947572932;
-double const P_MAX = 100 * PSI2KPA;
-
-// IGNORE
-//'Global' variables that are important for control
-// only proportional control b/c these dynamics are essentially a stable first order system and I don't
-// want to add a destabilizing integrator on this low level control
-float myTime = 0.0;
-float prevTime = 0.0; // Last time the loop was entered
-
 /*  int bus;
    Sensors in this configuration have noise magnitude of about 0.5 psi.
    Making railPSI < 2 made the arm very jittery.
@@ -67,8 +53,6 @@ float prevTime = 0.0; // Last time the loop was entered
    railPSI>5 was pretty sluggish tracking and seemed to exacerbate valve nonlinearities with small commands.
 
 */
-float railPSI = 2;
-float kp = 0.7 / (railPSI * PSI2KPA); // this kp means desired current will rail at .7 amps at a pressure error of >= railPSI.
 
 // denominator is set by the pressure error which will cause the input to saturate.
 // KEEP DEADBAND
@@ -179,19 +163,19 @@ int getrs485address()
 
   if (one == HIGH && two == HIGH)
   {
-    rs485addr = 'a';
+    rs485addr = 0xa;
   }
   else if (one == LOW && two == HIGH)
   {
-    rs485addr = 'b';
+    rs485addr = 0xb;
   }
   else if (one == HIGH && two == LOW)
   {
-    rs485addr = 'c';
+    rs485addr = 0xc;
   }
   else if (one == LOW && two == LOW)
   {
-    rs485addr = 'd';
+    rs485addr = 0xd;
   }
   return rs485addr;
 }
