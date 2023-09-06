@@ -7,6 +7,10 @@ add_compile_options(-std=c++11)
 #optimize to -O2 for speed, but keep footprint it small
 set(CMAKE_CXX_FLAGS "-Os")
 
+# Set the path to WiringPi library and include directories
+set(WIRINGPI_INCLUDE_DIRS "/usr/local/include/")
+set(WIRINGPI_LIBRARIES "/usr/lib/libwiringPi.so")
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -39,16 +43,12 @@ catkin_package(
 include_directories(
 include
 ${catkin_INCLUDE_DIRS}
+${WIRINGPI_INCLUDE_DIRS}
 )
 
 
-add_executable(i2c_pressure_control_node src/i2c_pressure_control.cpp src/I2CDevice.cpp src/GPIO.cpp src/PressureController.cpp)
-target_link_libraries(i2c_pressure_control_node ${catkin_LIBRARIES})
+add_executable(pressure_controller src/rs485_pressure_control.cpp src/PressureController.cpp)
+target_link_libraries(pressure_controller ${catkin_LIBRARIES} ${WIRINGPI_LIBRARIES})
 
 # add dependency on rad_msgs
-add_dependencies(i2c_pressure_control_node ${catkin_EXPORTED_TARGETS})
-
-
-#add_executable(i2c_imu_publisher_node src/i2c_imu_publisher.cpp src/I2CDevice.cpp src/IMUPublisher.cpp)
-#target_link_libraries(i2c_imu_publisher_node ${catkin_LIBRARIES})
-#add_dependencies(i2c_imu_publisher_node ${catkin_EXPORTED_TARGETS})
+add_dependencies(pressure_controller ${catkin_EXPORTED_TARGETS})
