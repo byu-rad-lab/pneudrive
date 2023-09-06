@@ -13,7 +13,7 @@ int main(int argc, char **argv)
   if (n.getParam("/hardware/pressure_sensors/rs485_info/addresses", expected_rs485_addresses))
   {
     PressureController controller(n, expected_rs485_addresses);
-    controller.do_pressure_control();
+    // controller.do_pressure_control();
   }
   else
   {

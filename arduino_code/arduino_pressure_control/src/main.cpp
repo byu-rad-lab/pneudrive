@@ -65,19 +65,19 @@ short error = 0;
 
 #define BYTES_IN_PACKET 9
 
-byte outgoing_bytes[BYTES_IN_PACKET] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-byte incoming_bytes[BYTES_IN_PACKET] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+byte outgoingPacket[BYTES_IN_PACKET] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+byte incomingDataBytes[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 char rs485_address = 'z';
 unsigned short pressure_commands[4] = {0, 0, 0, 0};
 unsigned short pressure_data[4] = {1, 2, 3, 4};
 
 void byteToShorts(unsigned short *short_array, const byte *byte_array)
 {
-  // Function to convert array of 8 bytes to array of 4 shorts, ignoring first byte
+  // Function to convert array of 8 bytes to array of 4 shorts
   unsigned int byteLength = 8;
   for (size_t i = 0; i < byteLength; i += 2)
   {
-    int byteIndex = i + 1;
+    int byteIndex = i;
     short_array[i / 2] = ((short)byte_array[byteIndex] << 8) | byte_array[byteIndex + 1];
   }
 }
@@ -95,22 +95,41 @@ void shortToBytes(const unsigned short *short_array, byte *byte_array)
   }
 }
 
+void emptyRXBuffer()
+{
+  while (Serial1.available() > 0)
+  {
+    Serial1.read();
+  }
+}
+
 void handleIncomingBytes()
 {
-  digitalWrite(LED_BUILTIN, HIGH);
-  if (Serial1.available() == 9) // specifically wait for correct amount before trying to read
+  if (Serial1.available() >= BYTES_IN_PACKET)
   {
-    Serial1.readBytes(incoming_bytes, BYTES_IN_PACKET);
-
-    if (static_cast<char>(incoming_bytes[0]) == rs485_address)
+    while (Serial1.available() > 0)
     {
-      // digitalWrite(LED_BUILTIN, HIGH);
-      // respond with pressure data
+      // read first byte of packet for checking addresses
+      //if address is never found, this will simply empty the RX buffer.
+      byte byte1 = Serial1.read();
+      // byte byte2 = Serial1.read();
 
-      Serial1.write(outgoing_bytes, BYTES_IN_PACKET);
+      // unsigned short short1 = (byte1 << 8) | byte2;
 
-      // if the incoming array was meant for this device, save it for use in control
-      byteToShorts(pressure_commands, incoming_bytes);
+      if (static_cast<unsigned char>(byte1) == rs485_address)
+      {
+        // if this device address is found, save the next 8 bytes because they contain pressure commands sent from controller
+        size_t numBytesRead = Serial1.readBytes(incomingDataBytes, 8);
+
+        // respond with pressure data
+        Serial1.write(outgoingPacket, BYTES_IN_PACKET);
+        digitalWrite(LED_BUILTIN, numBytesRead%8 == 0); // turn on LED if 9 bytes were read
+
+        // Serial1.flush();
+
+        // if the incoming array was meant for this device, save it for use in control
+        byteToShorts(pressure_commands, incomingDataBytes);
+      }
     }
   }
 }
@@ -157,6 +176,9 @@ int getrs485address()
   int rs485addr;
   int one;
   int two;
+
+  pinMode(10, INPUT_PULLUP);
+  pinMode(11, INPUT_PULLUP);
 
   one = digitalRead(10);
   two = digitalRead(11);
@@ -229,9 +251,7 @@ void custom_delay(int seconds)
 void setup()
 {
 
-  // b/c we are using pin 13 as an input, the LED_BUILTIN cannot be used.
-  pinMode(10, INPUT_PULLUP);
-  pinMode(11, INPUT_PULLUP);
+  pinMode(LED_BUILTIN, OUTPUT);
 
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
@@ -246,10 +266,10 @@ void setup()
 
   rs485_address = getrs485address();
   // Serial.println(rs485_address);
-  pinMode(LED_BUILTIN, OUTPUT);
 
   Serial1.begin(1000000); // RS485 Serial port
-  outgoing_bytes[0] = rs485_address;
+  Serial1.setTimeout(1);  // set timeout to 1 ms
+  outgoingPacket[0] = rs485_address;
 
   //  // uncomment to test valves
   //  valves.setValve0Speed(-200);
@@ -261,7 +281,7 @@ void setup()
   valves.setSpeeds(VENT_CMD);
 
   // Wait for 5 seconds for everything to vent out.
-  custom_delay(5);
+  // custom_delay(5);
 
   // close all valves now that they have vented.
   valves.setSpeeds(valve_cmd);
@@ -274,7 +294,7 @@ void loop()
 {
 
   readPressureData(); // expensive...
-  shortToBytes(pressure_data, outgoing_bytes);
+  shortToBytes(pressure_data, outgoingPacket);
   handleIncomingBytes();
 
   //  // KEEP, WILL CHANGE LATER, CHECK INTS, MOVE READ PRESSURE STUFF TO ODROID
