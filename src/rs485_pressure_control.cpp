@@ -10,10 +10,10 @@ int main(int argc, char **argv)
 
   std::map<std::string, int> expected_rs485_addresses;
 
-  if (n.getParam("/hardware/pressure_sensors/rs485_info/addresses", expected_rs485_addresses))
+  if (n.getParam("/rs485_bus_addresses", expected_rs485_addresses))
   {
     PressureController controller(n, expected_rs485_addresses);
-    // controller.do_pressure_control();
+    controller.do_pressure_control();
   }
   else
   {
