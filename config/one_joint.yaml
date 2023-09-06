@@ -1,3 +1,1 @@
-hardware/pressure_sensors/name: "Honeywell ABPDRNN100PGAA5"
-
-hardware/pressure_sensors/rs485_info/addresses: { joint_0: 0xa }
+rs485_bus_addresses: { joint_0: 0xa }
