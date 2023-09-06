@@ -38,9 +38,6 @@
 
 A4990ValveInterface valves;
 
-unsigned short p[4] = {0, 0, 0, 0};
-unsigned short pcmd[4] = {0, 0, 0, 0};
-
 // Keep, make it explicitly a short
 short valve_cmd[4] = {0, 0, 0, 0};
 short VENT_CMD[4] = {-400, -400, -400, -400};
@@ -56,8 +53,8 @@ short FILL_CMD[4] = {400, 400, 400, 400};
 
 // denominator is set by the pressure error which will cause the input to saturate.
 // KEEP DEADBAND
-short deadband = 0; // kpa, controller will not act on error less than deadband
 short error = 0;
+short kp = 0;
 
 // timer stuff (KEEP)
 #define PRESCALER 32
@@ -95,14 +92,6 @@ void shortToBytes(const unsigned short *short_array, byte *byte_array)
   }
 }
 
-void emptyRXBuffer()
-{
-  while (Serial1.available() > 0)
-  {
-    Serial1.read();
-  }
-}
-
 void handleIncomingBytes()
 {
   if (Serial1.available() >= BYTES_IN_PACKET)
@@ -110,7 +99,11 @@ void handleIncomingBytes()
     while (Serial1.available() > 0)
     {
       // read first byte of packet for checking addresses
-      //if address is never found, this will simply empty the RX buffer.
+      // if address is never found, this will simply empty the RX buffer.
+
+      //todo: need to adjust addresses to use 2 bytes instead of 1 to avoid conflicts with data.
+      //todo: this will require a slightly different resistor for the 555 timer circuit on the boards.
+      
       byte byte1 = Serial1.read();
       // byte byte2 = Serial1.read();
 
@@ -123,9 +116,6 @@ void handleIncomingBytes()
 
         // respond with pressure data
         Serial1.write(outgoingPacket, BYTES_IN_PACKET);
-        digitalWrite(LED_BUILTIN, numBytesRead%8 == 0); // turn on LED if 9 bytes were read
-
-        // Serial1.flush();
 
         // if the incoming array was meant for this device, save it for use in control
         byteToShorts(pressure_commands, incomingDataBytes);
@@ -136,6 +126,8 @@ void handleIncomingBytes()
 
 void readPressureData()
 {
+  // input voltage range from pressure sensors is .1Vsup - .9Vsup, which is .5V to 4.5V
+  // These voltages correspond to about 102 and 921 on the arduino analog input.
   pressure_data[0] = analogRead(A0);
   pressure_data[1] = analogRead(A1);
   pressure_data[2] = analogRead(A2);
@@ -268,7 +260,7 @@ void setup()
   // Serial.println(rs485_address);
 
   Serial1.begin(1000000); // RS485 Serial port
-  Serial1.setTimeout(1);  // set timeout to 1 ms
+  // Serial1.setTimeout(1);  // set timeout to 1 ms
   outgoingPacket[0] = rs485_address;
 
   //  // uncomment to test valves
@@ -281,10 +273,10 @@ void setup()
   valves.setSpeeds(VENT_CMD);
 
   // Wait for 5 seconds for everything to vent out.
-  // custom_delay(5);
+  custom_delay(5);
 
   // close all valves now that they have vented.
-  valves.setSpeeds(valve_cmd);
+  // valves.setSpeeds(valve_cmd);
 }
 
 //===============================================================================
@@ -293,59 +285,15 @@ void setup()
 void loop()
 {
 
-  readPressureData(); // expensive...
+  readPressureData(); // expensive... 300-500 us, about half of the loop time I think
   shortToBytes(pressure_data, outgoingPacket);
   handleIncomingBytes();
 
-  //  // KEEP, WILL CHANGE LATER, CHECK INTS, MOVE READ PRESSURE STUFF TO ODROID
-  //  // digital filter pressure data
-  //  p[0] = filter(p[0], A0);
-  //  p[1] = filter(p[1], A1);
-  //  p[2] = filter(p[2], A2);
-  //  p[3] = filter(p[3], A3);
-  //
-  //  //  //Uncomment to plot filtered data vs unfiltered data
-  //  //  Serial.print(myTime);
-  //  //  Serial.print("\t");
-  //  //  Serial.print(readPressure(A0));
-  //  //  Serial.print("\t");
-  //  //  Serial.print(p[0]);
-  //  //  Serial.print("\t");
-  //  //  Serial.print(fir_lp.processReading(readPressure(A0)));
-  //  //  Serial.println();
-  //
-  //  //  // Uncomment to see all pressures plotted together on serial monitor
-  //  //  for (int i = 0; i < 4; i++) {
-  //  //    Serial.print(p[0]);
-  //  //    Serial.print(",");
-  //  //  }
-  //  //  Serial.println();
-  //
-  //  // KEEP THIS FOR NOW
-  //  // PROPORTIONAL CONTROL on each valve
-  //  for (int i = 0; i < 4; i++)
-  //  {
-  //    // calculate control signals for each pressure
-  //    if (abs(pcmd[i] - p[i]) >= deadband)
-  //    {
-  //      error = pcmd[i] - p[i];
-  //
-  //      valve_cmd[i] = current2PWM(kp * error);
-  //
-  //      //      if (i == 0) {
-  //      //        Serial.print(valve_cmd[i]);
-  //      //        Serial.println();
-  //      //      }
-  //    }
-  //  }
-  //
-  //  // send updated control signals [-400,400]
-  //  valves.setSpeeds(valve_cmd);
-  //
-  //  // update p and pcmd in memory with new values of pchar and pcmdchar recieved on rs485
-  //  for (int i = 0; i < 4; i++)
-  //  {
-  //    shortToBytes(p[i], &pchar[i * BYTES_PER_PRESSURE]);
-  //    byteToShorts(pcmd[i], &pcmdchar[i * BYTES_PER_PRESSURE]);
-  //  }
+  for (int i = 0; i < 4; i++)
+  {
+    error = pressure_commands[i] - pressure_data[i];
+  }
+
+  // send updated control signals [-400,400]
+  valves.setSpeeds(VENT_CMD);
 }

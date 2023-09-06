@@ -15,10 +15,8 @@ const double psi2kpa = 6.8947572932;
 
 const int BYTES_PER_PRESSURE = 2;
 
-
-PressureController::PressureController(ros::NodeHandle n, std::map<std::string, int> expected_rs485_addresses)
+PressureController::PressureController(ros::NodeHandle n, std::map<std::string, int> &rs485_config) : rs485_addresses(rs485_config), spinner(3)
 {
-
 
   if ((this->fd = serialOpen("/dev/ttyS1", 1000000)) < 0)
   {
@@ -30,13 +28,12 @@ PressureController::PressureController(ros::NodeHandle n, std::map<std::string, 
     fprintf(stdout, "Unable to start wiringPi: %s\n", strerror(errno));
   }
 
-
   // get number of expected devices to make vectors the right size
-  numJoints = expected_rs485_addresses.size();
+  numJoints = this->rs485_addresses.size();
   pressures.resize(numJoints);
   pressureCommands.resize(numJoints);
 
-  this->check_devices(expected_rs485_addresses);
+  this->ping_devices();
 
   for (int i = 0; i < numJoints; i++)
   {
@@ -44,6 +41,8 @@ PressureController::PressureController(ros::NodeHandle n, std::map<std::string, 
     pressures[i].resize(numPressuresPerJoint);
     pressureCommands[i].resize(numPressuresPerJoint);
   }
+
+  spinner.start();
 
   // Create pressure command subscribers
   for (int i = 0; i < numJoints; i++)
@@ -65,26 +64,27 @@ PressureController::PressureController(ros::NodeHandle n, std::map<std::string, 
     pressurePublishers.push_back(pub);
     ROS_INFO("/pressure_state topic started for joint %d", i);
   }
+
+  publisher_timer = n.createTimer(ros::Duration(0.002), &PressureController::publishCallback, this);
 }
 
-void PressureController::check_devices(std::map<std::string, int> expected_rs485_addresses)
+void PressureController::ping_devices()
 {
   serialFlush(this->fd);
-  ROS_INFO("Checking communication with devices...");
+  ROS_INFO("Checking communication with serial devices...");
   bool error_flag = false;
 
   for (int joint = 0; joint < numJoints; joint++)
   {
-    ROS_INFO("Checking communication with joint %d...", joint);
-
     // specify target arduino
-    unsigned char jointAddress = expected_rs485_addresses["joint_" + std::to_string(joint)];
+    unsigned char jointAddress = this->rs485_addresses["joint_" + std::to_string(joint)];
 
     // specify target message (gives each joint a unique msg if we want to check if arduino can mirror it)
+    // todo: check how this int gets cast into unsigned char
     unsigned short test_short_write[4] = {static_cast<unsigned short>(joint * 1000)};
 
     // Construct a byte message to send to the arduino
-    this->outgoingBytes[0] = jointAddress;      // first byte dictates which joint
+    this->outgoingBytes[0] = jointAddress;               // first byte dictates which joint
     shortToBytes(test_short_write, this->outgoingBytes); // converts test_short_write (shorts) to check_msg_write (bytes)
 
     // Write byte message to the arduino
@@ -106,12 +106,11 @@ void PressureController::check_devices(std::map<std::string, int> expected_rs485
     }
 
     // READ the response from the arduino
-    if(!error_flag)
+    if (!error_flag)
     {
       ssize_t numBytesRead = read(this->fd, incomingBytes, BYTES_IN_PACKET);
       ROS_INFO("Joint %d: Communication successful", joint);
     }
-
 
     // Check if the read address matches the write address
     if (static_cast<unsigned char>(incomingBytes[0]) == jointAddress)
@@ -137,131 +136,80 @@ void PressureController::do_pressure_control()
 {
   while (ros::ok())
   {
-
+    auto arm_time_start = std::chrono::high_resolution_clock::now();
     ROS_INFO_STREAM_ONCE("PRESSURE CONTROL STARTED");
 
-  //   serialFlush(fd); // clear the current serial buffer before doing anything with it
+    serialFlush(fd); // clear the current serial buffer before doing anything with it
 
-  //   for (int joint = 0; joint < numJoints; joint++)
-  //   {
-  //     // Not entirely sure if these are in the right spot.
-  //     unsigned char pressure_msg_write[9];
-  //     unsigned char pressure_msg_read[9];
-  //     unsigned short analog_short_write;
-  //     unsigned short analog_short_read;
-  //     int jointAddress = expected_rs485_addresses["joint_" + std::to_string(joint)] int arduino_address_read;
+    for (int joint = 0; joint < numJoints; joint++)
+    {
 
-  //     // Convert pressureCommands to analog bin values
-  //     analog_short_write = kpaToAnalog(pressureCommands)
+      std::this_thread::sleep_for(std::chrono::microseconds(10)); // this seems to be necessary for some reason, devices hit time out without it.
 
-  //         // Construct a byte message to send to the arduino
-  //         pressure_msg_write[0] = jointAddress;    // first byte dictates which joint
-  //     shortToBytes(analog_short_write, pressure_msg_write); // converts pressureCommands (shorts) to pressure_msg_write (bytes)
+      bool error_flag = false;
+      // specify target arduino
+      // todo: check how int gets cast into unsigned char
+      unsigned char jointAddress = this->rs485_addresses["joint_" + std::to_string(joint)];
 
-  //     // Write byte message to the arduino
-  //     for (int i = 0; i < 9; i++)
-  //     {
-  //       serialPutchar(fd, pressure_msg_write[i]); // write one byte at a time
-  //       // delayMicroseconds(20);
-  //     }
+      // specify target message (gives each joint a unique msg if we want to check if arduino can mirror it)
+      unsigned short test_short_write[4] = {static_cast<unsigned short>(joint * 1000)};
 
-  //     // Wait for arduino to respond with 9 bytes
-  //     while (serialDataAvail(fd) != 9)
-  //     {
-  //       // Add time check error here
-  //       if (std::chrono::steady_clock::now() - start > std::chrono::milliseconds(200))
-  //       {
-  //         ROS_ERROR_THROTTLE(1, "Joint %d: Communication response timeout", joint)
-  //         break;
-  //       }
-  //       // For checking if chrono was implemented correctly:
-  //       // std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Adjust to your needs
-  //     }
+      // Construct a byte message to send to the arduino
+      this->outgoingBytes[0] = jointAddress;               // first byte dictates which joint
+      shortToBytes(test_short_write, this->outgoingBytes); // converts test_short_write (shorts) to check_msg_write (bytes)
 
-  //     // READ the response from the arduino
-  //     // printf("\nReceived Arduino Response:");
-  //     int pos = 0;
-  //     while (serialDataAvail(fd))
-  //     {
-  //       pressure_msg_read[pos] = serialGetchar(fd);
-  //       pos++;
-  //       fflush(stdout);
-  //     }
+      // Write byte message to the arduino
+      ssize_t numBytesWritten = write(this->fd, this->outgoingBytes, BYTES_IN_PACKET);
 
-  //     // Error if didn't read correct arduino response
-  //     if (pos != 9)
-  //     {
-  //       printf("\nGot %i bytes. Expected 9.", pos);
-  //       // send error message over ROS once per second on rs485 failure
-  //       ROS_ERROR_STREAM_THROTTLE(1, "rs485 Failure on node " << joint);
-  //     }
+      // Capture the start time
+      auto start = std::chrono::high_resolution_clock::now();
 
-  //     // Print the arduino response in bytes
-  //     printf("\n");
-  //     for (int i = 0; i < pos; i++)
-  //     {
-  //       printf("%02x ", pressure_msg_read[i]);
-  //     }
+      // Wait for arduino to respond with 9 bytes
+      while (serialDataAvail(fd) != 9)
+      {
+        // std::cout << "waiting for data" << std::endl;
+        // Add time check error here
+        if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(50))
+        {
+          ROS_WARN_THROTTLE(1, "Joint %d: No response received in 50 ms.", joint);
+          error_flag = true;
+          break;
+        }
+      }
 
-  //     // Convert the response from the arduino (bytes) into short array
-  //     byteToShorts(analog_short_read, pressure_msg_read);
-  //     arduino_address_read = pressure_msg_read[0];
+      // READ the response from the arduino
+      if (!error_flag)
+      {
+        ssize_t numBytesRead = read(this->fd, incomingBytes, BYTES_IN_PACKET);
+      }
+    }
 
-  //     // Convert response data (in analog voltage readings) to kPa
-  //     pressures[joint] = analogToKPA(analog_short_read)
-
-  //         // Print the arduino address and corresponding pressure commands as unsigned short integers
-  //         printf("\n");
-  //     printf("%c ", arduino_address_read);
-  //     for (int i = 0; i < 4; i++)
-  //     {
-  //       printf("%hu ", pressures[joint][i]);
-  //     }
-
-  //     // What remains of this for-loop is whats left after the necessary changes.
-  //     // Probably should confirm if what follows is useful.
-
-  //     if (error)
-  //     {
-  //       // send error message over ROS once per second on rs485 failure
-  //       ROS_ERROR_STREAM_THROTTLE(1, "rs485 Failure on node " << joint);
-  //     }
-
-  //     // This section just prints things out the cout for debugging purposes.
-  //     //	  std::cout<<"\n\nNode "<<joint<<" commands:"<<std::endl;
-  //     //	   for(int p=0; p<numPressuresPerJoint; p++)
-  //     //	     {
-  //     //	       std::cout<<pressureCommands[joint][p]<<"  ";
-  //     //	     }
-  //     //	   std::cout<<"\nNode "<<node<<" pressures:"<<std::endl;
-  //     //	   for(int p=0; p<numPressuresPerNode; p++)
-  //     //	     {
-  //     //	       std::cout<<pressures[node][p]<<"  ";
-  //     //	     }
-  //   }
-
-  //   // publish pressures
-  //   for (int joint = 0; joint < numJoints; joint++)
-  //   {
-  //     rad_msgs::PressureStamped msg;
-  //     msg.header = std_msgs::Header();
-  //     msg.header.stamp = ros::Time::now();
-
-  //     msg.pressure.resize(numPressuresPerJoint);
-
-  //     for (int p = 0; p < numPressuresPerJoint; p++)
-  //     {
-  //       msg.pressure[p] = pressures[joint][p];
-  //     }
-  //     pressurePublishers[joint].publish(msg);
-  //   }
-
-  //   ros::spinOnce();
+    ros::spinOnce();
+    // std::cout << "Time Point in Microseconds: " << std::chrono::duration_cast<std::chrono::microseconds>((std::chrono::high_resolution_clock::now() - arm_time_start)).count() << " microseconds" << std::endl;
   }
 }
 
-//todo: move to utils header
-void PressureController::shortToBytes(unsigned short* short_array, unsigned char* byte_array)
+void PressureController::publishCallback(const ros::TimerEvent &event)
+{
+  // publish pressures
+  for (int joint = 0; joint < numJoints; joint++)
+  {
+    rad_msgs::PressureStamped msg;
+    msg.header = std_msgs::Header();
+    msg.header.stamp = ros::Time::now();
+
+    msg.pressure.resize(numPressuresPerJoint);
+
+    for (int p = 0; p < numPressuresPerJoint; p++)
+    {
+      msg.pressure[p] = pressures[joint][p];
+    }
+    pressurePublishers[joint].publish(msg);
+  }
+}
+
+// todo: move to utils header
+void PressureController::shortToBytes(unsigned short *short_array, unsigned char *byte_array)
 {
   // Function to convert array of 4 shorts to array of 8 bytes (doesn't change first byte because of address byte)
   int shortLength = 4;
@@ -273,10 +221,9 @@ void PressureController::shortToBytes(unsigned short* short_array, unsigned char
     byte_array[byteIndex + 1] = bytePtr[0]; // Least significant byte
   }
 }
- 
 
-//todo: move to utils header
-void PressureController::byteToShorts(unsigned short* short_array, unsigned char* byte_array)
+// todo: move to utils header
+void PressureController::byteToShorts(unsigned short *short_array, unsigned char *byte_array)
 {
   // Function to convert array of 8 bytes to array of 4 shorts, ignoring first byte
   unsigned int byteLength = 8;
