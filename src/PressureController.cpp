@@ -15,8 +15,10 @@ const double psi2kpa = 6.8947572932;
 
 const int BYTES_PER_PRESSURE = 2;
 
-PressureController::PressureController(ros::NodeHandle n, std::map<std::string, int> &rs485_config) : rs485_addresses(rs485_config), spinner(3)
+
+PressureController::PressureController(ros::NodeHandle n, std::map<std::string, int>& rs485_config): rs485_addresses(rs485_config), spinner(3)
 {
+
 
   if ((this->fd = serialOpen("/dev/ttyS1", 1000000)) < 0)
   {
@@ -27,6 +29,7 @@ PressureController::PressureController(ros::NodeHandle n, std::map<std::string, 
   {
     fprintf(stdout, "Unable to start wiringPi: %s\n", strerror(errno));
   }
+
 
   // get number of expected devices to make vectors the right size
   numJoints = this->rs485_addresses.size();
@@ -64,7 +67,7 @@ PressureController::PressureController(ros::NodeHandle n, std::map<std::string, 
     pressurePublishers.push_back(pub);
     ROS_INFO("/pressure_state topic started for joint %d", i);
   }
-
+  
   publisher_timer = n.createTimer(ros::Duration(0.002), &PressureController::publishCallback, this);
 }
 
@@ -77,14 +80,14 @@ void PressureController::ping_devices()
   for (int joint = 0; joint < numJoints; joint++)
   {
     // specify target arduino
-    // todo: check how this int gets cast into unsigned short
+    //todo: check how this int gets cast into unsigned short
     unsigned short jointAddress = this->rs485_addresses["joint_" + std::to_string(joint)];
 
     // Construct a byte message to send to the arduino
     // assign both bytes of address to first two bytes of outgoing packet
     this->outgoingShorts[0] = jointAddress;
 
-    ROS_INFO("Pinging joint %d", jointAddress);
+    ROS_INFO("Pinging joint %d", joint);
     shortToBytes(this->outgoingShorts, this->outgoingBytes); // converts test_short_write (shorts) to check_msg_write (bytes)
 
     // Write byte message to the arduino
@@ -106,7 +109,7 @@ void PressureController::ping_devices()
     }
 
     // READ the response from the arduino
-    if (!error_flag)
+    if(!error_flag)
     {
       ssize_t numBytesRead = read(this->fd, incomingBytes, BYTES_IN_PACKET);
       ROS_INFO("Joint %d: Communication successful", joint);
@@ -131,11 +134,11 @@ void PressureController::do_pressure_control()
 
     for (int joint = 0; joint < numJoints; joint++)
     {
-      std::this_thread::sleep_for(std::chrono::microseconds(10)); // this seems to be necessary for some reason, devices hit time out without it.
+      std::this_thread::sleep_for(std::chrono::microseconds(10)); //this seems to be necessary for some reason, devices hit time out without it. 
 
       bool error_flag = false;
       // specify target arduino
-      // todo: check int cast to ushort
+      //todo: check int cast to ushort
       unsigned short jointAddress = this->rs485_addresses["joint_" + std::to_string(joint)];
 
       // assign both bytes of address to first two bytes of outgoing packet
@@ -167,109 +170,119 @@ void PressureController::do_pressure_control()
       }
 
       // READ the response from the arduino
-      if (!error_flag)
+      if(!error_flag)
       {
         ssize_t numBytesRead = read(this->fd, incomingBytes, BYTES_IN_PACKET);
-        // todo: convert incoming bytes to shorts, then to kpa.
+
+        byteToShorts(this->incomingShorts, this->incomingBytes);
+
+        //convert analog shorts to kpa and load for sending over ROS
+        for (size_t i=0;i<numPressuresPerJoint;i++)
+        {
+          float tmp = analogToKpa(this->incomingShorts[i+1]);
+          this->pressures[joint][i] = tmp;
+        }
       }
     }
-    // std::cout << "Time Point in Microseconds: " << std::chrono::duration_cast<std::chrono::microseconds>((std::chrono::high_resolution_clock::now() - arm_time_start)).count() << " microseconds" << std::endl;
+  // std::cout << "Time Point in Microseconds: " << std::chrono::duration_cast<std::chrono::microseconds>((std::chrono::high_resolution_clock::now() - arm_time_start)).count() << " microseconds" << std::endl;
   }
 }
 
-void PressureController::publishCallback(const ros::TimerEvent &event)
+void PressureController::publishCallback(const ros::TimerEvent& event)
 {
-  // publish pressures
-  for (int joint = 0; joint < numJoints; joint++)
-  {
-    rad_msgs::PressureStamped msg;
-    msg.header = std_msgs::Header();
-    msg.header.stamp = ros::Time::now();
-
-    msg.pressure.resize(numPressuresPerJoint);
-
-    for (int p = 0; p < numPressuresPerJoint; p++)
+      // publish pressures
+    for (int joint = 0; joint < numJoints; joint++)
     {
-      msg.pressure[p] = pressures[joint][p];
+      rad_msgs::PressureStamped msg;
+      msg.header = std_msgs::Header();
+      msg.header.stamp = ros::Time::now();
+
+      msg.pressure.resize(numPressuresPerJoint);
+
+      for (int p = 0; p < numPressuresPerJoint; p++)
+      {
+        msg.pressure[p] = pressures[joint][p];
+      }
+      pressurePublishers[joint].publish(msg);
     }
-    pressurePublishers[joint].publish(msg);
-  }
 }
 
-// todo: move to utils header
-void PressureController::shortToBytes(unsigned short *short_array, unsigned char *byte_array)
+//todo: move to utils header
+void PressureController::shortToBytes(unsigned short* short_array, unsigned char* byte_array)
 {
   // Function to convert array of 5 shorts to array of 10 bytes
   int shortLength = 5;
   for (int i = 0; i < shortLength; i++)
   {
     int byteIndex = i * 2;
-    unsigned char *bytePtr = (unsigned char *)&short_array[i];
+    unsigned char* bytePtr = (unsigned char *)& short_array[i];
+
+    // convert from big endian to little endian by switching bytes around
     byte_array[byteIndex] = bytePtr[1];     // LSB
     byte_array[byteIndex + 1] = bytePtr[0]; // MSB
   }
 }
+ 
 
-// todo: move to utils header
-void PressureController::byteToShorts(unsigned short *short_array, unsigned char *byte_array)
+//todo: move to utils header
+void PressureController::byteToShorts(unsigned short* short_array, unsigned char* byte_array)
 {
   // Function to convert array of 10 bytes to array of 5 shorts
   unsigned int byteLength = 10;
   for (size_t i = 0; i < byteLength; i += 2)
   {
-    short_array[i / 2] = ((short)byte_array[i] << 8) | byte_array[i + 1];
+    short_array[i / 2] = ((short)byte_array[i] << 8) | byte_array[i+1];
   }
 }
 
-// void PressureController::analogToKpa(unsigned short *analog)
-// {
-//   /*
-//      Function to convert an analog pressure reading into kPa
-//      ADC is 10 bit, so voltage is read as bin numbers ranging between 0 and 1023
-//      Analog reference is 5V, so 0=0v and 1023=5v
-//      Conversion is taken from Fig. 3 (transfer function A) in pressure sensor datasheet
-//      https://www.mouser.com/datasheet/2/187/honeywell-sensing-basic-board-mount-pressure-abp-s-1224358.pdf
-//   */
-//   // conversion factor from psi to kpa (ie kpa = psi * PSI2KPA)
-//   double const PSI2KPA = 6.8947572932;
-//   double const P_MAX = 100 * PSI2KPA;
+double PressureController::analogToKpa(unsigned short analog)
+{
+  /*
+     Function to convert an analog pressure reading into kPa
+     ADC is 10 bit, so voltage is read as bin numbers ranging between 0 and 1023
+     Analog reference is 5V, so 0=0v and 1023=5v
+     Conversion is taken from Fig. 3 (transfer function A) in pressure sensor datasheet
+     https://www.mouser.com/datasheet/2/187/honeywell-sensing-basic-board-mount-pressure-abp-s-1224358.pdf
+  */
+  // conversion factor from psi to kpa (ie kpa = psi * PSI2KPA)
+  double const PSI2KPA = 6.8947572932;
+  double const P_MAX = 100 * PSI2KPA;
 
-//   double v_sup = 5;
+  double v_sup = 5;
 
-//   // convert bin number to a voltage
-//   double v_out = analog * 5.0 / 1024.0;
+  // convert bin number to a voltage
+  double v_out = analog * 5.0 / 1024.0;
 
-//   // return applied pressure in kPa
-//   return ((v_out - 0.1 * v_sup) / (0.8 * v_sup)) * P_MAX;
-// }
+  // return applied pressure in kPa
+  return ((v_out - 0.1 * v_sup) / (0.8 * v_sup)) * P_MAX;
+}
 
-// void PressureController::kpaToAnalog(unsigned short *kPa)
-// {
-//   /*
-//      Function to convert a kPa pressure reading into an analog pressure
-//      ADC is 10 bit, so voltage is read as bin numbers ranging between 0 and 1023
-//      Analog reference is 5V, so 0=0v and 1023=5v
-//      This is the inverse of the function "analogToKpa" directly above.
-//   */
-//   // conversion factor from psi to kpa (ie kpa = psi * PSI2KPA)
-//   double const PSI2KPA = 6.8947572932;
-//   double const P_MAX = 100 * PSI2KPA;
+unsigned short PressureController::kpaToAnalog(float kPa)
+{
+  /*
+     Function to convert a kPa pressure reading into an analog pressure
+     ADC is 10 bit, so voltage is read as bin numbers ranging between 0 and 1023
+     Analog reference is 5V, so 0=0v and 1023=5v
+     This is the inverse of the function "analogToKpa" directly above.
+  */
+  // conversion factor from psi to kpa (ie kpa = psi * PSI2KPA)
+  double const PSI2KPA = 6.8947572932;
+  double const P_MAX = 100 * PSI2KPA;
 
-//   double v_sup = 5;
+  double v_sup = 5;
 
-//   // convert kPa to a voltage
-//   double v_out = v_sup * ((0.8 * kPa / P_MAX) + 0.1)
-
-//                  // convert voltage to a bin number
-//                  return v_out *
-//                  1024.0 / 5.0
-// }
+  // convert kPa to a voltage
+  double v_out = v_sup * ((0.8 * kPa / P_MAX) + 0.1);
+  
+  // convert voltage to a bin number
+  return v_out * 1024.0 / 5.0;
+}
 
 void PressureController::pcmd_callback(const rad_msgs::PressureStamped::ConstPtr &msg, int joint)
 {
   for (int i = 0; i < msg->pressure.size(); i++)
   {
-    float temp = (float)msg->pressure[i]; // cast double/float64 to float/float32 to send over i2c
+    float temp = (float)msg->pressure[i]; // cast double/float64 to float/float to send over i2c
     pressureCommands[joint][i] = temp;
   }
 }

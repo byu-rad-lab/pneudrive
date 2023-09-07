@@ -32,6 +32,8 @@ private:
   std::map<std::string, int> rs485_addresses;
   ros::Timer publisher_timer;
   ros::AsyncSpinner spinner;
+  double analogToKpa(unsigned short analog);
+  unsigned short kpaToAnalog(float kPa);
 
 public:
   PressureController(ros::NodeHandle n, std::map<std::string, int>& rs485_config);
