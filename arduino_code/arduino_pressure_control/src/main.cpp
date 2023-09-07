@@ -62,9 +62,11 @@ short kp = 0;
 
 #define BYTES_IN_PACKET 10
 
-byte outgoingPacket[BYTES_IN_PACKET] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-unsigned short outgoingShorts[5] = {0, 0, 0, 0, 0};
-byte incomingDataBytes[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+byte outgoingBytes[BYTES_IN_PACKET] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+byte incomingDataBytes[BYTES_IN_PACKET-2] = {0, 0, 0, 0, 0, 0, 0, 0};
+
+unsigned short outgoingShorts[BYTES_IN_PACKET/2] = {0, 0, 0, 0, 0};
+
 unsigned short rs485_address = 0x0000;
 unsigned short pressure_commands[4] = {0, 0, 0, 0};
 unsigned short pressure_data[4] = {1, 2, 3, 4};
@@ -82,14 +84,16 @@ void byteToShorts(unsigned short *short_array, const byte *byte_array)
 
 void shortToBytes(const unsigned short *short_array, byte *byte_array)
 {
-  // Function to convert array of 4 shorts to array of 8 bytes (doesn't change first 2 bytes because of address short)
+  // Function to convert array of 5 shorts to array of 10 bytes, but in big endian
   int shortLength = 5;
   for (size_t i = 0; i < shortLength; i++)
   {
     int byteIndex = i * 2;
     unsigned char *bytePtr = (unsigned char *)&short_array[i];
-    byte_array[byteIndex] = bytePtr[0];     // LSB
-    byte_array[byteIndex + 1] = bytePtr[1]; // MSB
+
+    //convert from little endian to big endian for odroid
+    byte_array[byteIndex] = bytePtr[1];     // LSB
+    byte_array[byteIndex + 1] = bytePtr[0]; // MSB
   }
 }
 
@@ -112,15 +116,15 @@ void handleIncomingBytes()
       if (short1 == rs485_address)
       {
         // if this device address is found, save the next 8 bytes because they contain pressure commands sent from controller
-        size_t numBytesRead = Serial1.readBytes(incomingDataBytes, 8);
-        digitalWrite(LED_BUILTIN, HIGH);
+        size_t numBytesRead = Serial1.readBytes(incomingDataBytes, BYTES_IN_PACKET-2);
+        // digitalWrite(LED_BUILTIN, HIGH);
 
         // respond with pressure data
-        Serial1.write(outgoingPacket, BYTES_IN_PACKET);
+        Serial1.write(outgoingBytes, BYTES_IN_PACKET);
 
         // if the incoming array was meant for this device, save it for use in control
         byteToShorts(pressure_commands, incomingDataBytes);
-        Serial.println(pressure_commands[0], DEC);
+        // Serial.println(pressure_commands[0], DEC);
       }
     }
   }
@@ -134,6 +138,11 @@ void readPressureData()
   pressure_data[1] = analogRead(A1);
   pressure_data[2] = analogRead(A2);
   pressure_data[3] = analogRead(A3);
+
+  for (int i=0; i<4; i++)
+  {
+    outgoingShorts[i + 1] = pressure_data[i];
+  }
 }
 
 //
@@ -256,10 +265,10 @@ void setup()
   analogReference(EXTERNAL);
 
   // comment out if not debugging
-  Serial.begin(9600);
+  // Serial.begin(9600);
 
   rs485_address = getrs485address();
-  Serial.println(rs485_address);
+  // Serial.println(rs485_address);
 
   Serial1.begin(1000000); // RS485 Serial port
   // Serial1.setTimeout(1);  // set timeout to 1 ms
@@ -290,7 +299,7 @@ void loop()
 {
 
   readPressureData(); // expensive... 300-500 us, about half of the loop time I think
-  shortToBytes(pressure_data, outgoingPacket);
+  shortToBytes(outgoingShorts, outgoingBytes);
   handleIncomingBytes();
 
   for (int i = 0; i < 4; i++)
