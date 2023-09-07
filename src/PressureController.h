@@ -9,7 +9,7 @@
 #include <unistd.h> //for delay function
 #include <numeric>
 
-#define BYTES_IN_PACKET 9
+#define BYTES_IN_PACKET 10
 
 /**
  * @class PressureController
@@ -26,6 +26,8 @@ private:
   std::vector<std::vector<float>> pressureCommands;
   unsigned char incomingBytes[BYTES_IN_PACKET];
   unsigned char outgoingBytes[BYTES_IN_PACKET];
+  unsigned short incomingShorts[5] = {0,0,0,0,0};
+  unsigned short outgoingShorts[5] = {0,0,0,0,0};
   int fd;
   std::map<std::string, int> rs485_addresses;
   ros::Timer publisher_timer;

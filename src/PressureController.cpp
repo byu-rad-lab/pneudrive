@@ -77,15 +77,15 @@ void PressureController::ping_devices()
   for (int joint = 0; joint < numJoints; joint++)
   {
     // specify target arduino
-    unsigned char jointAddress = this->rs485_addresses["joint_" + std::to_string(joint)];
-
-    // specify target message (gives each joint a unique msg if we want to check if arduino can mirror it)
-    // todo: check how this int gets cast into unsigned char
-    unsigned short test_short_write[4] = {static_cast<unsigned short>(joint * 1000)};
+    // todo: check how this int gets cast into unsigned short
+    unsigned short jointAddress = this->rs485_addresses["joint_" + std::to_string(joint)];
 
     // Construct a byte message to send to the arduino
-    this->outgoingBytes[0] = jointAddress;               // first byte dictates which joint
-    shortToBytes(test_short_write, this->outgoingBytes); // converts test_short_write (shorts) to check_msg_write (bytes)
+    // assign both bytes of address to first two bytes of outgoing packet
+    this->outgoingShorts[0] = jointAddress;
+
+    ROS_INFO("Pinging joint %d", jointAddress);
+    shortToBytes(this->outgoingShorts, this->outgoingBytes); // converts test_short_write (shorts) to check_msg_write (bytes)
 
     // Write byte message to the arduino
     ssize_t numBytesWritten = write(this->fd, this->outgoingBytes, BYTES_IN_PACKET);
@@ -93,8 +93,8 @@ void PressureController::ping_devices()
     // Capture the start time
     static std::chrono::_V2::steady_clock::time_point start = std::chrono::steady_clock::now();
 
-    // Wait for arduino to respond with 9 bytes
-    while (serialDataAvail(fd) != 9)
+    // Wait for arduino to respond with 10 bytes
+    while (serialDataAvail(fd) != BYTES_IN_PACKET)
     {
       // Add time check error here
       if (std::chrono::steady_clock::now() - start > std::chrono::milliseconds(1000))
@@ -110,18 +110,6 @@ void PressureController::ping_devices()
     {
       ssize_t numBytesRead = read(this->fd, incomingBytes, BYTES_IN_PACKET);
       ROS_INFO("Joint %d: Communication successful", joint);
-    }
-
-    // Check if the read address matches the write address
-    if (static_cast<unsigned char>(incomingBytes[0]) == jointAddress)
-    {
-    }
-    else
-    {
-      ROS_ERROR_STREAM("Joint " << joint << ": Received communication from incorrect device "
-                                            "(expected: "
-                                << joint << ", received: " << static_cast<unsigned char>(incomingBytes[0]) << ")");
-      error_flag = true;
     }
   }
 
@@ -143,20 +131,21 @@ void PressureController::do_pressure_control()
 
     for (int joint = 0; joint < numJoints; joint++)
     {
-
       std::this_thread::sleep_for(std::chrono::microseconds(10)); // this seems to be necessary for some reason, devices hit time out without it.
 
       bool error_flag = false;
       // specify target arduino
-      // todo: check how int gets cast into unsigned char
-      unsigned char jointAddress = this->rs485_addresses["joint_" + std::to_string(joint)];
+      // todo: check int cast to ushort
+      unsigned short jointAddress = this->rs485_addresses["joint_" + std::to_string(joint)];
 
-      // specify target message (gives each joint a unique msg if we want to check if arduino can mirror it)
-      unsigned short test_short_write[4] = {static_cast<unsigned short>(joint * 1000)};
+      // assign both bytes of address to first two bytes of outgoing packet
+      this->outgoingShorts[0] = jointAddress;
+      this->outgoingShorts[1] = 1;
+      this->outgoingShorts[2] = 2;
+      this->outgoingShorts[3] = 3;
+      this->outgoingShorts[4] = 4;
 
-      // Construct a byte message to send to the arduino
-      this->outgoingBytes[0] = jointAddress;               // first byte dictates which joint
-      shortToBytes(test_short_write, this->outgoingBytes); // converts test_short_write (shorts) to check_msg_write (bytes)
+      shortToBytes(this->outgoingShorts, this->outgoingBytes); // converts test_short_write (shorts) to check_msg_write (bytes)
 
       // Write byte message to the arduino
       ssize_t numBytesWritten = write(this->fd, this->outgoingBytes, BYTES_IN_PACKET);
@@ -164,8 +153,8 @@ void PressureController::do_pressure_control()
       // Capture the start time
       auto start = std::chrono::high_resolution_clock::now();
 
-      // Wait for arduino to respond with 9 bytes
-      while (serialDataAvail(fd) != 9)
+      // Wait for arduino to respond with 10 bytes
+      while (serialDataAvail(fd) != BYTES_IN_PACKET)
       {
         // std::cout << "waiting for data" << std::endl;
         // Add time check error here
@@ -181,10 +170,9 @@ void PressureController::do_pressure_control()
       if (!error_flag)
       {
         ssize_t numBytesRead = read(this->fd, incomingBytes, BYTES_IN_PACKET);
+        // todo: convert incoming bytes to shorts, then to kpa.
       }
     }
-
-    ros::spinOnce();
     // std::cout << "Time Point in Microseconds: " << std::chrono::duration_cast<std::chrono::microseconds>((std::chrono::high_resolution_clock::now() - arm_time_start)).count() << " microseconds" << std::endl;
   }
 }
@@ -211,26 +199,25 @@ void PressureController::publishCallback(const ros::TimerEvent &event)
 // todo: move to utils header
 void PressureController::shortToBytes(unsigned short *short_array, unsigned char *byte_array)
 {
-  // Function to convert array of 4 shorts to array of 8 bytes (doesn't change first byte because of address byte)
-  int shortLength = 4;
+  // Function to convert array of 5 shorts to array of 10 bytes
+  int shortLength = 5;
   for (int i = 0; i < shortLength; i++)
   {
-    int byteIndex = i * 2 + 1;
+    int byteIndex = i * 2;
     unsigned char *bytePtr = (unsigned char *)&short_array[i];
-    byte_array[byteIndex] = bytePtr[1];     // Most significant byte
-    byte_array[byteIndex + 1] = bytePtr[0]; // Least significant byte
+    byte_array[byteIndex] = bytePtr[1];     // LSB
+    byte_array[byteIndex + 1] = bytePtr[0]; // MSB
   }
 }
 
 // todo: move to utils header
 void PressureController::byteToShorts(unsigned short *short_array, unsigned char *byte_array)
 {
-  // Function to convert array of 8 bytes to array of 4 shorts, ignoring first byte
-  unsigned int byteLength = 8;
+  // Function to convert array of 10 bytes to array of 5 shorts
+  unsigned int byteLength = 10;
   for (size_t i = 0; i < byteLength; i += 2)
   {
-    int byteIndex = i + 1;
-    short_array[i / 2] = ((short)byte_array[byteIndex] << 8) | byte_array[byteIndex + 1];
+    short_array[i / 2] = ((short)byte_array[i] << 8) | byte_array[i + 1];
   }
 }
 
