@@ -50,11 +50,10 @@ short FILL_CMD[4] = {400, 400, 400, 400};
    railPSI>5 was pretty sluggish tracking and seemed to exacerbate valve nonlinearities with small commands.
 
 */
-
 // denominator is set by the pressure error which will cause the input to saturate.
-// KEEP DEADBAND
-short error = 0;
-short kp = 0;
+const unsigned short MAX_INPUT = 400;
+unsigned short saturation_error = 50; // TUNE ME, lower is more aggressive :)
+unsigned short kp = MAX_INPUT / saturation_error;
 
 // timer stuff (KEEP)
 #define PRESCALER 32
@@ -63,13 +62,13 @@ short kp = 0;
 #define BYTES_IN_PACKET 10
 
 byte outgoingBytes[BYTES_IN_PACKET] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-byte incomingDataBytes[BYTES_IN_PACKET-2] = {0, 0, 0, 0, 0, 0, 0, 0};
+byte incomingDataBytes[BYTES_IN_PACKET - 2] = {0, 0, 0, 0, 0, 0, 0, 0};
 
-unsigned short outgoingShorts[BYTES_IN_PACKET/2] = {0, 0, 0, 0, 0};
+unsigned short outgoingShorts[BYTES_IN_PACKET / 2] = {0, 0, 0, 0, 0};
 
 unsigned short rs485_address = 0x0000;
 unsigned short pressure_commands[4] = {0, 0, 0, 0};
-unsigned short pressure_data[4] = {1, 2, 3, 4};
+unsigned short pressure_data[4] = {0, 0, 0, 0};
 
 void byteToShorts(unsigned short *short_array, const byte *byte_array)
 {
@@ -91,7 +90,7 @@ void shortToBytes(const unsigned short *short_array, byte *byte_array)
     int byteIndex = i * 2;
     unsigned char *bytePtr = (unsigned char *)&short_array[i];
 
-    //convert from little endian to big endian for odroid
+    // convert from little endian to big endian for odroid
     byte_array[byteIndex] = bytePtr[1];     // LSB
     byte_array[byteIndex + 1] = bytePtr[0]; // MSB
   }
@@ -116,7 +115,7 @@ void handleIncomingBytes()
       if (short1 == rs485_address)
       {
         // if this device address is found, save the next 8 bytes because they contain pressure commands sent from controller
-        size_t numBytesRead = Serial1.readBytes(incomingDataBytes, BYTES_IN_PACKET-2);
+        size_t numBytesRead = Serial1.readBytes(incomingDataBytes, BYTES_IN_PACKET - 2);
         // digitalWrite(LED_BUILTIN, HIGH);
 
         // respond with pressure data
@@ -139,7 +138,7 @@ void readPressureData()
   pressure_data[2] = analogRead(A2);
   pressure_data[3] = analogRead(A3);
 
-  for (int i=0; i<4; i++)
+  for (int i = 0; i < 4; i++)
   {
     outgoingShorts[i + 1] = pressure_data[i];
   }
@@ -265,7 +264,7 @@ void setup()
   analogReference(EXTERNAL);
 
   // comment out if not debugging
-  // Serial.begin(9600);
+  Serial.begin(9600);
 
   rs485_address = getrs485address();
   // Serial.println(rs485_address);
@@ -304,9 +303,15 @@ void loop()
 
   for (int i = 0; i < 4; i++)
   {
-    error = pressure_commands[i] - pressure_data[i];
+    valve_cmd[i] = kp * (pressure_commands[i] - pressure_data[i]);
   }
 
+  Serial.println(valve_cmd[0], DEC);
+  Serial.println(valve_cmd[1], DEC);
+  Serial.println(valve_cmd[2], DEC);
+  Serial.println(valve_cmd[3], DEC);
+  Serial.println(" ");
+
   // send updated control signals [-400,400]
-  valves.setSpeeds(VENT_CMD);
+  valves.setSpeeds(valve_cmd);
 }

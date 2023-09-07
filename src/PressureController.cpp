@@ -143,10 +143,13 @@ void PressureController::do_pressure_control()
 
       // assign both bytes of address to first two bytes of outgoing packet
       this->outgoingShorts[0] = jointAddress;
-      this->outgoingShorts[1] = 1;
-      this->outgoingShorts[2] = 2;
-      this->outgoingShorts[3] = 3;
-      this->outgoingShorts[4] = 4;
+      // this->outgoingShorts[1] = 2;
+
+      //prepare commands received over ROS for sending to arduinos
+      for (int i=0;i<4;i++)
+      {
+        this->outgoingShorts[i+1] = kpaToAnalog(this->pressureCommands[joint][i]);
+      }
 
       shortToBytes(this->outgoingShorts, this->outgoingBytes); // converts test_short_write (shorts) to check_msg_write (bytes)
 
