@@ -60,11 +60,12 @@ short kp = 0;
 #define PRESCALER 32
 #define ONE_SECOND 32000
 
-#define BYTES_IN_PACKET 9
+#define BYTES_IN_PACKET 10
 
-byte outgoingPacket[BYTES_IN_PACKET] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+byte outgoingPacket[BYTES_IN_PACKET] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+unsigned short outgoingShorts[5] = {0, 0, 0, 0, 0};
 byte incomingDataBytes[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-char rs485_address = 'z';
+unsigned short rs485_address = 0x0000;
 unsigned short pressure_commands[4] = {0, 0, 0, 0};
 unsigned short pressure_data[4] = {1, 2, 3, 4};
 
@@ -81,14 +82,14 @@ void byteToShorts(unsigned short *short_array, const byte *byte_array)
 
 void shortToBytes(const unsigned short *short_array, byte *byte_array)
 {
-  // Function to convert array of 4 shorts to array of 8 bytes (doesn't change first byte because of address byte)
-  int shortLength = 4;
+  // Function to convert array of 4 shorts to array of 8 bytes (doesn't change first 2 bytes because of address short)
+  int shortLength = 5;
   for (size_t i = 0; i < shortLength; i++)
   {
-    int byteIndex = i * 2 + 1;
+    int byteIndex = i * 2;
     unsigned char *bytePtr = (unsigned char *)&short_array[i];
-    byte_array[byteIndex] = bytePtr[1];     // Most significant byte
-    byte_array[byteIndex + 1] = bytePtr[0]; // Least significant byte
+    byte_array[byteIndex] = bytePtr[0];     // LSB
+    byte_array[byteIndex + 1] = bytePtr[1]; // MSB
   }
 }
 
@@ -96,29 +97,30 @@ void handleIncomingBytes()
 {
   if (Serial1.available() >= BYTES_IN_PACKET)
   {
-    while (Serial1.available() > 0)
+    while (Serial1.available() > 1)
     {
-      // read first byte of packet for checking addresses
+      // read first 2 bytes of transmission to see if this device is being addressed
       // if address is never found, this will simply empty the RX buffer.
 
-      //todo: need to adjust addresses to use 2 bytes instead of 1 to avoid conflicts with data.
-      //todo: this will require a slightly different resistor for the 555 timer circuit on the boards.
-      
-      byte byte1 = Serial1.read();
-      // byte byte2 = Serial1.read();
+      byte LSB = Serial1.read(); // LSB
+      byte MSB = Serial1.read(); // MSB
 
-      // unsigned short short1 = (byte1 << 8) | byte2;
+      unsigned short short1 = (LSB << 8) | MSB; // arduino is little endian
+      // Serial.print(byte1, BIN);
+      // Serial.print(byte2, BIN);
 
-      if (static_cast<unsigned char>(byte1) == rs485_address)
+      if (short1 == rs485_address)
       {
         // if this device address is found, save the next 8 bytes because they contain pressure commands sent from controller
         size_t numBytesRead = Serial1.readBytes(incomingDataBytes, 8);
+        digitalWrite(LED_BUILTIN, HIGH);
 
         // respond with pressure data
         Serial1.write(outgoingPacket, BYTES_IN_PACKET);
 
         // if the incoming array was meant for this device, save it for use in control
         byteToShorts(pressure_commands, incomingDataBytes);
+        Serial.println(pressure_commands[0], DEC);
       }
     }
   }
@@ -165,7 +167,7 @@ int getrs485address()
      the voltage is pulled HIGH.
   */
 
-  int rs485addr;
+  unsigned short rs485addr;
   int one;
   int two;
 
@@ -177,19 +179,19 @@ int getrs485address()
 
   if (one == HIGH && two == HIGH)
   {
-    rs485addr = 0xa;
+    rs485addr = 0xFF01;
   }
   else if (one == LOW && two == HIGH)
   {
-    rs485addr = 0xb;
+    rs485addr = 0xFF02;
   }
   else if (one == HIGH && two == LOW)
   {
-    rs485addr = 0xc;
+    rs485addr = 0xFF03;
   }
   else if (one == LOW && two == LOW)
   {
-    rs485addr = 0xd;
+    rs485addr = 0xFF04;
   }
   return rs485addr;
 }
@@ -254,14 +256,16 @@ void setup()
   analogReference(EXTERNAL);
 
   // comment out if not debugging
-  // Serial.begin(9600);
+  Serial.begin(9600);
 
   rs485_address = getrs485address();
-  // Serial.println(rs485_address);
+  Serial.println(rs485_address);
 
   Serial1.begin(1000000); // RS485 Serial port
   // Serial1.setTimeout(1);  // set timeout to 1 ms
-  outgoingPacket[0] = rs485_address;
+
+  // assign both bytes of address to first two bytes of outgoing packet
+  outgoingShorts[0] = rs485_address;
 
   //  // uncomment to test valves
   //  valves.setValve0Speed(-200);
