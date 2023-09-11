@@ -20,57 +20,14 @@ PressureController::PressureController(ros::NodeHandle n, std::map<std::string, 
   : rs485_addresses(rs485_config), spinner(3)
 {
 
-
-  if ((this->fd = serialOpen("/dev/ttyS1", 1000000)) < 0)
-  {
-    fprintf(stderr, "Unable to open serial device: %s\n", strerror(errno));
-  }
-
-  if (wiringPiSetup() == -1)
-  {
-    fprintf(stdout, "Unable to start wiringPi: %s\n", strerror(errno));
-  }
-
-
-  // get number of expected devices to make vectors the right size
-  numJoints = this->rs485_addresses.size();
-  pressures.resize(numJoints);
-  pressureCommands.resize(numJoints);
-  jointContactCounter.resize(numJoints);
-
+  initializeSerial();
+  initializeDataVectors();
   this->ping_devices();
-
-  for (int i = 0; i < numJoints; i++)
-  {
-    // std::string joint_name = "joint_" + std::to_string(i);
-    pressures[i].resize(numPressuresPerJoint);
-    pressureCommands[i].resize(numPressuresPerJoint);
-  }
 
   spinner.start();
 
-  // Create pressure command subscribers
-  for (int i = 0; i < numJoints; i++)
-  {
-    std::string topicString = "/robo_0/joint_" + std::to_string(i) + "/pressure_command";
-    /*
-      See https://answers.ros.org/question/63991/how-to-make-callback-function-called-by-several-subscriber/?answer=63998?answer=63998#post-id-63998 for more details on this trickery.
-     */
-    ros::Subscriber sub = n.subscribe<rad_msgs::PressureStamped>(topicString, 1, boost::bind(&PressureController::pcmd_callback, this, _1, i), ros::VoidConstPtr(), ros::TransportHints().tcpNoDelay());
-    pressureCommandSubscribers.push_back(sub);
-    ROS_INFO("/pressure_command topic started for joint %d", i);
-  }
-
-  // Create pressure data publisheers
-  for (int i = 0; i < numJoints; i++)
-  {
-    std::string topic_string = "/robo_0/joint_" + std::to_string(i) + "/pressure_state";
-    ros::Publisher pub = n.advertise<rad_msgs::PressureStamped>(topic_string, 1);
-    pressurePublishers.push_back(pub);
-    ROS_INFO("/pressure_state topic started for joint %d", i);
-  }
-  
-  publisher_timer = n.createTimer(ros::Duration(0.002), &PressureController::publishCallback, this);
+  startSubscribers(n);
+  startPublishers(n);
 }
 
 void PressureController::ping_devices()
@@ -269,7 +226,6 @@ void PressureController::shortToBytes(unsigned short* short_array, unsigned char
   }
 }
  
-
 //todo: move to utils header
 void PressureController::byteToShorts(unsigned short* short_array, unsigned char* byte_array)
 {
@@ -322,6 +278,66 @@ unsigned short PressureController::kpaToAnalog(float kPa)
   
   // convert voltage to a bin number
   return v_out * 1024.0 / 5.0;
+}
+
+void PressureController::initializeSerial()
+{
+  if ((this->fd = serialOpen("/dev/ttyS1", 1000000)) < 0)
+  {
+    fprintf(stderr, "Unable to open serial device: %s\n", strerror(errno));
+  }
+
+  if (wiringPiSetup() == -1)
+  {
+    fprintf(stdout, "Unable to start wiringPi: %s\n", strerror(errno));
+  }
+}
+
+void PressureController::initializeDataVectors()
+{
+  // get number of expected devices to make vectors the right size
+  numJoints = this->rs485_addresses.size();
+  pressures.resize(numJoints);
+  pressureCommands.resize(numJoints);
+  jointContactCounter.resize(numJoints);
+
+
+
+  for (int i = 0; i < numJoints; i++)
+  {
+    // std::string joint_name = "joint_" + std::to_string(i);
+    pressures[i].resize(numPressuresPerJoint);
+    pressureCommands[i].resize(numPressuresPerJoint);
+  }
+}
+
+void PressureController::startSubscribers(ros::NodeHandle n)
+{
+  // Create pressure command subscribers
+  for (int i = 0; i < numJoints; i++)
+  {
+    std::string topicString = "/robo_0/joint_" + std::to_string(i) + "/pressure_command";
+    /*
+      See https://answers.ros.org/question/63991/how-to-make-callback-function-called-by-several-subscriber/?answer=63998?answer=63998#post-id-63998 for more details on this trickery.
+     */
+    ros::Subscriber sub = n.subscribe<rad_msgs::PressureStamped>(topicString, 1, boost::bind(&PressureController::pcmd_callback, this, _1, i), ros::VoidConstPtr(), ros::TransportHints().tcpNoDelay());
+    pressureCommandSubscribers.push_back(sub);
+    ROS_INFO("/pressure_command topic started for joint %d", i);
+  }
+}
+
+void PressureController::startPublishers(ros::NodeHandle n)
+{
+  // Create pressure data publisheers
+  for (int i = 0; i < numJoints; i++)
+  {
+    std::string topic_string = "/robo_0/joint_" + std::to_string(i) + "/pressure_state";
+    ros::Publisher pub = n.advertise<rad_msgs::PressureStamped>(topic_string, 1);
+    pressurePublishers.push_back(pub);
+    ROS_INFO("/pressure_state topic started for joint %d", i);
+  }
+  
+  this->publisher_timer = n.createTimer(ros::Duration(0.002), &PressureController::publishCallback, this);
 }
 
 void PressureController::pcmd_callback(const rad_msgs::PressureStamped::ConstPtr &msg, int joint)

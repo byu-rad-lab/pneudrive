@@ -20,20 +20,29 @@ class PressureController
 private:
   int numJoints;
   int numPressuresPerJoint = 4;
+
   std::vector<ros::Publisher> pressurePublishers;
+  ros::Timer publisher_timer;
+  
   std::vector<ros::Subscriber> pressureCommandSubscribers;
   std::vector<std::vector<float>> pressures;
   std::vector<std::vector<float>> pressureCommands;
+  std::vector<int> jointContactCounter;
+
   unsigned char incomingBytes[BYTES_IN_PACKET];
   unsigned char outgoingBytes[BYTES_IN_PACKET];
   unsigned short incomingShorts[5] = {0,0,0,0,0};
   unsigned short outgoingShorts[5] = {0,0,0,0,0};
+  
   int fd;
   std::map<std::string, int> rs485_addresses;
-  ros::Timer publisher_timer;
   ros::AsyncSpinner spinner;
   double analogToKpa(unsigned short analog);
   unsigned short kpaToAnalog(float kPa);
+  void initializeSerial();
+  void initializeDataVectors();
+  void startSubscribers(ros::NodeHandle n);
+  void startPublishers(ros::NodeHandle n);
 
 public:
   PressureController(ros::NodeHandle n, std::map<std::string, int>& rs485_config);

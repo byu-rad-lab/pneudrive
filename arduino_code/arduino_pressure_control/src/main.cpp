@@ -160,32 +160,13 @@ void readPressureData()
 {
   // input voltage range from pressure sensors is .1Vsup - .9Vsup, which is .5V to 4.5V
   // These voltages correspond to about 102 and 921 on the arduino analog input.
-  pressure_data[0] = analogRead(A0);
-  pressure_data[1] = analogRead(A1);
-  pressure_data[2] = analogRead(A2);
-  pressure_data[3] = analogRead(A3);
-
   for (int i = 0; i < 4; i++)
   {
+    pressure_data[i] = analogRead(A0 + i);
     outgoingShorts[i + 1] = pressure_data[i];
   }
 }
 
-//
-// float filter(float prev, float input)
-//{
-//  /*
-//      This function implements a first order low pass filter
-//      with a cutoff frequency of 50 Hz. First order hold discrete implementation with dt=.001.
-//      First order filter is of form:
-//      a / (z - b)
-//  */
-//
-//  float a = .2696;
-//  float b = .7304;
-//
-//  return b * prev + a * input(v_out - 0.1 * v_sup) / (0.8 * v_sup)) * P_MAX;
-//}
 void custom_delay(int seconds)
 {
   for (int s = 0; s < seconds; s++)
