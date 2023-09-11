@@ -98,14 +98,9 @@ void shortToBytes(const unsigned short *short_array, byte *byte_array)
 
 void handleIncomingBytes()
 {
-  Serial.print("start bytes: ");
-  Serial.println(Serial1.available(), DEC);
+  // Serial.print("start bytes: ");
+  // Serial.println(Serial1.available(), DEC);
   byte firstByte = 0;
-
-  if (Serial1.available() == 9)
-  {
-    Serial.println("Dropped Byte!");
-  }
 
   // Serial.println(Serial1.available(), DEC);
   while (Serial1.available() > 0)
@@ -117,29 +112,40 @@ void handleIncomingBytes()
 
     unsigned short short1 = (firstByte << 8) | secondByte; // arduino is little endian
 
-    Serial.println(firstByte, HEX);
-    Serial.println(secondByte, HEX);
-    Serial.println();
+    // Serial.println(firstByte, HEX);
+    // Serial.println(secondByte, HEX);
+    // Serial.println();
 
     if (short1 == rs485_address)
     {
-      Serial.println("address found");
+      // Serial.println("address found");
       // if this device address is found, save the next 8 bytes because they contain pressure commands sent from controller
-      if (Serial1.readBytes(incomingDataBytes, BYTES_IN_PACKET - 2) == 8)
+      size_t numBytesRead = Serial1.readBytes(incomingDataBytes, BYTES_IN_PACKET-2);
+      if (numBytesRead == 8)
       {
         // print each bytes in incoming data bytes
-        for (int i = 0; i < 8; i++)
-        {
-          Serial.println(incomingDataBytes[i], HEX);
-        }
-        Serial.println("read 8 bytes");
+        // for (int i = 0; i < 8; i++)
+        // {
+        // Serial.println(incomingDataBytes[i], HEX);
+        // }
+        // Serial.println("read 8 bytes");
         // respond with pressure data
-        Serial1.write(outgoingBytes, BYTES_IN_PACKET);
+        size_t numBytesWritten = Serial1.write(outgoingBytes, BYTES_IN_PACKET);
+        // if (numBytesWritten != BYTES_IN_PACKET)
+        // {
+        //   Serial.print("Error. Bytes written: ");
+        //   Serial.println(numBytesWritten, DEC);
+        // }
         // if the incoming array was meant for this device, save it for use in control
         byteToShorts(pressure_commands, incomingDataBytes);
 
-        firstByte = 0;
+        firstByte = 0; //reset to scan for address of next packet
       }
+      // else
+      // {
+      //   Serial.print("Timeout. Bytes read: ");
+      //   Serial.println(numBytesRead, DEC);
+      // }
     }
     else
     {
@@ -147,7 +153,7 @@ void handleIncomingBytes()
     }
   }
   // Serial.println(Serial1.available(), DEC);
-  Serial.println("done");
+  // Serial.println("done");
 }
 
 void readPressureData()
@@ -271,10 +277,10 @@ void setup()
   analogReference(EXTERNAL);
 
   // comment out if not debugging
-  Serial.begin(115200);
+  // Serial.begin(115200);
 
   rs485_address = getrs485address();
-  Serial.println(rs485_address);
+  // Serial.println(rs485_address);
 
   Serial1.begin(1000000); // RS485 Serial port
   Serial1.setTimeout(1);  // set timeout to 1 ms

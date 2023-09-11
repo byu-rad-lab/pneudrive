@@ -16,7 +16,8 @@ const double psi2kpa = 6.8947572932;
 const int BYTES_PER_PRESSURE = 2;
 
 
-PressureController::PressureController(ros::NodeHandle n, std::map<std::string, int>& rs485_config): rs485_addresses(rs485_config), spinner(3)
+PressureController::PressureController(ros::NodeHandle n, std::map<std::string, int>& rs485_config)
+  : rs485_addresses(rs485_config), spinner(3)
 {
 
 
@@ -35,6 +36,7 @@ PressureController::PressureController(ros::NodeHandle n, std::map<std::string, 
   numJoints = this->rs485_addresses.size();
   pressures.resize(numJoints);
   pressureCommands.resize(numJoints);
+  jointContactCounter.resize(numJoints);
 
   this->ping_devices();
 
@@ -87,26 +89,26 @@ void PressureController::ping_devices()
     // assign both bytes of address to first two bytes of outgoing packet
     this->outgoingShorts[0] = jointAddress;
 
-    ROS_INFO("Pinging joint %d", joint);
+    ROS_INFO("Pinging joint %d", jointAddress);
     shortToBytes(this->outgoingShorts, this->outgoingBytes); // converts test_short_write (shorts) to check_msg_write (bytes)
 
     // Write byte message to the arduino
     ssize_t numBytesWritten = write(this->fd, this->outgoingBytes, BYTES_IN_PACKET);
 
-    // Capture the start time
-    static std::chrono::_V2::steady_clock::time_point start = std::chrono::steady_clock::now();
+    ros::Time start = ros::Time::now();
 
     // Wait for arduino to respond with 10 bytes
     while (serialDataAvail(fd) != BYTES_IN_PACKET)
     {
       // Add time check error here
-      if (std::chrono::steady_clock::now() - start > std::chrono::milliseconds(1000))
+      if (ros::Time::now() - start > ros::Duration(1))
       {
         ROS_ERROR("Joint %d: Communication response timeout", joint);
         error_flag = true;
         break;
       }
     }
+    
 
     // READ the response from the arduino
     if(!error_flag)
@@ -125,16 +127,20 @@ void PressureController::ping_devices()
 
 void PressureController::do_pressure_control()
 {
+  ros::Duration max_loop_time(0);
+  int numLoops = 0;
+  int numMissed = 0;
+  int lost_contact_counter = 0;
   while (ros::ok())
   {
-    auto arm_time_start = std::chrono::high_resolution_clock::now();
+    ros::Time loop_start = ros::Time::now();
     ROS_INFO_STREAM_ONCE("PRESSURE CONTROL STARTED");
 
     serialFlush(fd); // clear the current serial buffer before doing anything with it
 
     for (int joint = 0; joint < numJoints; joint++)
     {
-      std::this_thread::sleep_for(std::chrono::microseconds(10)); //this seems to be necessary for some reason, devices hit time out without it. 
+      // std::this_thread::sleep_for(std::chrono::microseconds(1)); //this seems to be necessary for some reason, devices hit time out without it. 
 
       bool error_flag = false;
       // specify target arduino
@@ -148,25 +154,32 @@ void PressureController::do_pressure_control()
       //prepare commands received over ROS for sending to arduinos
       for (int i=0;i<4;i++)
       {
-        this->outgoingShorts[i+1] = kpaToAnalog(this->pressureCommands[joint][i]);
+        // this->outgoingShorts[i+1] = kpaToAnalog(this->pressureCommands[joint][i]);
+        this->outgoingShorts[i+1] = i;
       }
 
       shortToBytes(this->outgoingShorts, this->outgoingBytes); // converts test_short_write (shorts) to check_msg_write (bytes)
 
       // Write byte message to the arduino
-      ssize_t numBytesWritten = write(this->fd, this->outgoingBytes, BYTES_IN_PACKET);
+      if (write(this->fd, this->outgoingBytes, BYTES_IN_PACKET) != 10)
+      {
+        ROS_WARN("Incorrect amount of bytes sent.");
+      }
 
       // Capture the start time
-      auto start = std::chrono::high_resolution_clock::now();
+      // auto start = std::chrono::high_resolution_clock::now();
+      ros::Time start = ros::Time::now();
 
       // Wait for arduino to respond with 10 bytes
       while (serialDataAvail(fd) != BYTES_IN_PACKET)
       {
         // std::cout << "waiting for data" << std::endl;
         // Add time check error here
-        if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(50))
+
+        //there's a fair bit of nondeterminism that happens when bits get into TX buffer. If it happens that this
+        // takes too long, move on to other joints to not delay everything. 
+        if (ros::Time::now() - start > ros::Duration(.002))
         {
-          ROS_WARN_THROTTLE(1, "Joint %d: No response received in 50 ms.", joint);
           error_flag = true;
           break;
         }
@@ -185,10 +198,40 @@ void PressureController::do_pressure_control()
           float tmp = analogToKpa(this->incomingShorts[i+1]);
           this->pressures[joint][i] = tmp;
         }
+
+        //reset contact counter for this joint since communication was succesful
+        jointContactCounter[joint] = 0;
+      }
+      else
+      {
+        //its possible there are some bytes in the RX buffer... so empty it out before reading next one
+        numMissed++;
+        jointContactCounter[joint]++;
+
+        if (jointContactCounter[joint] > 10)
+        {
+          ROS_WARN_STREAM("Lost connection with joint " << joint);
+        }
+
+        while(serialDataAvail(fd)>0)
+        {
+          int trash = serialGetchar(fd);
+        }
       }
     }
-  // std::cout << "Time Point in Microseconds: " << std::chrono::duration_cast<std::chrono::microseconds>((std::chrono::high_resolution_clock::now() - arm_time_start)).count() << " microseconds" << std::endl;
+
+    ros::Duration loop_time = ros::Time::now() - loop_start;
+    if (loop_time > max_loop_time)
+    {
+      max_loop_time = loop_time;
+    }
+
+    // ROS_INFO_STREAM("Loop Time: " << ros::Time::now() - loop_start << " s");
+    numLoops++;
   }
+
+  std::cout << "Max loop time was " << max_loop_time << std::endl;
+  std::cout << "Threw away " << numMissed << " of " << numLoops;
 }
 
 void PressureController::publishCallback(const ros::TimerEvent& event)
