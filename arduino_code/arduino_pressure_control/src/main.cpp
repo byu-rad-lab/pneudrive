@@ -98,35 +98,56 @@ void shortToBytes(const unsigned short *short_array, byte *byte_array)
 
 void handleIncomingBytes()
 {
-  if (Serial1.available() >= BYTES_IN_PACKET)
+  Serial.print("start bytes: ");
+  Serial.println(Serial1.available(), DEC);
+  byte firstByte = 0;
+
+  if (Serial1.available() == 9)
   {
-    while (Serial1.available() > 1)
+    Serial.println("Dropped Byte!");
+  }
+
+  // Serial.println(Serial1.available(), DEC);
+  while (Serial1.available() > 0)
+  {
+    // read first 2 bytes of transmission to see if this device is being addressed
+    // if address is never found, this will simply empty the RX buffer.
+
+    byte secondByte = Serial1.read();
+
+    unsigned short short1 = (firstByte << 8) | secondByte; // arduino is little endian
+
+    Serial.println(firstByte, HEX);
+    Serial.println(secondByte, HEX);
+    Serial.println();
+
+    if (short1 == rs485_address)
     {
-      // read first 2 bytes of transmission to see if this device is being addressed
-      // if address is never found, this will simply empty the RX buffer.
-
-      byte LSB = Serial1.read(); // LSB
-      byte MSB = Serial1.read(); // MSB
-
-      unsigned short short1 = (LSB << 8) | MSB; // arduino is little endian
-      // Serial.print(byte1, BIN);
-      // Serial.print(byte2, BIN);
-
-      if (short1 == rs485_address)
+      Serial.println("address found");
+      // if this device address is found, save the next 8 bytes because they contain pressure commands sent from controller
+      if (Serial1.readBytes(incomingDataBytes, BYTES_IN_PACKET - 2) == 8)
       {
-        // if this device address is found, save the next 8 bytes because they contain pressure commands sent from controller
-        size_t numBytesRead = Serial1.readBytes(incomingDataBytes, BYTES_IN_PACKET - 2);
-        // digitalWrite(LED_BUILTIN, HIGH);
-
+        // print each bytes in incoming data bytes
+        for (int i = 0; i < 8; i++)
+        {
+          Serial.println(incomingDataBytes[i], HEX);
+        }
+        Serial.println("read 8 bytes");
         // respond with pressure data
         Serial1.write(outgoingBytes, BYTES_IN_PACKET);
-
         // if the incoming array was meant for this device, save it for use in control
         byteToShorts(pressure_commands, incomingDataBytes);
-        // Serial.println(pressure_commands[0], DEC);
+
+        firstByte = 0;
       }
     }
+    else
+    {
+      firstByte = secondByte;
+    }
   }
+  // Serial.println(Serial1.available(), DEC);
+  Serial.println("done");
 }
 
 void readPressureData()
@@ -159,6 +180,13 @@ void readPressureData()
 //
 //  return b * prev + a * input(v_out - 0.1 * v_sup) / (0.8 * v_sup)) * P_MAX;
 //}
+void custom_delay(int seconds)
+{
+  for (int s = 0; s < seconds; s++)
+  {
+    delay(ONE_SECOND);
+  }
+}
 
 int getrs485address()
 {
@@ -187,36 +215,23 @@ int getrs485address()
 
   if (one == HIGH && two == HIGH)
   {
-    rs485addr = 0xFF01;
+    rs485addr = 0xFFFF - 0;
   }
   else if (one == LOW && two == HIGH)
   {
-    rs485addr = 0xFF02;
+    rs485addr = 0xFFFF - 1;
   }
   else if (one == HIGH && two == LOW)
   {
-    rs485addr = 0xFF03;
+    rs485addr = 0xFFFF - 2;
   }
   else if (one == LOW && two == LOW)
   {
-    rs485addr = 0xFF04;
+    rs485addr = 0xFFFF - 3;
   }
   return rs485addr;
 }
 
-int current2PWM(double current)
-{
-  /*
-    From enfield valve measurements: current = .004*PWM
-
-    Note, this model is only valid in the linear regime which is PWM=[-175,175].
-    Outside of this, the current is maxed out by the driver boards at ~0.7 amps.
-    That is, any PWM command outside of [-175,175] will be saturated at .7 amps.
-  */
-  int PWM = int(current / .004);
-  return PWM;
-}
-// LEAVE
 void speedupPWM()
 {
   cli(); // Disable Interrupts
@@ -238,14 +253,6 @@ void speedupPWM()
 
   sei(); // Enable Interrupts
 }
-// LEAVE
-void custom_delay(int seconds)
-{
-  for (int s = 0; s < seconds; s++)
-  {
-    delay(ONE_SECOND);
-  }
-}
 
 //===============================================================================
 //  Initialization
@@ -264,13 +271,13 @@ void setup()
   analogReference(EXTERNAL);
 
   // comment out if not debugging
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   rs485_address = getrs485address();
-  // Serial.println(rs485_address);
+  Serial.println(rs485_address);
 
   Serial1.begin(1000000); // RS485 Serial port
-  // Serial1.setTimeout(1);  // set timeout to 1 ms
+  Serial1.setTimeout(1);  // set timeout to 1 ms
 
   // assign both bytes of address to first two bytes of outgoing packet
   outgoingShorts[0] = rs485_address;
@@ -301,17 +308,23 @@ void loop()
   shortToBytes(outgoingShorts, outgoingBytes);
   handleIncomingBytes();
 
+  // Serial.println(pressure_commands[0], DEC);
+  // Serial.println(pressure_commands[1], DEC);
+  // Serial.println(pressure_commands[2], DEC);
+  // Serial.println(pressure_commands[3], DEC);
+  // Serial.println(" ");
+
   for (int i = 0; i < 4; i++)
   {
     valve_cmd[i] = kp * (pressure_commands[i] - pressure_data[i]);
   }
 
-  Serial.println(valve_cmd[0], DEC);
-  Serial.println(valve_cmd[1], DEC);
-  Serial.println(valve_cmd[2], DEC);
-  Serial.println(valve_cmd[3], DEC);
-  Serial.println(" ");
+  // Serial.println(valve_cmd[0], DEC);
+  // Serial.println(valve_cmd[1], DEC);
+  // Serial.println(valve_cmd[2], DEC);
+  // Serial.println(valve_cmd[3], DEC);
+  // Serial.println(" ");
 
   // send updated control signals [-400,400]
-  valves.setSpeeds(valve_cmd);
+  valves.setSpeeds(VENT_CMD);
 }
