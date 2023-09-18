@@ -61,6 +61,8 @@ unsigned short kp = MAX_INPUT / saturation_error;
 
 #define BYTES_IN_PACKET 10
 
+#define DEBUG_MODE false
+
 byte outgoingBytes[BYTES_IN_PACKET] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 byte incomingDataBytes[BYTES_IN_PACKET - 2] = {0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -79,6 +81,17 @@ void byteToShorts(unsigned short *short_array, const byte *byte_array)
     int byteIndex = i;
     short_array[i / 2] = ((short)byte_array[byteIndex] << 8) | byte_array[byteIndex + 1];
   }
+
+  if (DEBUG_MODE)
+  {
+    Serial.print("Incoming shorts: ");
+    for (int i = 0; i < 4; i++)
+    {
+      Serial.print(short_array[i], DEC);
+      Serial.print(" ");
+    }
+    Serial.println();
+  }
 }
 
 void shortToBytes(const unsigned short *short_array, byte *byte_array)
@@ -94,66 +107,98 @@ void shortToBytes(const unsigned short *short_array, byte *byte_array)
     byte_array[byteIndex] = bytePtr[1];     // LSB
     byte_array[byteIndex + 1] = bytePtr[0]; // MSB
   }
+
+  if (DEBUG_MODE)
+  {
+    Serial.print("Outgoing bytes: ");
+    for (int i = 0; i < 10; i++)
+    {
+      Serial.print(byte_array[i], DEC);
+      Serial.print(" ");
+    }
+    Serial.println();
+  }
 }
 
 void handleIncomingBytes()
 {
-  // Serial.print("start bytes: ");
-  // Serial.println(Serial1.available(), DEC);
   byte firstByte = 0;
-
-  // Serial.println(Serial1.available(), DEC);
   while (Serial1.available() > 0)
   {
+    if (DEBUG_MODE)
+    {
+      Serial.print("Available bytes: ");
+      Serial.println(Serial1.available(), DEC);
+    }
     // read first 2 bytes of transmission to see if this device is being addressed
     // if address is never found, this will simply empty the RX buffer.
 
     byte secondByte = Serial1.read();
 
-    unsigned short short1 = (firstByte << 8) | secondByte; // arduino is little endian
+    if (DEBUG_MODE)
+    {
+      Serial.print("First byte: ");
+      Serial.println(firstByte, DEC);
+      Serial.print("Second byte: ");
+      Serial.println(secondByte, DEC);
+    }
 
-    // Serial.println(firstByte, HEX);
-    // Serial.println(secondByte, HEX);
-    // Serial.println();
+    unsigned short short1 = (firstByte << 8) | secondByte; // arduino is little endian
 
     if (short1 == rs485_address)
     {
-      // Serial.println("address found");
+      if (DEBUG_MODE)
+      {
+        Serial.println("Address found!");
+      }
+
       // if this device address is found, save the next 8 bytes because they contain pressure commands sent from controller
-      size_t numBytesRead = Serial1.readBytes(incomingDataBytes, BYTES_IN_PACKET-2);
+      size_t numBytesRead = Serial1.readBytes(incomingDataBytes, BYTES_IN_PACKET - 2);
+
+      if (DEBUG_MODE)
+      {
+        Serial.print("Incoming bytes: ");
+        for (int i = 0; i < 8; i++)
+        {
+          Serial.print(incomingDataBytes[i], DEC);
+          Serial.print(" ");
+        }
+        Serial.println();
+      }
+
       if (numBytesRead == 8)
       {
-        // print each bytes in incoming data bytes
-        // for (int i = 0; i < 8; i++)
-        // {
-        // Serial.println(incomingDataBytes[i], HEX);
-        // }
-        // Serial.println("read 8 bytes");
-        // respond with pressure data
-        size_t numBytesWritten = Serial1.write(outgoingBytes, BYTES_IN_PACKET);
-        // if (numBytesWritten != BYTES_IN_PACKET)
-        // {
-        //   Serial.print("Error. Bytes written: ");
-        //   Serial.println(numBytesWritten, DEC);
-        // }
+        Serial1.flush();
+        if (Serial1.availableForWrite() == SERIAL_TX_BUFFER_SIZE - 1) // if tx buffer is empty
+        {
+          size_t numBytesWritten = Serial1.write(outgoingBytes, BYTES_IN_PACKET);
+          if (DEBUG_MODE)
+          {
+            Serial.print("Outgoing bytes written: ");
+            Serial.println(numBytesWritten, DEC);
+          }
+        }
         // if the incoming array was meant for this device, save it for use in control
         byteToShorts(pressure_commands, incomingDataBytes);
 
-        firstByte = 0; //reset to scan for address of next packet
+        firstByte = 0; // reset to scan for address of next packet
       }
-      // else
-      // {
-      //   Serial.print("Timeout. Bytes read: ");
-      //   Serial.println(numBytesRead, DEC);
-      // }
+      else
+      {
+        // Serial.print("Timeout. Bytes read: ");
+        // Serial.println(numBytesRead, DEC);
+      }
     }
     else
     {
+      if (DEBUG_MODE)
+      {
+        Serial.println("Address not found.");
+      }
+
       firstByte = secondByte;
     }
   }
-  // Serial.println(Serial1.available(), DEC);
-  // Serial.println("done");
 }
 
 void readPressureData()
@@ -164,6 +209,17 @@ void readPressureData()
   {
     pressure_data[i] = analogRead(A0 + i);
     outgoingShorts[i + 1] = pressure_data[i];
+  }
+
+  if (DEBUG_MODE)
+  {
+    Serial.print("Pressure data: ");
+    for (int i = 0; i < 4; i++)
+    {
+      Serial.print(pressure_data[i], DEC);
+      Serial.print(" ");
+    }
+    Serial.println();
   }
 }
 
@@ -257,32 +313,23 @@ void setup()
   speedupPWM();
   analogReference(EXTERNAL);
 
-  // comment out if not debugging
-  // Serial.begin(115200);
-
   rs485_address = getrs485address();
-  // Serial.println(rs485_address);
+
+  if (DEBUG_MODE)
+  {
+    Serial.begin(115200);
+    Serial.print("Device address: ");
+    Serial.println(rs485_address, DEC);
+  }
 
   Serial1.begin(1000000); // RS485 Serial port
   Serial1.setTimeout(1);  // set timeout to 1 ms
 
-  // assign both bytes of address to first two bytes of outgoing packet
   outgoingShorts[0] = rs485_address;
 
-  //  // uncomment to test valves
-  //  valves.setValve0Speed(-200);
-  //  valves.setValve1Speed(-200);
-  //  valves.setValve2Speed(-200);
-  //  valves.setValve3Speed(-200);
-
-  // vent all valves at first
   valves.setSpeeds(VENT_CMD);
 
-  // Wait for 5 seconds for everything to vent out.
   custom_delay(5);
-
-  // close all valves now that they have vented.
-  // valves.setSpeeds(valve_cmd);
 }
 
 //===============================================================================
@@ -290,28 +337,19 @@ void setup()
 //===============================================================================
 void loop()
 {
-
   readPressureData(); // expensive... 300-500 us, about half of the loop time I think
   shortToBytes(outgoingShorts, outgoingBytes);
   handleIncomingBytes();
-
-  // Serial.println(pressure_commands[0], DEC);
-  // Serial.println(pressure_commands[1], DEC);
-  // Serial.println(pressure_commands[2], DEC);
-  // Serial.println(pressure_commands[3], DEC);
-  // Serial.println(" ");
 
   for (int i = 0; i < 4; i++)
   {
     valve_cmd[i] = kp * (pressure_commands[i] - pressure_data[i]);
   }
 
-  // Serial.println(valve_cmd[0], DEC);
-  // Serial.println(valve_cmd[1], DEC);
-  // Serial.println(valve_cmd[2], DEC);
-  // Serial.println(valve_cmd[3], DEC);
-  // Serial.println(" ");
+  valves.setSpeeds(valve_cmd);
 
-  // send updated control signals [-400,400]
-  valves.setSpeeds(VENT_CMD);
+  if (DEBUG_MODE)
+  {
+    Serial.println();
+  }
 }
