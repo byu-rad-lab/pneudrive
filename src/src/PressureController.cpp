@@ -47,13 +47,13 @@ void PressureController::ping_devices()
     
     if(!timeout)
     {
-      if (!handleIncomingBytes(jointAddress))
+      if (handleIncomingBytes(jointAddress))
       {
-        ROS_WARN("Unsucessful read");
+        ROS_INFO_STREAM("Joint " << jointAddress << " ping successful.");
       }
       else
       {
-        ROS_INFO_STREAM("Joint " << jointAddress << " ping successful.");
+        ROS_WARN("Unsucessful read");
       }
     }
     else
@@ -100,20 +100,22 @@ void PressureController::do_pressure_control()
 
       if(!timeout)
       {
-        if(!handleIncomingBytes(jointAddress))
+        if(handleIncomingBytes(jointAddress))
         {
-          ROS_WARN("Unsucessful read");
-        }
+          //convert analog shorts to kpa and load for sending over ROS
+          for (size_t i=0;i<numPressuresPerJoint;i++)
+          {
+            float tmp = analogToKpa(this->incomingDataShorts[i]);
+            this->pressures[joint][i] = tmp;
+          }
 
-        //convert analog shorts to kpa and load for sending over ROS
-        for (size_t i=0;i<numPressuresPerJoint;i++)
+          //reset contact counter for this joint since communication was succesful
+          jointMissedCounter[joint] = 0;
+        }
+        else
         {
-          float tmp = analogToKpa(this->incomingDataShorts[i]);
-          this->pressures[joint][i] = tmp;
+          printf("Unsucessful read. Data not saved.\n");
         }
-
-        //reset contact counter for this joint since communication was succesful
-        jointMissedCounter[joint] = 0;
       }
       else
       {
@@ -348,28 +350,43 @@ bool PressureController::handleIncomingBytes(unsigned short jointAddress)
       if(read(this->fd, this->incomingDataBytes, BYTES_IN_PACKET-2) == BYTES_IN_PACKET-2)
       {
         byteToShorts(this->incomingDataShorts, this->incomingDataBytes);
-        readSuccessful = true;
+
+        if(DEBUG_MODE)
+        {
+          std::cout << "Address match!" <<std::endl;
+          std::cout << "Incoming bytes: ";
+          for (int i = 0; i < 8; i++)
+          {
+            printf("%02x ", incomingDataBytes[i]);
+          }
+          std::cout << std::endl;
+
+          std::cout << "Converted to shorts: ";
+          for (int i = 0; i < 4; i++)
+          {
+            printf("%d ", incomingDataShorts[i]);
+          }
+          std::cout << std::endl;
+
+          printf("Bytes available after read: %d\n", serialDataAvail(fd));
+        }
+        
+        // check that valid data was received
+        for (int i=0; i<4; i++)
+        {
+          //must be limited by 10 bit resolution of ADC, otherwise this is incorrect
+          if(this->incomingDataShorts[i] > 1023)
+          {
+            readSuccessful=false;
+            printf("Invalid shorts recieved. Should be 0-1023. Throwing away data.\n");
+            break;
+          }
+          else
+          {
+            readSuccessful=true;
+          }
+        }
         firstByte = 0;
-      }
-
-      if(DEBUG_MODE)
-      {
-        std::cout << "Address match!" <<std::endl;
-        std::cout << "Incoming bytes: ";
-        for (int i = 0; i < 8; i++)
-        {
-          printf("%02x ", incomingDataBytes[i]);
-        }
-        std::cout << std::endl;
-
-        std::cout << "Converted to shorts: ";
-        for (int i = 0; i < 4; i++)
-        {
-          printf("%d ", incomingDataShorts[i]);
-        }
-        std::cout << std::endl;
-
-        printf("Bytes available after read: %d\n", serialDataAvail(fd));
       }
     }
     else
