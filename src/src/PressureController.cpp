@@ -96,7 +96,7 @@ void PressureController::do_pressure_control()
         ROS_WARN("Incorrect amount of bytes sent.");
       }
 
-      bool timeout = waitForResponse(2);
+      bool timeout = waitForResponse(1);
 
       if(!timeout)
       {
@@ -124,11 +124,11 @@ void PressureController::do_pressure_control()
 
         if (jointMissedCounter[joint] > 10)
         {
-          ROS_WARN_STREAM("Lost connection with joint " << joint);
+          ROS_ERROR_STREAM("Lost connection with joint " << joint);
         }
         else
         {
-          ROS_ERROR("Joint %d: Communication response timeout", joint);
+          ROS_WARN("Joint %d: Communication response timeout", joint);
         }
 
         //empty both RX and TX buffers
