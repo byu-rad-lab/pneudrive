@@ -39,7 +39,7 @@ void PressureController::ping_devices()
     unsigned short jointAddress = this->rs485_addresses["joint_" + std::to_string(joint)];
     ROS_INFO("Pinging joint %d", jointAddress);
 
-    prepareOutgoingBytes(jointAddress);
+    prepareOutgoingBytes(joint);
 
     ssize_t numBytesWritten = write(this->fd, this->outgoingBytes, BYTES_IN_PACKET);
 
@@ -47,13 +47,15 @@ void PressureController::ping_devices()
     
     if(!timeout)
     {
-      if (handleIncomingBytes(jointAddress))
+      if (handleIncomingBytes(joint))
       {
         ROS_INFO_STREAM("Joint " << jointAddress << " ping successful.");
       }
       else
       {
         ROS_WARN("Unsucessful read");
+        ROS_ERROR_ONCE("Not all devices found. Killing node.");
+        ros::shutdown();
       }
     }
     else
@@ -87,26 +89,60 @@ void PressureController::do_pressure_control()
       
       serialFlush(fd); // clear the current serial buffer before doing anything with it, RX AND TX
 
-      unsigned short jointAddress = this->rs485_addresses["joint_" + std::to_string(joint)];
 
-      prepareOutgoingBytes(jointAddress);
+
+      prepareOutgoingBytes(joint);
+
+      if(DEBUG_MODE)
+      {
+        printf("Pressure commands: ");
+        for (int i=0;i<4;i++)
+        {
+          printf("%f ", this->pressureCommands[joint][i]);
+        }
+        printf("\n");
+
+        printf("Address + outgoing pressure command shorts: ");
+        for (int i=0;i<5;i++)
+        {
+          printf("%d ", this->outgoingShorts[i]);
+        }
+        printf("\n");
+
+        printf("Address + outgoing pressure command bytes: ");
+        for (int i=0;i<10;i++)
+        {
+          printf("%02x ", this->outgoingBytes[i]);
+        }
+        printf("\n");
+      }
 
       if (write(this->fd, this->outgoingBytes, BYTES_IN_PACKET) != 10)
       {
         ROS_WARN("Incorrect amount of bytes sent.");
       }
 
-      bool timeout = waitForResponse(1);
+      bool timeout = waitForResponse(2);
 
       if(!timeout)
       {
-        if(handleIncomingBytes(jointAddress))
+        if(handleIncomingBytes(joint))
         {
           //convert analog shorts to kpa and load for sending over ROS
           for (size_t i=0;i<numPressuresPerJoint;i++)
           {
             float tmp = analogToKpa(this->incomingDataShorts[i]);
-            this->pressures[joint][i] = tmp;
+            this->pressures[joint][i] = filter(this->pressures[joint][i], tmp);
+          }
+
+          if(DEBUG_MODE)
+          {
+            printf("Converted to pressures: ");
+            for (int i=0;i<4;i++)
+            {
+              printf("%f ", this->pressures[joint][i]);
+            }
+            printf("\n");
           }
 
           //reset contact counter for this joint since communication was succesful
@@ -226,7 +262,7 @@ unsigned short PressureController::kpaToAnalog(float kPa)
      This is the inverse of the function "analogToKpa" directly above.
   */
   // convert kPa to a voltage
-  double v_out = V_SUP * ((0.8 * kPa / P_MAX) + 0.1);
+  double v_out = V_SUP * ((0.8 * kPa / (P_MAX)) + 0.1);
   
   // convert voltage to a bin number
   return v_out * 1024.0 / 5.0;
@@ -322,8 +358,9 @@ bool PressureController::waitForResponse(int timeoutMilliseconds)
   return timeout;
 }
 
-bool PressureController::handleIncomingBytes(unsigned short jointAddress)
+bool PressureController::handleIncomingBytes(int joint)
 {
+  unsigned short jointAddress = this->rs485_addresses["joint_" + std::to_string(joint)];
   unsigned char firstByte = 0;
   bool readSuccessful = false;
 
@@ -332,7 +369,7 @@ bool PressureController::handleIncomingBytes(unsigned short jointAddress)
   {
     if(DEBUG_MODE)
     {
-      std::cout << "Bytes available: " << std::dec << serialDataAvail(fd) << std::endl;
+      std::cout << "Bytes available on handle: " << std::dec << serialDataAvail(fd) << std::endl;
     }
 
     unsigned char secondByte = serialGetchar(fd);
@@ -343,7 +380,12 @@ bool PressureController::handleIncomingBytes(unsigned short jointAddress)
       printf(" Second Byte: %02x\n", secondByte);
     }
 
-    unsigned short short1 = (secondByte << 8) | firstByte;
+    unsigned short short1 = (firstByte << 8) | secondByte;
+
+    if(DEBUG_MODE)
+    {
+      printf("short to check: %d\n", short1);
+    }
 
     if(short1 == jointAddress)
     {
@@ -402,12 +444,31 @@ bool PressureController::handleIncomingBytes(unsigned short jointAddress)
   return readSuccessful;
 }
 
-void PressureController::prepareOutgoingBytes(unsigned short jointAddress)
+void PressureController::prepareOutgoingBytes(int joint)
 {
   // Construct a byte message to send to the arduino
   // assign both bytes of address to first two bytes of outgoing packet
+  unsigned short jointAddress = this->rs485_addresses["joint_" + std::to_string(joint)];
   this->outgoingShorts[0] = jointAddress;
 
+  //fill appropriate commands from this->pressure_commands into outgoing Shorts
+  for (int i=0;i<4;i++)
+  {
+    this->outgoingShorts[i+1] = kpaToAnalog(this->pressureCommands[joint][i]);
+  }
 
   shortToBytes(this->outgoingShorts, this->outgoingBytes); // converts test_short_write (shorts) to check_msg_write (bytes)
+}
+
+float PressureController::filter(float prev, float input)
+{  /*
+      This function implements a first order low pass filter
+      with a cutoff frequency of 50 Hz. First order hold discrete implementation with dt=.001.
+      First order filter is of form:
+      a / (z - b)
+  */
+  float a = 1.0;
+  float b = 1.0 - a;
+
+  return b * prev + a * input;
 }

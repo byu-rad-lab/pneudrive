@@ -36,7 +36,7 @@ private:
   unsigned char incomingDataBytes[BYTES_IN_PACKET-2];
   unsigned char outgoingBytes[BYTES_IN_PACKET];
   unsigned short incomingDataShorts[4] = {0,0,0,0};
-  unsigned short outgoingShorts[5] = {0,1,2,3,4};
+  unsigned short outgoingShorts[5] = {0,0,0,0,0};
   
   int fd;
   std::map<std::string, int> rs485_addresses;
@@ -49,8 +49,9 @@ private:
   void startPublishers(ros::NodeHandle n);
 
   bool waitForResponse(int timeoutMillieconds);
-  bool handleIncomingBytes(unsigned short jointAddress);
-  void prepareOutgoingBytes(unsigned short jointAddress);
+  bool handleIncomingBytes(int joint);
+  void prepareOutgoingBytes(int joint);
+  float filter(float prev, float input);
 
 public:
   PressureController(ros::NodeHandle n, std::map<std::string, int>& rs485_config);
