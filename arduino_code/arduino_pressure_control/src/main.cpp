@@ -52,7 +52,7 @@ short FILL_CMD[4] = {400, 400, 400, 400};
 */
 // denominator is set by the pressure error which will cause the input to saturate.
 const unsigned short MAX_INPUT = 400;
-unsigned short saturation_error = 50; // TUNE ME, lower is more aggressive :)
+unsigned short saturation_error = 20; // TUNE ME, lower is more aggressive :)
 unsigned short kp = MAX_INPUT / saturation_error;
 
 // timer stuff (KEEP)
@@ -350,6 +350,12 @@ void loop()
 
   if (DEBUG_MODE)
   {
+    Serial.print("Valve commands: ");
+    for (int i = 0; i < 4; i++)
+    {
+      Serial.print(valve_cmd[i], DEC);
+      Serial.print(" ");
+    }
     Serial.println();
   }
 }
