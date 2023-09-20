@@ -5,11 +5,11 @@
   <arg name="numjoints" doc="numJoints specifies the number of rs485 devices which should be included for pressure control." />
 
   <!-- start pressure control node -->
-  <node name='rs485_pressure_node' pkg='byu_pressure_control' type='rs485_pressure_control_node' required='false' output='screen' />
+  <node name='rs485_pressure_node' pkg='pneudrive' type='pressure_controller_node' required='false' output='screen' />
 
   <!--Load hardware yaml file according to numjoints so controller knows what to look for-->
-  <rosparam if="$(eval numjoints==1)" command="load" file="$(find byu_pressure_control)/config/one_joint.yaml" />
-  <rosparam if="$(eval numjoints==2)" command="load" file="$(find byu_pressure_control)/config/two_joints.yaml" />
-  <rosparam if="$(eval numjoints==3)" command="load" file="$(find byu_pressure_control)/config/three_joints.yaml" />
+  <rosparam if="$(eval numjoints==1)" command="load" file="$(find pneudrive)/config/one_joint.yaml" />
+  <rosparam if="$(eval numjoints==2)" command="load" file="$(find pneudrive)/config/two_joints.yaml" />
+  <rosparam if="$(eval numjoints==3)" command="load" file="$(find pneudrive)/config/three_joints.yaml" />
 
 </launch>

@@ -1,1 +1,1 @@
-rs485_bus_addresses: { joint_0: 0xa, joint_1: 0xb }
+rs485_bus_addresses: { joint_0: 0xFFFF, joint_1: 0xFFFE }

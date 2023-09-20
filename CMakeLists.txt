@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(byu_pressure_control)
+project(pneudrive)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
@@ -47,8 +47,8 @@ ${WIRINGPI_INCLUDE_DIRS}
 )
 
 
-add_executable(pressure_controller src/rs485_pressure_control.cpp src/PressureController.cpp)
-target_link_libraries(pressure_controller ${catkin_LIBRARIES} ${WIRINGPI_LIBRARIES})
+add_executable(pressure_controller_node src/rs485_pressure_control.cpp src/PressureController.cpp)
+target_link_libraries(pressure_controller_node ${catkin_LIBRARIES} ${WIRINGPI_LIBRARIES})
 
 # add dependency on rad_msgs
-add_dependencies(pressure_controller ${catkin_EXPORTED_TARGETS})
+add_dependencies(pressure_controller_node ${catkin_EXPORTED_TARGETS})
