@@ -10,6 +10,10 @@
 #include <numeric>
 
 #define BYTES_IN_PACKET 10
+#define PSI2KPA 6.8947572932
+#define P_MAX 100 * PSI2KPA
+#define V_SUP 5.0
+#define DEBUG_MODE true
 
 /**
  * @class PressureController
@@ -27,11 +31,11 @@ private:
   std::vector<ros::Subscriber> pressureCommandSubscribers;
   std::vector<std::vector<float>> pressures;
   std::vector<std::vector<float>> pressureCommands;
-  std::vector<int> jointContactCounter;
+  std::vector<int> jointMissedCounter;
 
-  unsigned char incomingBytes[BYTES_IN_PACKET];
+  unsigned char incomingDataBytes[BYTES_IN_PACKET-2];
   unsigned char outgoingBytes[BYTES_IN_PACKET];
-  unsigned short incomingShorts[5] = {0,0,0,0,0};
+  unsigned short incomingDataShorts[4] = {0,0,0,0};
   unsigned short outgoingShorts[5] = {0,0,0,0,0};
   
   int fd;
@@ -44,8 +48,14 @@ private:
   void startSubscribers(ros::NodeHandle n);
   void startPublishers(ros::NodeHandle n);
 
+  bool waitForResponse(int timeoutMillieconds);
+  bool handleIncomingBytes(int joint);
+  void prepareOutgoingBytes(int joint);
+  float filter(float prev, float input);
+
 public:
   PressureController(ros::NodeHandle n, std::map<std::string, int>& rs485_config);
+  ~PressureController();
   void do_pressure_control();
   void ping_devices();
   void shortToBytes(unsigned short *short_array, unsigned char* byte_array);

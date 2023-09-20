@@ -10,16 +10,9 @@
 #include <wiringPi.h>
 #include <wiringSerial.h>
 
-// conversion factor from psi to kpa (ie kpa = psi * psi2kpa)
-const double psi2kpa = 6.8947572932;
-
-const int BYTES_PER_PRESSURE = 2;
-
-
 PressureController::PressureController(ros::NodeHandle n, std::map<std::string, int>& rs485_config)
   : rs485_addresses(rs485_config), spinner(3)
 {
-
   initializeSerial();
   initializeDataVectors();
   this->ping_devices();
@@ -30,55 +23,46 @@ PressureController::PressureController(ros::NodeHandle n, std::map<std::string, 
   startPublishers(n);
 }
 
+PressureController::~PressureController()
+{
+  serialFlush(this->fd);
+  serialClose(this->fd);
+}
+
 void PressureController::ping_devices()
 {
   serialFlush(this->fd);
   ROS_INFO("Checking communication with serial devices...");
-  bool error_flag = false;
 
   for (int joint = 0; joint < numJoints; joint++)
   {
-    // specify target arduino
-    //todo: check how this int gets cast into unsigned short
     unsigned short jointAddress = this->rs485_addresses["joint_" + std::to_string(joint)];
-
-    // Construct a byte message to send to the arduino
-    // assign both bytes of address to first two bytes of outgoing packet
-    this->outgoingShorts[0] = jointAddress;
-
     ROS_INFO("Pinging joint %d", jointAddress);
-    shortToBytes(this->outgoingShorts, this->outgoingBytes); // converts test_short_write (shorts) to check_msg_write (bytes)
 
-    // Write byte message to the arduino
+    prepareOutgoingBytes(joint);
+
     ssize_t numBytesWritten = write(this->fd, this->outgoingBytes, BYTES_IN_PACKET);
 
-    ros::Time start = ros::Time::now();
-
-    // Wait for arduino to respond with 10 bytes
-    while (serialDataAvail(fd) != BYTES_IN_PACKET)
+    bool timeout = waitForResponse(5000);
+    
+    if(!timeout)
     {
-      // Add time check error here
-      if (ros::Time::now() - start > ros::Duration(1))
+      if (handleIncomingBytes(joint))
       {
-        ROS_ERROR("Joint %d: Communication response timeout", joint);
-        error_flag = true;
-        break;
+        ROS_INFO_STREAM("Joint " << jointAddress << " ping successful.");
+      }
+      else
+      {
+        ROS_WARN("Unsucessful read");
+        ROS_ERROR_ONCE("Not all devices found. Killing node.");
+        ros::shutdown();
       }
     }
-    
-
-    // READ the response from the arduino
-    if(!error_flag)
+    else
     {
-      ssize_t numBytesRead = read(this->fd, incomingBytes, BYTES_IN_PACKET);
-      ROS_INFO("Joint %d: Communication successful", joint);
+      ROS_ERROR_ONCE("Not all devices found. Killing node.");
+      ros::shutdown();
     }
-  }
-
-  if (error_flag)
-  {
-    ROS_ERROR_ONCE("Not all devices found. Killing node.");
-    ros::shutdown();
   }
 }
 
@@ -88,92 +72,103 @@ void PressureController::do_pressure_control()
   int numLoops = 0;
   int numMissed = 0;
   int lost_contact_counter = 0;
+
   while (ros::ok())
   {
     ros::Time loop_start = ros::Time::now();
     ROS_INFO_STREAM_ONCE("PRESSURE CONTROL STARTED");
+    printf("Loop num: %d\n", numLoops);
 
-    serialFlush(fd); // clear the current serial buffer before doing anything with it
 
     for (int joint = 0; joint < numJoints; joint++)
     {
-      // std::this_thread::sleep_for(std::chrono::microseconds(1)); //this seems to be necessary for some reason, devices hit time out without it. 
-
-      bool error_flag = false;
-      // specify target arduino
-      //todo: check int cast to ushort
-      unsigned short jointAddress = this->rs485_addresses["joint_" + std::to_string(joint)];
-
-      // assign both bytes of address to first two bytes of outgoing packet
-      this->outgoingShorts[0] = jointAddress;
-      // this->outgoingShorts[1] = 2;
-
-      //prepare commands received over ROS for sending to arduinos
-      for (int i=0;i<4;i++)
+      if(DEBUG_MODE)
       {
-        // this->outgoingShorts[i+1] = kpaToAnalog(this->pressureCommands[joint][i]);
-        this->outgoingShorts[i+1] = i;
+        // ros::Duration(.03).sleep();
+      }
+      
+      serialFlush(fd); // clear the current serial buffer before doing anything with it, RX AND TX
+
+
+
+      prepareOutgoingBytes(joint);
+
+      if(DEBUG_MODE)
+      {
+        printf("Pressure commands: ");
+        for (int i=0;i<4;i++)
+        {
+          printf("%f ", this->pressureCommands[joint][i]);
+        }
+        printf("\n");
+
+        printf("Address + outgoing pressure command shorts: ");
+        for (int i=0;i<5;i++)
+        {
+          printf("%d ", this->outgoingShorts[i]);
+        }
+        printf("\n");
+
+        printf("Address + outgoing pressure command bytes: ");
+        for (int i=0;i<10;i++)
+        {
+          printf("%02x ", this->outgoingBytes[i]);
+        }
+        printf("\n");
       }
 
-      shortToBytes(this->outgoingShorts, this->outgoingBytes); // converts test_short_write (shorts) to check_msg_write (bytes)
-
-      // Write byte message to the arduino
       if (write(this->fd, this->outgoingBytes, BYTES_IN_PACKET) != 10)
       {
         ROS_WARN("Incorrect amount of bytes sent.");
       }
 
-      // Capture the start time
-      // auto start = std::chrono::high_resolution_clock::now();
-      ros::Time start = ros::Time::now();
+      bool timeout = waitForResponse(2);
 
-      // Wait for arduino to respond with 10 bytes
-      while (serialDataAvail(fd) != BYTES_IN_PACKET)
+      if(!timeout)
       {
-        // std::cout << "waiting for data" << std::endl;
-        // Add time check error here
-
-        //there's a fair bit of nondeterminism that happens when bits get into TX buffer. If it happens that this
-        // takes too long, move on to other joints to not delay everything. 
-        if (ros::Time::now() - start > ros::Duration(.002))
+        if(handleIncomingBytes(joint))
         {
-          error_flag = true;
-          break;
+          //convert analog shorts to kpa and load for sending over ROS
+          for (size_t i=0;i<numPressuresPerJoint;i++)
+          {
+            float tmp = analogToKpa(this->incomingDataShorts[i]);
+            this->pressures[joint][i] = filter(this->pressures[joint][i], tmp);
+          }
+
+          if(DEBUG_MODE)
+          {
+            printf("Converted to pressures: ");
+            for (int i=0;i<4;i++)
+            {
+              printf("%f ", this->pressures[joint][i]);
+            }
+            printf("\n");
+          }
+
+          //reset contact counter for this joint since communication was succesful
+          jointMissedCounter[joint] = 0;
         }
-      }
-
-      // READ the response from the arduino
-      if(!error_flag)
-      {
-        ssize_t numBytesRead = read(this->fd, incomingBytes, BYTES_IN_PACKET);
-
-        byteToShorts(this->incomingShorts, this->incomingBytes);
-
-        //convert analog shorts to kpa and load for sending over ROS
-        for (size_t i=0;i<numPressuresPerJoint;i++)
+        else
         {
-          float tmp = analogToKpa(this->incomingShorts[i+1]);
-          this->pressures[joint][i] = tmp;
+          printf("Unsucessful read. Data not saved.\n");
         }
-
-        //reset contact counter for this joint since communication was succesful
-        jointContactCounter[joint] = 0;
       }
       else
       {
-        //its possible there are some bytes in the RX buffer... so empty it out before reading next one
         numMissed++;
-        jointContactCounter[joint]++;
+        jointMissedCounter[joint]++;
 
-        if (jointContactCounter[joint] > 10)
+        if (jointMissedCounter[joint] > 10)
         {
-          ROS_WARN_STREAM("Lost connection with joint " << joint);
+          ROS_ERROR_STREAM("Lost connection with joint " << joint);
+        }
+        else
+        {
+          ROS_WARN("Joint %d: Communication response timeout", joint);
         }
 
-        while(serialDataAvail(fd)>0)
-        {
-          int trash = serialGetchar(fd);
-        }
+        //empty both RX and TX buffers
+        serialFlush(fd);
       }
     }
 
@@ -183,12 +178,17 @@ void PressureController::do_pressure_control()
       max_loop_time = loop_time;
     }
 
-    // ROS_INFO_STREAM("Loop Time: " << ros::Time::now() - loop_start << " s");
     numLoops++;
+
+    if(DEBUG_MODE)
+    {
+      ROS_INFO_STREAM("Loop Time: " << ros::Time::now() - loop_start << " s");
+      std::cout << std::endl;
+    }
   }
 
   std::cout << "Max loop time was " << max_loop_time << std::endl;
-  std::cout << "Threw away " << numMissed << " of " << numLoops;
+  std::cout << "Dropped " << numMissed << " of " << numLoops << std::endl;
 }
 
 void PressureController::publishCallback(const ros::TimerEvent& event)
@@ -246,17 +246,11 @@ double PressureController::analogToKpa(unsigned short analog)
      Conversion is taken from Fig. 3 (transfer function A) in pressure sensor datasheet
      https://www.mouser.com/datasheet/2/187/honeywell-sensing-basic-board-mount-pressure-abp-s-1224358.pdf
   */
-  // conversion factor from psi to kpa (ie kpa = psi * PSI2KPA)
-  double const PSI2KPA = 6.8947572932;
-  double const P_MAX = 100 * PSI2KPA;
-
-  double v_sup = 5;
-
   // convert bin number to a voltage
   double v_out = analog * 5.0 / 1024.0;
 
   // return applied pressure in kPa
-  return ((v_out - 0.1 * v_sup) / (0.8 * v_sup)) * P_MAX;
+  return ((v_out - 0.1 * V_SUP) / (0.8 * V_SUP)) * P_MAX;
 }
 
 unsigned short PressureController::kpaToAnalog(float kPa)
@@ -267,14 +261,8 @@ unsigned short PressureController::kpaToAnalog(float kPa)
      Analog reference is 5V, so 0=0v and 1023=5v
      This is the inverse of the function "analogToKpa" directly above.
   */
-  // conversion factor from psi to kpa (ie kpa = psi * PSI2KPA)
-  double const PSI2KPA = 6.8947572932;
-  double const P_MAX = 100 * PSI2KPA;
-
-  double v_sup = 5;
-
   // convert kPa to a voltage
-  double v_out = v_sup * ((0.8 * kPa / P_MAX) + 0.1);
+  double v_out = V_SUP * ((0.8 * kPa / (P_MAX)) + 0.1);
   
   // convert voltage to a bin number
   return v_out * 1024.0 / 5.0;
@@ -299,7 +287,7 @@ void PressureController::initializeDataVectors()
   numJoints = this->rs485_addresses.size();
   pressures.resize(numJoints);
   pressureCommands.resize(numJoints);
-  jointContactCounter.resize(numJoints);
+  jointMissedCounter.resize(numJoints);
 
 
 
@@ -347,4 +335,140 @@ void PressureController::pcmd_callback(const rad_msgs::PressureStamped::ConstPtr
     float temp = (float)msg->pressure[i]; // cast double/float64 to float/float to send over i2c
     pressureCommands[joint][i] = temp;
   }
+}
+
+bool PressureController::waitForResponse(int timeoutMilliseconds)
+{
+  bool timeout = false;
+
+  std::chrono::milliseconds waitTime(timeoutMilliseconds);
+  std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+
+  while (serialDataAvail(fd) < BYTES_IN_PACKET)
+  {
+    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+    std::chrono::milliseconds elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - start);
+    if (elapsed > waitTime)
+    {
+      timeout = true;
+      break;
+    }
+  }
+
+  return timeout;
+}
+
+bool PressureController::handleIncomingBytes(int joint)
+{
+  unsigned short jointAddress = this->rs485_addresses["joint_" + std::to_string(joint)];
+  unsigned char firstByte = 0;
+  bool readSuccessful = false;
+
+
+  while (serialDataAvail(fd) > 0)
+  {
+    if(DEBUG_MODE)
+    {
+      std::cout << "Bytes available on handle: " << std::dec << serialDataAvail(fd) << std::endl;
+    }
+
+    unsigned char secondByte = serialGetchar(fd);
+
+    if(DEBUG_MODE)
+    {
+      printf("First Byte: %02x", firstByte);
+      printf(" Second Byte: %02x\n", secondByte);
+    }
+
+    unsigned short short1 = (firstByte << 8) | secondByte;
+
+    if(DEBUG_MODE)
+    {
+      printf("short to check: %d\n", short1);
+    }
+
+    if(short1 == jointAddress)
+    {
+      if(read(this->fd, this->incomingDataBytes, BYTES_IN_PACKET-2) == BYTES_IN_PACKET-2)
+      {
+        byteToShorts(this->incomingDataShorts, this->incomingDataBytes);
+
+        if(DEBUG_MODE)
+        {
+          std::cout << "Address match!" <<std::endl;
+          std::cout << "Incoming bytes: ";
+          for (int i = 0; i < 8; i++)
+          {
+            printf("%02x ", incomingDataBytes[i]);
+          }
+          std::cout << std::endl;
+
+          std::cout << "Converted to shorts: ";
+          for (int i = 0; i < 4; i++)
+          {
+            printf("%d ", incomingDataShorts[i]);
+          }
+          std::cout << std::endl;
+
+          printf("Bytes available after read: %d\n", serialDataAvail(fd));
+        }
+        
+        // check that valid data was received
+        for (int i=0; i<4; i++)
+        {
+          //must be limited by 10 bit resolution of ADC, otherwise this is incorrect
+          if(this->incomingDataShorts[i] > 1023)
+          {
+            readSuccessful=false;
+            printf("Invalid shorts recieved. Should be 0-1023. Throwing away data.\n");
+            break;
+          }
+          else
+          {
+            readSuccessful=true;
+          }
+        }
+        firstByte = 0;
+      }
+    }
+    else
+    {
+      if(DEBUG_MODE)
+      {
+        std::cout << "No address match" << std::endl;
+      }
+      firstByte = secondByte;
+    }
+  }
+
+  return readSuccessful;
+}
+
+void PressureController::prepareOutgoingBytes(int joint)
+{
+  // Construct a byte message to send to the arduino
+  // assign both bytes of address to first two bytes of outgoing packet
+  unsigned short jointAddress = this->rs485_addresses["joint_" + std::to_string(joint)];
+  this->outgoingShorts[0] = jointAddress;
+
+  //fill appropriate commands from this->pressure_commands into outgoing Shorts
+  for (int i=0;i<4;i++)
+  {
+    this->outgoingShorts[i+1] = kpaToAnalog(this->pressureCommands[joint][i]);
+  }
+
+  shortToBytes(this->outgoingShorts, this->outgoingBytes); // converts test_short_write (shorts) to check_msg_write (bytes)
+}
+
+float PressureController::filter(float prev, float input)
+{  /*
+      This function implements a first order low pass filter
+      with a cutoff frequency of 50 Hz. First order hold discrete implementation with dt=.001.
+      First order filter is of form:
+      a / (z - b)
+  */
+  float a = 0.6;
+  float b = 1.0 - a;
+
+  return b * prev + a * input;
 }
