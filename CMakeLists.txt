@@ -10,7 +10,6 @@ set(CMAKE_CXX_FLAGS "-Os")
 # Set the path to WiringPi library and include directories
 set(WIRINGPI_INCLUDE_DIRS "/usr/local/include/")
 set(WIRINGPI_LIBRARIES "/usr/lib/libwiringPi.so")
-set(PYBIND11_PYTHON_VERSION 3.8)
 
 # # Find catkin macros and libraries
 # # if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -52,10 +51,3 @@ target_link_libraries(pressure_controller_node ${catkin_LIBRARIES} ${WIRINGPI_LI
 
 # add dependency on rad_msgs
 add_dependencies(pressure_controller_node ${catkin_EXPORTED_TARGETS})
-
-
-
-
-add_subdirectory(extern/pybind11)
-pybind11_add_module(pneudrive python/PressureControllerPython.cpp)
-target_link_libraries(pneudrive ${WIRINGPI_LIBRARIES})
