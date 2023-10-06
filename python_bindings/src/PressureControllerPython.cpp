@@ -46,13 +46,14 @@ void PressureControllerPython::ping_devices()
       }
       else
       {
-        py::print("Unsucessful read");
-        py::print("Not all devices found.");
+        std::string errorMessage = "Attempted read was unsuccesful. Not all devices found.";
+        throw std::runtime_error(errorMessage);
       }
     }
     else
     {
-      py::print("Not all devices found.");
+      std::string errorMessage = "Device timeout. Not all devices found.";
+      throw std::runtime_error(errorMessage);
     }
   }
 }
@@ -203,12 +204,14 @@ void PressureControllerPython::initializeSerial(const char *port)
 {
   if ((this->fd = serialOpen(port, 1000000)) < 0)
   {
-    py::print("Unable to open serial device:", strerror(errno));
+    std::string errorMessage = "Unable to open serial device: " + std::string(strerror(errno));
+    throw std::runtime_error(errorMessage);
   }
 
   if (wiringPiSetup() == -1)
   {
-    py::print("Unable to start wiringPi:", strerror(errno));
+    std::string errorMessage = "Unable to start WiringPi: " + std::string(strerror(errno));
+    throw std::runtime_error(errorMessage);
   }
 }
 
