@@ -1,4 +1,4 @@
-## Overview
+# PneuDrive Pressure Control System
 
 This repository contains all of the designs, code, and instructions needed to create a low level pressure controller designed for pneumatically actuated robots. This pressure controller is designed to use relatively inexpensive off-the-shelf components and to favor simplicity in an effort to make it easy to understand and adapt for different applications.
 
@@ -62,7 +62,9 @@ Once the SBC boots up it you can ssh into it with ```ssh ubuntu@192.168.0.xxx```
 
 Once you are logged in, you can launch the pressure control ROS node (along with a roscore) using the following command:
 
-``` roslaunch pneudrive rs485_pressure.launch numjoints:=[number of joints]```
+``` shell
+roslaunch pneudrive rs485_pressure.launch numjoints:=[number of joints]
+```
 
 where the ```numjoints``` command line argument is required and tells the node how many joints to look for on the serial bus. 
 
@@ -74,4 +76,10 @@ This creates a ROS node called "PressureController". This launch file looks in t
 
 When the node launches, it will print out all of the joints it detected and start the node.
 
+## Citation
 
+If you use PneuDrive in your research, please cite the following paper:
+
+```bibtex
+FILL ME IN
+```

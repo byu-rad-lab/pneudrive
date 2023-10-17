@@ -17,6 +17,7 @@ This directory contains everything you need to order and assemble the PCBs neede
 
 
 # PneuDrive Embedded Board
+![Embedded Board](../resources/SingleBoardDiagram.png)
 ### Ordering PCB
 1)  Go to their [website](https://jlcpcb.com/), click upload gerber file, and upload pneudrive_embeddedv1.2_gerbers.zip After processing, it should say "Detected 4 layer board of 75x69mm(2.95x2.72 inches)."
 2)  Every option can remain default except for the following: **Remove Order Number: Specify a Location**
@@ -30,17 +31,16 @@ This directory contains everything you need to order and assemble the PCBs neede
 ### Assembly
 1) Solder the SMT components on the bottom before any of the through hole components. This is because the through hole components will get in the way of the hot air rework station. [Here](https://www.youtube.com/watch?v=fYInlAmPnGo&pp=ygUWc210IHNvbGRlcmluZyB0dXRvcmlhbA%3D%3D) is a good tutorial on how to do SMT soldering.
 
-![Embedded Board](../resources/SingleBoardDiagram.png)
 
 
 # Consumables
 
 For assembly, we used the following:
-- [Solder Paste](https://www.amazon.com/Wonderway-Soldering-Electronics-CELLPHONE-Repairing/dp/B0BLSJQPR6/ref=sr_1_6?crid=6NIL0QUJVAGM&keywords=solder+paste&qid=1697561173&sprefix=solder+paste%2Caps%2C127&sr=8-6) ~$15 USD
-- [Flux](https://www.amazon.com/Smooth-Flow-No-Clean-syringe-plunger/dp/B08KJRCYRH/ref=sr_1_1?crid=447AJ25QBNVN&keywords=chip+quik+nc191&qid=1697561249&sprefix=chip+quik+nc191%2Caps%2C107&sr=8-1) ~$15 USD
-- [Solder Wire](https://www.amazon.com/Dia0-032in-0-11lb-Precision-Electronics-Soldering/dp/B07Q167J98/ref=sr_1_5?crid=2V5IWMRTC525D&keywords=solder+lead+free&qid=1697561457&sprefix=solder+lead+free%2Caps%2C109&sr=8-5) ~$10 USD
+* [Solder Paste](https://www.amazon.com/Wonderway-Soldering-Electronics-CELLPHONE-Repairing/dp/B0BLSJQPR6/ref=sr_1_6?crid=6NIL0QUJVAGM&keywords=solder+paste&qid=1697561173&sprefix=solder+paste%2Caps%2C127&sr=8-6) ~$15 USD
+* [Flux](https://www.amazon.com/Smooth-Flow-No-Clean-syringe-plunger/dp/B08KJRCYRH/ref=sr_1_1?crid=447AJ25QBNVN&keywords=chip+quik+nc191&qid=1697561249&sprefix=chip+quik+nc191%2Caps%2C107&sr=8-1) ~$15 USD
+* [Solder Wire](https://www.amazon.com/Dia0-032in-0-11lb-Precision-Electronics-Soldering/dp/B07Q167J98/ref=sr_1_5?crid=2V5IWMRTC525D&keywords=solder+lead+free&qid=1697561457&sprefix=solder+lead+free%2Caps%2C109&sr=8-5) ~$10 USD
 
 # Tools
 You'll need
-- A soldering iron
-- A hot air rework station (for SMT components)
+* A soldering iron
+* A hot air rework station (for SMT components)
