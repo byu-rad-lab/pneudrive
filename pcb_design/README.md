@@ -7,7 +7,7 @@ This directory contains everything you need to order and assemble the PCBs neede
 3) If you want, you can order a stencil to make soldering the SMT components easier. We have not done this since there are only 1 or 2 controller boards that need to be assembled.
 
 ### Ordering Components
-1) The Bill of Materials (BoM) PneuDrive BoM - Controllerv1.2.pdf. The BoM contains links to purchase components, descriptions, and part numbers. For convenience, [here](https://www.mouser.com/ProjectManager/ProjectDetail.aspx?AccessID=e7e1c98464) is a link to a Mouser cart with **MOST OF** the components needed to assemble the controller board. The total price as of 2023 is $5.87 USD.
+1) The Bill of Materials (BoM) PneuDrive BoM - Controllerv1.2.pdf. The BoM contains links to purchase components, descriptions, and part numbers. The total price as of 2023 is $5.87 USD.
 2) You will also need female headers to plug things into and the logic level shifter from pololu.
 
 ### Assembly
@@ -25,7 +25,7 @@ This directory contains everything you need to order and assemble the PCBs neede
 4)  All the stencil options can stay default except the following: **Stencil Side: Bottom**
 
 ### Ordering Components
-1) The Bill of Materials (BoM) PneuDrive BoM - Embeddedv1.2.pdf. The BoM contains links to purchase components, descriptions, and part numbers. For convenience, [here](https://www.mouser.com/ProjectManager/ProjectDetail.aspx?AccessID=7def45c634) is a link to a Mouser cart with **MOST OF** the components needed to assemble the controller board. The total price as of 2023 is $156.74 USD.
+1) The Bill of Materials (BoM) PneuDrive BoM - Embeddedv1.2.pdf. The BoM contains links to purchase components, descriptions, and part numbers. The total price as of 2023 is $156.74 USD.
 2) You will also need female headers to plug things into and the a4990 motor driver breakouts from pololu.
 
 ### Assembly
