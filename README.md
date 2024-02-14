@@ -2,6 +2,8 @@
 
 This repository contains all of the designs, code, and instructions needed to create a low level pressure controller designed for pneumatically actuated robots. This pressure controller is designed to use relatively inexpensive off-the-shelf components and to favor simplicity in an effort to make it easy to understand and adapt for different applications.
 
+Here is a [video](https://bit.ly/3QkrEqO) that is a brief overview of the system.
+
 <!-- add picture of boards from resources folder -->
 ![PneuDrive boards](resources/PneuDrive_Boards.png)
 
