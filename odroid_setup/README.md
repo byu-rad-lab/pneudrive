@@ -26,7 +26,7 @@
 
 #### Ensure Correct File Structure
 
-Ensure the directory contains the Pneudrive package.
+Ensure the directory contains the Pneudrive package. Ensure that it is the most up-to-date version.
 
 #### Change Static IP Address
 
