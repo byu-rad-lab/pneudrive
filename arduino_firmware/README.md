@@ -1,4 +1,4 @@
-# A4990ValveInterface Arduino Code
+# PneuDrive Firmware
 
 ## Introduction
 This Arduino code is designed for controlling valves using the A4990 motor driver and interfacing with pressure sensors. It provides functionality for reading pressure data and adjusting valve positions accordingly. The code and hardware is designed for each module to be a node on an RS485 bus for high speed and robust communication.
@@ -65,20 +65,3 @@ Valve PWM commands are on the interval [-400, 400].
 ## Author
 - Curtis Johnson
 
-## Citation
-
-If you use this code in your work, please cite it as follows:
-
-```bibtex
-@software{Johnson2023,
-  author = {Curtis C. Johnson},
-  title = {A4990ValveInterface Arduino Code},
-  year = {2023},
-  url = {https://bitbucket.org/byu_rad_lab/byu_pressure_control/src/RS485_validation/arduino_code/arduino_pressure_control/},
-  version = {1.0},
-}
-```
-
-
-## License
-This code is provided under the [License Name], which can be found in the LICENSE file.
