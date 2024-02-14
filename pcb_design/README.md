@@ -1,6 +1,9 @@
 This directory contains everything you need to order and assemble the PCBs needed for PneuDrive. 
 
 # PnueDrive Controller Board
+### Design Files
+1. All design files (Bill of Materials, 3d step file, .sch, .brd, and a pdf of the schematic) are located in PnueDrive-Controllerv1.2-Designs.zip.
+
 ### Ordering PCB
 1. Any PCB manufacturer can be used, but we have used JLCPCB in the past. Go to their [website](https://jlcpcb.com/), click upload gerber file, and upload pneudrive_controllerv1.2_gerbers.zip. After processing, it should say "Detected 4 layer board of 65x31mm(2.56x1.22 inches) ."
 2. Every manufacturing option can remain default except for the following: **Remove Order Number: Specify a Location**
@@ -18,6 +21,10 @@ This directory contains everything you need to order and assemble the PCBs neede
 
 # PneuDrive Embedded Board
 ![Embedded Board](../resources/SingleBoardDiagram.png)
+
+### Design Files
+1. All design files (Bill of Materials, 3d step file, .sch, .brd, and a pdf of the schematic) are located in PneuDrive-Embeddedv1.2-Designs.zip.
+
 ### Ordering PCB
 1.  Go to their [website](https://jlcpcb.com/), click upload gerber file, and upload pneudrive_embeddedv1.2_gerbers.zip After processing, it should say "Detected 4 layer board of 75x69mm(2.95x2.72 inches)."
 2.  Every option can remain default except for the following: **Remove Order Number: Specify a Location**
