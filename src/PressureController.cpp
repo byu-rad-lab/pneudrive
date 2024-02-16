@@ -298,10 +298,11 @@ void PressureController::initializeDataVectors()
 
 void PressureController::startSubscribers(ros::NodeHandle n)
 {
+  std::string ns = ros::this_node::getNamespace();
   // Create pressure command subscribers
   for (int i = 0; i < numJoints; i++)
   {
-    std::string topicString = "/robo_0/joint_" + std::to_string(i) + "/pressure_command";
+    std::string topicString = ns + "/joint_" + std::to_string(i) + "/pressure_command";
     /*
       See https://answers.ros.org/question/63991/how-to-make-callback-function-called-by-several-subscriber/?answer=63998?answer=63998#post-id-63998 for more details on this trickery.
      */
@@ -313,10 +314,11 @@ void PressureController::startSubscribers(ros::NodeHandle n)
 
 void PressureController::startPublishers(ros::NodeHandle n)
 {
+  std::string ns = ros::this_node::getNamespace();
   // Create pressure data publisheers
   for (int i = 0; i < numJoints; i++)
   {
-    std::string topic_string = "/robo_0/joint_" + std::to_string(i) + "/pressure_state";
+    std::string topic_string = ns + "/joint_" + std::to_string(i) + "/pressure_state";
     ros::Publisher pub = n.advertise<rad_msgs::PressureStamped>(topic_string, 1);
     pressurePublishers.push_back(pub);
     ROS_INFO("/pressure_state topic started for joint %d", i);
