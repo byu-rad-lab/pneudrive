@@ -13,7 +13,7 @@
 #define PSI2KPA 6.8947572932
 #define P_MAX 100 * PSI2KPA
 #define V_SUP 5.0
-#define DEBUG_MODE true
+#define DEBUG_MODE false
 
 /**
  * @class PressureController
@@ -27,17 +27,17 @@ private:
 
   std::vector<ros::Publisher> pressurePublishers;
   ros::Timer publisher_timer;
-  
+
   std::vector<ros::Subscriber> pressureCommandSubscribers;
   std::vector<std::vector<float>> pressures;
   std::vector<std::vector<float>> pressureCommands;
   std::vector<int> jointMissedCounter;
 
-  unsigned char incomingDataBytes[BYTES_IN_PACKET-2];
+  unsigned char incomingDataBytes[BYTES_IN_PACKET - 2];
   unsigned char outgoingBytes[BYTES_IN_PACKET];
-  unsigned short incomingDataShorts[4] = {0,0,0,0};
-  unsigned short outgoingShorts[5] = {0,0,0,0,0};
-  
+  unsigned short incomingDataShorts[4] = {0, 0, 0, 0};
+  unsigned short outgoingShorts[5] = {0, 0, 0, 0, 0};
+
   int fd;
   std::map<std::string, int> rs485_addresses;
   ros::AsyncSpinner spinner;
@@ -54,14 +54,14 @@ private:
   float filter(float prev, float input);
 
 public:
-  PressureController(ros::NodeHandle n, std::map<std::string, int>& rs485_config);
+  PressureController(ros::NodeHandle n, std::map<std::string, int> &rs485_config);
   ~PressureController();
   void do_pressure_control();
   void ping_devices();
-  void shortToBytes(unsigned short *short_array, unsigned char* byte_array);
-  void byteToShorts(unsigned short *short_array, unsigned char* byte_array);
-  void pcmd_callback(const rad_msgs::PressureStamped::ConstPtr& msg, int joint);
-  void publishCallback(const ros::TimerEvent& event);
+  void shortToBytes(unsigned short *short_array, unsigned char *byte_array);
+  void byteToShorts(unsigned short *short_array, unsigned char *byte_array);
+  void pcmd_callback(const rad_msgs::PressureStamped::ConstPtr &msg, int joint);
+  void publishCallback(const ros::TimerEvent &event);
 };
 
 #endif /* PCONTROL_H_ */
