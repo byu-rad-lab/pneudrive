@@ -34,12 +34,13 @@ Ensure the directory contains the Pneudrive package. Ensure that it is the most 
 2. Update the Lab Wiki with your IP address and device information.
 3. Print a label and attach it to the Odroid for future reference.
 4. Determine the network interface with `ip addr` (likely `eth0`).
-5. Edit the Netplan configuration file (Change ONLY the IP address): ``` bash sudo nano /etc/netplan/radlabconfig.yaml ```
-6. Apply the changes: ```bash sudo netplan apply```
-7. Reconnect to the Odroid with the new IP address.
-8. Reboot and check the updated IP address:
+5. Edit the Netplan configuration file (Change ONLY the IP address): ```sudo nano /etc/netplan/radlabconfig.yaml ```
+6. Go edit the .bashrc file so that ROS_IP is the ip address you just changed to.
+7. Apply the changes: ```sudo netplan apply```
+8. Reconnect to the Odroid with the new IP address.
+9. Reboot and check the updated IP address:
 
-```bash
+```
 sudo shutdown now -r
 ssh ubuntu@<new_ip_address>
 ip addr show
