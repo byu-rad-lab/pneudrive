@@ -59,7 +59,7 @@ unsigned short outgoingShorts[BYTES_IN_PACKET / 2] = {0, 0, 0, 0, 0};
 unsigned short rs485_address = 0x0000;
 unsigned short pressure_commands[4] = {0, 0, 0, 0};
 unsigned short pressure_data[4] = {0, 0, 0, 0};
-unsigned short alpha = 165;
+unsigned long alpha = 165;
 
 // Function to convert array of 8 bytes to array of 4 shorts
 void byteToShorts(unsigned short *short_array, const byte *byte_array)
@@ -190,7 +190,8 @@ void readPressureData()
   for (int i = 0; i < 4; i++)
   {
     // low pass filter with fixed point math for speed
-    pressure_data[i] = ((alpha * pressure_data[i] + (256 - alpha) * analogRead(A0 + i)) >> 8); //
+    unsigned long temp = alpha * pressure_data[i] + (256 - alpha) * analogRead(A0 + i); // max value is 1023*256 = 261888, need a long to prevent overflow
+    pressure_data[i] = static_cast<unsigned short>(temp / 256);                         // divide by 256, back to short range
     outgoingShorts[i + 1] = pressure_data[i];
   }
 
