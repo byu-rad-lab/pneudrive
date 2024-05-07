@@ -43,9 +43,9 @@ short VENT_CMD[4] = { -400, -400, -400, -400 };
 short FILL_CMD[4] = { 400, 400, 400, 400 };
 
 const unsigned short MAX_INPUT = 400;
-unsigned short saturation_error = 45; //tuned with Ziegle-Nichols method, Ku ~ 35 is oscillations.
+unsigned short saturation_error = 150;
 unsigned short kp = MAX_INPUT / saturation_error;
-unsigned short kd = 100; // 400 too high, acting on noise
+unsigned short kd = 50;
 
 #define PRESCALER 32
 #define ONE_SECOND 32000
