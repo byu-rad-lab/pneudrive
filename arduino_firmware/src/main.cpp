@@ -38,31 +38,33 @@
 
 A4990ValveInterface valves;
 
-short valve_cmd[4] = {0, 0, 0, 0};
-short VENT_CMD[4] = {-400, -400, -400, -400};
-short FILL_CMD[4] = {400, 400, 400, 400};
+short valve_cmd[4] = { 0, 0, 0, 0 };
+short VENT_CMD[4] = { -400, -400, -400, -400 };
+short FILL_CMD[4] = { 400, 400, 400, 400 };
 
 const unsigned short MAX_INPUT = 400;
-unsigned short saturation_error = 20; // TUNE ME, lower is more aggressive :)
+unsigned short saturation_error = 45; //tuned with Ziegle-Nichols method, Ku ~ 35 is oscillations.
 unsigned short kp = MAX_INPUT / saturation_error;
+unsigned short kd = 100; // 400 too high, acting on noise
 
 #define PRESCALER 32
 #define ONE_SECOND 32000
 #define BYTES_IN_PACKET 10
 #define DEBUG_MODE false
 
-byte outgoingBytes[BYTES_IN_PACKET] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-byte incomingDataBytes[BYTES_IN_PACKET - 2] = {0, 0, 0, 0, 0, 0, 0, 0};
+byte outgoingBytes[BYTES_IN_PACKET] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+byte incomingDataBytes[BYTES_IN_PACKET - 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-unsigned short outgoingShorts[BYTES_IN_PACKET / 2] = {0, 0, 0, 0, 0};
+unsigned short outgoingShorts[BYTES_IN_PACKET / 2] = { 0, 0, 0, 0, 0 };
 
 unsigned short rs485_address = 0x0000;
-unsigned short pressure_commands[4] = {0, 0, 0, 0};
-unsigned short pressure_data[4] = {0, 0, 0, 0};
-unsigned long alpha = 165;
+unsigned short pressure_commands[4] = { 0, 0, 0, 0 };
+unsigned short pressure_data[4] = { 0, 0, 0, 0 };
+unsigned short prev_pressure_data[4] = { 0, 0, 0, 0 };
+unsigned long alpha = 210;
 
 // Function to convert array of 8 bytes to array of 4 shorts
-void byteToShorts(unsigned short *short_array, const byte *byte_array)
+void byteToShorts(unsigned short* short_array, const byte* byte_array)
 {
   unsigned int byteLength = 8;
   for (size_t i = 0; i < byteLength; i += 2)
@@ -84,13 +86,13 @@ void byteToShorts(unsigned short *short_array, const byte *byte_array)
 }
 
 // Function to convert array of 5 shorts to array of 10 bytes, but in big endian
-void shortToBytes(const unsigned short *short_array, byte *byte_array)
+void shortToBytes(const unsigned short* short_array, byte* byte_array)
 {
   int shortLength = 5;
   for (size_t i = 0; i < shortLength; i++)
   {
     int byteIndex = i * 2;
-    unsigned char *bytePtr = (unsigned char *)&short_array[i];
+    unsigned char* bytePtr = (unsigned char*)&short_array[i];
 
     // Convert from little endian to big endian
     byte_array[byteIndex] = bytePtr[1];     // LSB
@@ -189,6 +191,9 @@ void readPressureData()
 {
   for (int i = 0; i < 4; i++)
   {
+    //update delayed vars before reading new data
+    prev_pressure_data[i] = pressure_data[i];
+
     // low pass filter with fixed point math for speed
     unsigned long temp = alpha * pressure_data[i] + (256 - alpha) * analogRead(A0 + i); // max value is 1023*256 = 261888, need a long to prevent overflow
     pressure_data[i] = static_cast<unsigned short>(temp / 256);                         // divide by 256, back to short range
@@ -304,7 +309,9 @@ void loop()
 
   for (int i = 0; i < 4; i++)
   {
-    valve_cmd[i] = kp * (pressure_commands[i] - pressure_data[i]);
+    int proportional = kp * (pressure_commands[i] - pressure_data[i]);
+    int derivative = kd * (pressure_data[i] - prev_pressure_data[i]);
+    valve_cmd[i] = proportional - derivative;
   }
 
   valves.setSpeeds(valve_cmd);
