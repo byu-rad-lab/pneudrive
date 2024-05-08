@@ -58,7 +58,7 @@ byte incomingDataBytes[BYTES_IN_PACKET - 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 unsigned short outgoingShorts[BYTES_IN_PACKET / 2] = { 0, 0, 0, 0, 0 };
 
 unsigned short rs485_address = 0x0000;
-unsigned short pressure_commands[4] = { 0, 0, 0, 0 };
+unsigned short pressure_commands[4] = { 102, 102, 102, 102 }; // ADC value of 102 corresponds to 0 kPa
 unsigned short pressure_data[4] = { 0, 0, 0, 0 };
 unsigned short prev_pressure_data[4] = { 0, 0, 0, 0 };
 unsigned long alpha = 210;
