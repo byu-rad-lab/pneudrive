@@ -3,15 +3,15 @@
 #include <string.h>
 #include <sstream>
 #include <chrono>
-#include "PressureController.h"
+#include "PressureController.hpp"
 #include <unistd.h>
 #include <thread>
 
 #include <wiringPi.h>
 #include <wiringSerial.h>
 
-PressureController::PressureController(ros::NodeHandle n, std::map<std::string, int> &rs485_config)
-    : rs485_addresses(rs485_config), spinner(3)
+PressureController::PressureController(ros::NodeHandle n, std::map<std::string, int>& rs485_config)
+  : rs485_addresses(rs485_config), spinner(3)
 {
   initializeSerial();
   initializeDataVectors();
@@ -69,9 +69,9 @@ void PressureController::ping_devices()
 void PressureController::do_pressure_control()
 {
   ros::Duration max_loop_time(0);
-  int numLoops = 0;
-  int numMissed = 0;
-  int lost_contact_counter = 0;
+  unsigned long numLoops = 0;
+  unsigned long numCorrupted = 0;
+  unsigned long numTimeout = 0;
 
   while (ros::ok())
   {
@@ -141,30 +141,29 @@ void PressureController::do_pressure_control()
             printf("\n");
           }
 
-          // reset contact counter for this joint since communication was succesful
+          // reset counters since communication was succesful
           jointMissedCounter[joint] = 0;
         }
         else
         {
-          printf("Unsucessful read. Data not saved.\n");
+          // printf("Unsucessful read. Data not saved.\n");
+          numCorrupted++;
+          jointMissedCounter[joint]++;
         }
       }
       else
       {
-        numMissed++;
+        numTimeout++;
         jointMissedCounter[joint]++;
-
-        if (jointMissedCounter[joint] > 10)
-        {
-          ROS_ERROR_STREAM("Lost connection with joint " << joint);
-        }
-        else
-        {
-          // ROS_WARN("Joint %d: Communication response timeout", joint);
-        }
 
         // empty both RX and TX buffers
         serialFlush(fd);
+      }
+
+      //check if we have lots of consecutive misses, likely something broke
+      if (jointMissedCounter[joint] > 50)
+      {
+        ROS_ERROR_STREAM_THROTTLE(1, "Lost connection with joint " << joint);
       }
     }
 
@@ -184,13 +183,13 @@ void PressureController::do_pressure_control()
   }
 
   // print serial communication statistics
-  std::cout << "\n\nSERIAL COMMUNICATION STATISTICS\n"
-            << std::endl;
-  std::cout << "Max Loop Time: " << max_loop_time << std::endl;
-  std::cout << "Dropped " << float(numMissed) / numLoops * 100 << "% of messages" << std::endl;
+  std::cout << "\n\nSERIAL COMMUNICATION STATISTICS\n" << std::endl;
+  std::cout << "Max Loop Time: " << max_loop_time << " s" << std::endl;
+  std::cout << "Corrupted " << float(numCorrupted) / numLoops * 100 << "% of messages" << std::endl;
+  std::cout << "Timed out " << float(numTimeout) / numLoops * 100 << "% of messages\n\n" << std::endl;
 }
 
-void PressureController::publishCallback(const ros::TimerEvent &event)
+void PressureController::publishCallback(const ros::TimerEvent& event)
 {
   // publish pressures
   for (int joint = 0; joint < numJoints; joint++)
@@ -210,14 +209,14 @@ void PressureController::publishCallback(const ros::TimerEvent &event)
 }
 
 // todo: move to utils header
-void PressureController::shortToBytes(unsigned short *short_array, unsigned char *byte_array)
+void PressureController::shortToBytes(unsigned short* short_array, unsigned char* byte_array)
 {
   // Function to convert array of 5 shorts to array of 10 bytes
   int shortLength = 5;
   for (int i = 0; i < shortLength; i++)
   {
     int byteIndex = i * 2;
-    unsigned char *bytePtr = (unsigned char *)&short_array[i];
+    unsigned char* bytePtr = (unsigned char*)&short_array[i];
 
     // convert from big endian to little endian by switching bytes around
     byte_array[byteIndex] = bytePtr[1];     // LSB
@@ -226,7 +225,7 @@ void PressureController::shortToBytes(unsigned short *short_array, unsigned char
 }
 
 // todo: move to utils header
-void PressureController::byteToShorts(unsigned short *short_array, unsigned char *byte_array)
+void PressureController::byteToShorts(unsigned short* short_array, unsigned char* byte_array)
 {
   // Function to convert array of 10 bytes to array of 5 shorts
   unsigned int byteLength = 10;
@@ -327,7 +326,7 @@ void PressureController::startPublishers(ros::NodeHandle n)
   this->publisher_timer = n.createTimer(ros::Duration(0.002), &PressureController::publishCallback, this);
 }
 
-void PressureController::pcmd_callback(const rad_msgs::PressureStamped::ConstPtr &msg, int joint)
+void PressureController::pcmd_callback(const rad_msgs::PressureStamped::ConstPtr& msg, int joint)
 {
   for (int i = 0; i < msg->pressure.size(); i++)
   {
@@ -418,7 +417,7 @@ bool PressureController::handleIncomingBytes(int joint)
           if (this->incomingDataShorts[i] > 1023)
           {
             readSuccessful = false;
-            printf("Invalid shorts recieved. Should be 0-1023. Throwing away data.\n");
+            // printf("Invalid shorts recieved. Should be 0-1023. Throwing away data.\n");
             break;
           }
           else

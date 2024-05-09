@@ -1,5 +1,5 @@
 #include <iostream>
-#include "PressureController.h"
+#include "PressureController.hpp"
 
 int main(int argc, char **argv)
 {
