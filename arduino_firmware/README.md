@@ -16,10 +16,12 @@ Valve PWM commands are on the interval [-400, 400].
 - This code relies on the `A4990ValveInterface` library.
 
 ## Installation
-1. Ensure you have the necessary hardware setup.
-2. Install the required Arduino libraries.
-3. Upload this code to your Arduino Nano Every.
-4. We use the [PlatformIO extension](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide), so the configuration files are already included. If you are using the Arduino IDE, you will need to manually install the libraries and configure the project. 
+1. Ensure you have the necessary hardware set up (i.e. the PCBs are all built)
+2. We use the [PlatformIO extension](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide), so the configuration files are already included. If you are using the Arduino IDE, you will need to manually install the libraries and configure the project. 
+3. Open this directory with Platform IO
+4. Install the required Arduino libraries (if using Arduino IDE), or let PlatformIO do that for you based on the platform.ini
+5. Upload main.cpp to your Arduino Nano Every from PlatformIO. 
+
 
 ## Usage
 1. Connect the pressure sensors as specified in the code.
