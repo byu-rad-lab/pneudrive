@@ -43,9 +43,9 @@ short VENT_CMD[4] = { -400, -400, -400, -400 };
 short FILL_CMD[4] = { 400, 400, 400, 400 };
 
 const unsigned short MAX_INPUT = 400;
-unsigned short saturation_error = 150;
+unsigned short saturation_error = 40;
 unsigned short kp = MAX_INPUT / saturation_error;
-unsigned short kd = 50;
+unsigned short kd = 20;
 
 #define PRESCALER 32
 #define ONE_SECOND 32000
