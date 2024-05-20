@@ -59,6 +59,7 @@ unsigned short outgoingShorts[BYTES_IN_PACKET / 2] = { 0, 0, 0, 0, 0 };
 
 unsigned short rs485_address = 0x0000;
 unsigned short pressure_commands[4] = { 102, 102, 102, 102 }; // ADC value of 102 corresponds to 0 kPa
+unsigned short incoming_commands[4] = { 102, 102, 102, 102 };
 unsigned short pressure_data[4] = { 102, 102, 102, 102 };
 unsigned short prev_pressure_data[4] = { 102, 102, 102, 102 };
 unsigned long alpha = 210;
@@ -82,6 +83,25 @@ void byteToShorts(unsigned short* short_array, const byte* byte_array)
       Serial.print(" ");
     }
     Serial.println();
+  }
+}
+
+void saveIfValid(unsigned short* incoming_commands, unsigned short* pressure_commands)
+{
+  //if any of the incoming commands are out of bounds, don't save the entire array since it got corrupted
+
+  for (int i = 0; i < 4; i++)
+  {
+    if (incoming_commands[i] < 0 || incoming_commands[i] > 1023)
+    {
+      return;
+    }
+  }
+
+  // all commands are valid, save them
+  for (int i = 0; i < 4; i++)
+  {
+    pressure_commands[i] = incoming_commands[i];
   }
 }
 
@@ -165,7 +185,8 @@ void handleIncomingBytes()
             Serial.println(numBytesWritten, DEC);
           }
         }
-        byteToShorts(pressure_commands, incomingDataBytes);
+        byteToShorts(incoming_commands, incomingDataBytes);
+        saveIfValid(incoming_commands, pressure_commands);
 
         firstByte = 0;
       }
