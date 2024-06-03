@@ -80,8 +80,25 @@ When the node launches, it will print out all of the joints it detected and star
 
 ## Citation
 
-If you use PneuDrive in your research, please cite the following paper:
+If you use PneuDrive in your research, please cite the our paper:
 
 ```bibtex
-FILL ME IN
+
+ @inproceedings{
+	 Johnson_Cheney_Cordon_Killpack_2024, 
+	 address={San Diego, CA, USA}, 
+	 title={PneuDrive: An Embedded Pressure Control System and Modeling Toolkit for Large-Scale Soft Robots}, 
+	 rights={https://doi.org/10.15223/policy-029}, 
+	 ISBN={9798350381818}, 
+	 url={https://ieeexplore.ieee.org/document/10521958/}, 
+	 DOI={10.1109/RoboSoft60065.2024.10521958}, 
+	 booktitle={2024 IEEE 7th International Conference on Soft Robotics (RoboSoft)}, 
+	 publisher={IEEE}, 
+	 author={Johnson, Curtis C. and Cheney, Daniel G. and Cordon, Dallin L. and Killpack, Marc D.}, 
+	 year={2024}, 
+	 month=apr, 
+	 pages={786–792}, 
+	 language={en} 
+ }
+
 ```
