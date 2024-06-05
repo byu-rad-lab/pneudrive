@@ -1,7 +1,7 @@
 #include <iostream>
 #include "PressureController.hpp"
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
 
   // start up node
@@ -9,9 +9,8 @@ int main(int argc, char **argv)
   ros::NodeHandle n;
 
   std::map<std::string, int> expected_rs485_addresses;
-  std::string ns = ros::this_node::getNamespace();
 
-  if (n.getParam(ns + "/rs485_bus_addresses", expected_rs485_addresses))
+  if (n.getParam("rs485_bus_addresses", expected_rs485_addresses))
   {
     PressureController controller(n, expected_rs485_addresses);
     controller.do_pressure_control();
