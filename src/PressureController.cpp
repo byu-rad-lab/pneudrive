@@ -10,7 +10,7 @@
 #include <wiringPi.h>
 #include <wiringSerial.h>
 
-PressureController::PressureController(ros::NodeHandle n, std::map<std::string, int>& rs485_config)
+PressureController::PressureController(std::shared_ptr<rclcpp::Node> node, std::map<std::string, int>& rs485_config)
   : rs485_addresses(rs485_config), spinner(3)
 {
   initializeSerial();
@@ -32,12 +32,12 @@ PressureController::~PressureController()
 void PressureController::ping_devices()
 {
   serialFlush(this->fd);
-  ROS_INFO("Checking communication with serial devices...");
+  RCLCPP_INFO(node->get_logger(), "Checking communication with serial devices...");
 
   for (int joint = 0; joint < numJoints; joint++)
   {
     unsigned short jointAddress = this->rs485_addresses["joint_" + std::to_string(joint)];
-    ROS_INFO("Pinging joint %d", jointAddress);
+    RCLCPP_INFO(node->get_logger(), "Pinging joint %d", jointAddress);
 
     prepareOutgoingBytes(joint);
 
@@ -49,40 +49,40 @@ void PressureController::ping_devices()
     {
       if (handleIncomingBytes(joint))
       {
-        ROS_INFO_STREAM("Joint " << jointAddress << " ping successful.");
+        RCLCPP_INFO_STREAM(node->get_logger(), "Joint " << jointAddress << " ping successful.");
       }
       else
       {
-        ROS_WARN("Unsucessful read");
-        ROS_ERROR_ONCE("Not all devices found. Killing node.");
-        ros::shutdown();
+        RCLCPP_WARN(node->get_logger(), "Unsucessful read");
+        RCLCPP_ERROR_ONCE(node->get_logger(), "Not all devices found. Killing node.");
+        rclcpp::shutdown();
       }
     }
     else
     {
-      ROS_ERROR_ONCE("Not all devices found. Killing node.");
-      ros::shutdown();
+      RCLCPP_ERROR_ONCE(node->get_logger(), "Not all devices found. Killing node.");
+      rclcpp::shutdown();
     }
   }
 }
 
 void PressureController::do_pressure_control()
 {
-  ros::Duration max_loop_time(0);
+  rclcpp::Duration max_loop_time(0);
   unsigned long numLoops = 0;
   unsigned long numCorrupted = 0;
   unsigned long numTimeout = 0;
 
-  while (ros::ok())
+  while (rclcpp::ok())
   {
-    ros::Time loop_start = ros::Time::now();
-    ROS_INFO_STREAM_ONCE("PRESSURE CONTROL STARTED");
+    rclcpp::Time loop_start = rclcpp::Time::now();
+    RCLCPP_INFO_STREAM_ONCE(node->get_logger(), "PRESSURE CONTROL STARTED");
 
     for (int joint = 0; joint < numJoints; joint++)
     {
       if (DEBUG_MODE)
       {
-        // ros::Duration(.03).sleep();
+        // rclcpp::Duration(.03).sleep();
       }
 
       serialFlush(fd); // clear the current serial buffer before doing anything with it, RX AND TX
@@ -115,7 +115,7 @@ void PressureController::do_pressure_control()
 
       if (write(this->fd, this->outgoingBytes, BYTES_IN_PACKET) != 10)
       {
-        ROS_WARN("Incorrect amount of bytes sent.");
+        RCLCPP_WARN(node->get_logger(), "Incorrect amount of bytes sent.");
       }
 
       bool timeout = waitForResponse(2);
@@ -167,7 +167,7 @@ void PressureController::do_pressure_control()
       }
     }
 
-    ros::Duration loop_time = ros::Time::now() - loop_start;
+    rclcpp::Duration loop_time = rclcpp::Time::now() - loop_start;
     if (loop_time > max_loop_time)
     {
       max_loop_time = loop_time;
@@ -177,7 +177,7 @@ void PressureController::do_pressure_control()
 
     if (DEBUG_MODE)
     {
-      ROS_INFO_STREAM("Loop Time: " << ros::Time::now() - loop_start << " s");
+      RCLCPP_INFO_STREAMnode->get_logger(), ("Loop Time: " << rclcpp::Time::now() - loop_start << " s");
       std::cout << std::endl;
     }
   }
@@ -189,14 +189,14 @@ void PressureController::do_pressure_control()
   std::cout << "Timed out " << float(numTimeout) / numLoops * 100 << "% of messages\n\n" << std::endl;
 }
 
-void PressureController::publishCallback(const ros::TimerEvent& event)
+void PressureController::publishCallback(const rclcpp::TimerEvent& event)
 {
   // publish pressures
   for (int joint = 0; joint < numJoints; joint++)
   {
     rad_msgs::PressureStamped msg;
     msg.header = std_msgs::Header();
-    msg.header.stamp = ros::Time::now();
+    msg.header.stamp = rclcpp::Time::now();
 
     msg.pressure.resize(numPressuresPerJoint);
 
@@ -295,9 +295,9 @@ void PressureController::initializeDataVectors()
   }
 }
 
-void PressureController::startSubscribers(ros::NodeHandle n)
+void PressureController::startSubscribers(std::shared_ptr<rclcpp::Node> node)
 {
-  std::string ns = ros::this_node::getNamespace();
+  std::string ns = node->get_node_name(); 
   // Create pressure command subscribers
   for (int i = 0; i < numJoints; i++)
   {
@@ -305,25 +305,25 @@ void PressureController::startSubscribers(ros::NodeHandle n)
     /*
       See https://answers.ros.org/question/63991/how-to-make-callback-function-called-by-several-subscriber/?answer=63998?answer=63998#post-id-63998 for more details on this trickery.
      */
-    ros::Subscriber sub = n.subscribe<rad_msgs::PressureStamped>(topicString, 1, boost::bind(&PressureController::pcmd_callback, this, _1, i), ros::VoidConstPtr(), ros::TransportHints().tcpNoDelay());
+    rclcpp::Subscriber<rad_msgs::msg::PressureStamped>::SharedPtr sub = node->create_subscriber<rad_msgs::msg::PressureStamped>(topicString, 1, boost::bind(&PressureController::pcmd_callback, this, _1, i), rclcpp::VoidConstPtr(), rclcpp::TransportHints().tcpNoDelay());
     pressureCommandSubscribers.push_back(sub);
-    ROS_INFO("/pressure_command topic started for joint %d", i);
+    RCLCPP_INFO(node->get_logger(), "/pressure_command topic started for joint %d", i);
   }
 }
 
-void PressureController::startPublishers(ros::NodeHandle n)
+void PressureController::startPublishers(std::shared_ptr<rclcpp::Node> node)
 {
-  std::string ns = ros::this_node::getNamespace();
+  std::string ns = node->get_node_name();
   // Create pressure data publisheers
   for (int i = 0; i < numJoints; i++)
   {
     std::string topic_string = ns + "/joint_" + std::to_string(i) + "/pressure_state";
-    ros::Publisher pub = n.advertise<rad_msgs::PressureStamped>(topic_string, 1);
+    rclcpp::Publisherrad_msgs::msg::PressureStamped>::SharedPtr pub = node->create_publisher<rad_msgs::PressureStamped>(topic_string, 1);
     pressurePublishers.push_back(pub);
-    ROS_INFO("/pressure_state topic started for joint %d", i);
+    RCLCPP_INFO(node->get_logger(), "/pressure_state topic started for joint %d", i);
   }
 
-  this->publisher_timer = n.createTimer(ros::Duration(0.002), &PressureController::publishCallback, this);
+  this->publisher_timer = n.createTimer(rclcpp::Duration(0.002), &PressureController::publishCallback, this);
 }
 
 void PressureController::pcmd_callback(const rad_msgs::PressureStamped::ConstPtr& msg, int joint)
