@@ -7,17 +7,20 @@ int main(int argc, char** argv)
   // start up node
   rclcpp::init(argc, argv);
   std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("PressureController");
+  node->declare_parameter("numjoints", 4);
+  //rclcpp::spin(node);
 
-  std::map<std::string, int> expected_rs485_addresses;
+  int num_joints; 
 
-  if (node->getParam("rs485_bus_addresses", expected_rs485_addresses))
+  if (node->get_parameter("numjoints", num_joints))
   {
-    PressureController controller(node, expected_rs485_addresses);
+    RCLCPP_INFO(node->get_logger(), "YAY! Retrieved parameter numjoints: %d", num_joints);
+    PressureController controller(node, num_joints);
     controller.do_pressure_control();
   }
   else
   {
-    RCLCPP_ERROR("Failed to retrieve rs485 information from parameter server.");
+    RCLCPP_ERROR(node->get_logger(), "Failed to retrieve rs485 information from parameter server.");
   }
 
   return 0;

@@ -3,6 +3,8 @@ project(pneudrive)
 
 # # Enable C++17 support, required for ROS 2
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # # Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
@@ -10,17 +12,19 @@ add_compile_options(-std=c++11)
 # optimize to -O2 for speed, but keep footprint it small
 set(CMAKE_CXX_FLAGS "-Os")
 
+include_directories("/usr/local/include/wiringpi2/")
 # Set the path to WiringPi library and include directories
-set(WIRINGPI_INCLUDE_DIRS "/usr/local/include/")
-set(WIRINGPI_LIBRARIES "/usr/lib/libwiringPi.so")
+set(WIRINGPI_INCLUDE_DIRS "/usr/local/include/wiringpi2/")
+set(WIRINGPI_LIBRARIES "/usr/local/lib/libwiringPi.so")
 
 # # Find catkin macros and libraries
 # # if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 # # is used, also find other catkin packages
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(tf REQUIRED)
-find_package(rospy REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(rclpy REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(rad_msgs REQUIRED)
@@ -52,20 +56,29 @@ include_directories(include)
 add_executable(pressure_controller_node src/rs485_pressure_control.cpp src/PressureController.cpp)
 # target_link_libraries(pressure_controller_node ${catkin_LIBRARIES} ${WIRINGPI_LIBRARIES})
 ament_target_dependencies(pressure_controller_node
-	rclcpp
-	tf
-	rospy
-	sensor_msgs
-	std_msgs
-	rad_msgs
-	message_generation
-	)
+  rclcpp
+  tf2
+  rclpy
+  sensor_msgs
+  std_msgs
+  rad_msgs
+)
 
+install(TARGETS
+  pressure_controller_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/launch
+)
+
+target_link_libraries(pressure_controller_node
+  ${WIRINGPI_LIBRARIES}
+)
 
 # add dependency on rad_msgs
-add_dependencies(pressure_controller_node ${catkin_EXPORTED_TARGETS})
+# add_dependencies(pressure_controller_node ${rad_msgs_EXPORTED_TARGETS})
 
 # Auto-generates configuration files for other packages, replaces catkin_package()
-ament_export_dependencies(message_runtime)
-ament_export_dependencies(rad_msgs)
 ament_package()

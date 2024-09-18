@@ -2,10 +2,11 @@
 #define PCONTROL_H_
 
 #include <vector>
-#include <rad_msgs/msg/PressureStamped.hpp>
+#include <rad_msgs/msg/pressure_stamped.hpp>
 #include <std_msgs/msg/header.hpp>
+#include <std_msgs/msg/string.hpp>
+#include <rclcpp/executors/multi_threaded_executor.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include <rclcpp/console.hpp>
 #include <unistd.h> //for delay function
 #include <numeric>
 
@@ -19,16 +20,17 @@
  * @class PressureController
  * @brief Designed to create a ROS node and create an interface with multiple lower level pressure control microcontrollers
  */
-class PressureController
+class PressureController : public rclcpp::Node
 {
 private:
   int numJoints;
   int numPressuresPerJoint = 4;
 
-  std::vector<ros::Publisher> pressurePublishers;
-  ros::Timer publisher_timer;
+  //std::map<std::string, int> convert_parameter_map(const rclcpp::Parameter& param);
+  std::vector<std::shared_ptr<rclcpp::Publisher<rad_msgs::msg::PressureStamped>>> pressurePublishers;
+  std::shared_ptr<rclcpp::TimerBase> publisher_timer;
 
-  std::vector<ros::Subscriber> pressureCommandSubscribers;
+  std::vector<std::shared_ptr<rclcpp::Subscription<rad_msgs::msg::PressureStamped>>> pressureCommandSubscribers;
   std::vector<std::vector<float>> pressures;
   std::vector<std::vector<float>> pressureCommands;
   std::vector<int> jointMissedCounter;
@@ -40,13 +42,13 @@ private:
 
   int fd;
   std::map<std::string, int> rs485_addresses;
-  ros::AsyncSpinner spinner;
+  rclcpp::executors::MultiThreadedExecutor executor;
   double analogToKpa(unsigned short analog);
   unsigned short kpaToAnalog(float kPa);
   void initializeSerial();
   void initializeDataVectors();
-  void startSubscribers(ros::NodeHandle n);
-  void startPublishers(ros::NodeHandle n);
+  void startSubscribers();
+  void startPublishers();
 
   bool waitForResponse(int timeoutMillieconds);
   bool handleIncomingBytes(int joint);
@@ -54,14 +56,14 @@ private:
   float filter(float prev, float input);
 
 public:
-  PressureController(ros::NodeHandle n, std::map<std::string, int>& rs485_config);
+  PressureController(std::shared_ptr<rclcpp::Node> node, int num_joints);
   ~PressureController();
   void do_pressure_control();
   void ping_devices();
   void shortToBytes(unsigned short* short_array, unsigned char* byte_array);
   void byteToShorts(unsigned short* short_array, unsigned char* byte_array);
-  void pcmd_callback(const rad_msgs::PressureStamped::ConstPtr& msg, int joint);
-  void publishCallback(const ros::TimerEvent& event);
+  void pcmd_callback(const rad_msgs::msg::PressureStamped::SharedPtr msg, int joint);
+  void publishCallback();
 };
 
 #endif /* PCONTROL_H_ */
