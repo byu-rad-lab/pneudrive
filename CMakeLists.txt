@@ -7,15 +7,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # # Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+#add_compile_options(-std=c++11)
 
 # optimize to -O2 for speed, but keep footprint it small
 set(CMAKE_CXX_FLAGS "-Os")
 
-include_directories("/usr/local/include/wiringpi2/")
-# Set the path to WiringPi library and include directories
-set(WIRINGPI_INCLUDE_DIRS "/usr/local/include/wiringpi2/")
-set(WIRINGPI_LIBRARIES "/usr/local/lib/libwiringPi.so")
+
+set(WIRINGPI_INCLUDE_DIRS "/usr/include/wiringpi2/")
+set(WIRINGPI_LIB "/usr/lib/aarch64-linux-gnu/libwiringPi.so")
+#include_directories(${WIRINGPI_INCLUDE_DIRS})
 
 # # Find catkin macros and libraries
 # # if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -54,7 +54,9 @@ find_package(rad_msgs REQUIRED)
 include_directories(include)
 
 add_executable(pressure_controller_node src/rs485_pressure_control.cpp src/PressureController.cpp)
-# target_link_libraries(pressure_controller_node ${catkin_LIBRARIES} ${WIRINGPI_LIBRARIES})
+target_include_directories(pressure_controller_node PRIVATE ${WIRINGPI_INCLUDE_DIRS})
+target_link_libraries(pressure_controller_node ${WIRINGPI_LIB})
+
 ament_target_dependencies(pressure_controller_node
   rclcpp
   tf2
@@ -71,10 +73,6 @@ install(TARGETS
 
 install(DIRECTORY launch/
   DESTINATION share/${PROJECT_NAME}/launch
-)
-
-target_link_libraries(pressure_controller_node
-  ${WIRINGPI_LIBRARIES}
 )
 
 # add dependency on rad_msgs

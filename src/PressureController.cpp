@@ -17,29 +17,30 @@ PressureController::PressureController(std::shared_ptr<rclcpp::Node> node, int n
   if (num_joints > 1) {
     this->rs485_addresses["joint_1"] = 0xFFFE;
   }
-  else if (num_joints > 2) {
+  if (num_joints > 2) {
     this->rs485_addresses["joint_2"] = 0xFFFD;
   }
 
-  initializeSerial();
-  initializeDataVectors();
+  this->initializeSerial();
+  this->initializeDataVectors();
   this->ping_devices();
 
   // Getting the parameter rs485_config
   // rs485_addresses = this->convert_parameter_map(this->get_parameter("rs485_config"));
 
+  // ######### Commented out by Curtis. Why do we need multithreaded operations launched here? ########
   // Add this node to the executor
-  executor.add_node(this->get_node_base_interface());
+  //executor.add_node(this->get_node_base_interface());
 
   // Start the executor in a separate thread
-  std::thread executor_thread([this, node]() {
-      RCLCPP_INFO(this->get_logger(), "Starting executor");
-      executor.spin();  // Spin the executor to process callbacks
-  });
-  executor_thread.detach();  // Detach the thread to run asynchronously
+  //std::thread executor_thread([this, node]() {
+  //    RCLCPP_INFO(this->get_logger(), "Starting executor");
+  //    executor.spin();  // Spin the executor to process callbacks
+  //});
+  //executor_thread.detach();  // Detach the thread to run asynchronously
 
-  startSubscribers();
-  startPublishers();
+  this->startSubscribers();
+  this->startPublishers();
 }
 
 PressureController::~PressureController()
@@ -73,7 +74,7 @@ void PressureController::ping_devices()
 
     ssize_t numBytesWritten = write(this->fd, this->outgoingBytes, BYTES_IN_PACKET);
 
-    bool timeout = waitForResponse(5000);
+    bool timeout = waitForResponse(2000);
 
     if (!timeout)
     {
@@ -84,14 +85,16 @@ void PressureController::ping_devices()
       else
       {
         RCLCPP_WARN(this->get_logger(), "Unsucessful read");
-        RCLCPP_ERROR_ONCE(this->get_logger(), "Not all devices found. Killing node.");
-        rclcpp::shutdown();
+        //RCLCPP_ERROR_ONCE(this->get_logger(), "Not all devices found. Killing node.");
+        //rclcpp::shutdown();
+	throw std::runtime_error("Communication attempted and failed. Killing node.");
       }
     }
     else
     {
-      RCLCPP_ERROR_ONCE(this->get_logger(), "Not all devices found. Killing node.");
-      rclcpp::shutdown();
+      //RCLCPP_ERROR_ONCE(this->get_logger(), "Not all devices found. Killing node.");
+      //rclcpp::shutdown();
+      throw std::runtime_error("Timeout. Killing node.");
     }
   }
 }
@@ -193,7 +196,7 @@ void PressureController::do_pressure_control()
       //check if we have lots of consecutive misses, likely something broke
       if (jointMissedCounter[joint] > 50)
       {
-        //RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), this->get_clock(), 1, "Lost connection with joint " << joint);
+        RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), this->get_clock(), 1, "Lost connection with joint " << joint);
       }
     }
 

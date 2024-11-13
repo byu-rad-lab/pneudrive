@@ -7,7 +7,7 @@ int main(int argc, char** argv)
   // start up node
   rclcpp::init(argc, argv);
   std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("PressureController");
-  node->declare_parameter("numjoints", 4);
+  node->declare_parameter("numjoints", 1);
   //rclcpp::spin(node);
 
   int num_joints; 
