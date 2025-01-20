@@ -39,7 +39,7 @@
 A4990ValveInterface valves;
 
 short valve_cmd[4] = { 0, 0, 0, 0 };
-short VENT_CMD[4] = { -400, -400, -400, -400 };
+short SLOW_VENT_CMD[4] = { -50, -50, -50, -50 };
 short FILL_CMD[4] = { 400, 400, 400, 400 };
 
 const unsigned short MAX_INPUT = 400;
@@ -317,9 +317,9 @@ void setup()
 
   outgoingShorts[0] = rs485_address;
 
-  valves.setSpeeds(VENT_CMD);
+  valves.setSpeeds(SLOW_VENT_CMD);
 
-  custom_delay(2);
+  custom_delay(5);
 }
 
 void loop()
