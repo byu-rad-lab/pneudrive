@@ -10,8 +10,8 @@
 #include <wiringPi.h>
 #include <wiringSerial.h>
 
-PressureController::PressureController(std::shared_ptr<rclcpp::Node> node, int num_joints)
-  : Node("pressure_controller"), executor() 
+PressureController::PressureController(int num_joints)
+  : Node("pressure_controller")
 {
   this->rs485_addresses["joint_0"] = 0xFFFF;
   if (num_joints > 1) {
@@ -41,6 +41,9 @@ PressureController::PressureController(std::shared_ptr<rclcpp::Node> node, int n
 
   this->startSubscribers();
   this->startPublishers();
+
+  std::thread control_thread([this]() {do_pressure_control(); });
+  control_thread.detach();
 }
 
 PressureController::~PressureController()
@@ -92,7 +95,7 @@ void PressureController::ping_devices()
     }
     else
     {
-      //RCLCPP_ERROR_ONCE(this->get_logger(), "Not all devices found. Killing node.");
+      RCLCPP_ERROR_ONCE(this->get_logger(), "Not all devices found. Killing node.");
       //rclcpp::shutdown();
       throw std::runtime_error("Timeout. Killing node.");
     }
@@ -125,11 +128,13 @@ void PressureController::do_pressure_control()
       if (DEBUG_MODE)
       {
         printf("Pressure commands: ");
+	this->m.lock();
         for (int i = 0; i < 4; i++)
         {
           printf("%f ", this->pressureCommands[joint][i]);
         }
         printf("\n");
+	this->m.unlock();
 
         printf("Address + outgoing pressure command shorts: ");
         for (int i = 0; i < 5; i++)
@@ -158,20 +163,24 @@ void PressureController::do_pressure_control()
         if (handleIncomingBytes(joint))
         {
           // convert analog shorts to kpa and load for sending over ROS
+	  this->m.lock();
           for (size_t i = 0; i < numPressuresPerJoint; i++)
           {
             float tmp = analogToKpa(this->incomingDataShorts[i]);
             this->pressures[joint][i] = filter(this->pressures[joint][i], tmp);
           }
+	  this->m.unlock();
 
           if (DEBUG_MODE)
           {
             printf("Converted to pressures: ");
+	    this->m.lock();
             for (int i = 0; i < 4; i++)
             {
               printf("%f ", this->pressures[joint][i]);
             }
             printf("\n");
+	    this->m.unlock();
           }
 
           // reset counters since communication was succesful
@@ -233,10 +242,12 @@ void PressureController::publishCallback()
 
     msg.pressure.resize(numPressuresPerJoint);
 
+    this->m.lock();
     for (int p = 0; p < numPressuresPerJoint; p++)
     {
       msg.pressure[p] = pressures[joint][p];
     }
+    thi->m.unlock();
     pressurePublishers[joint]->publish(msg);
   }
 }
@@ -361,11 +372,13 @@ void PressureController::startPublishers()
 
 void PressureController::pcmd_callback(const rad_msgs::msg::PressureStamped::SharedPtr msg, int joint)
 {
+  this->m.lock();
   for (int i = 0; i < msg->pressure.size(); i++)
   {
     float temp = (float)msg->pressure[i]; // cast double/float64 to float/float to send over i2c
     pressureCommands[joint][i] = temp;
   }
+  this->m.unlock();
 }
 
 bool PressureController::waitForResponse(int timeoutMilliseconds)

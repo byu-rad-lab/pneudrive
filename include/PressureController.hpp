@@ -26,6 +26,8 @@ private:
   int numJoints;
   int numPressuresPerJoint = 4;
 
+  std::mutex m;
+
   //std::map<std::string, int> convert_parameter_map(const rclcpp::Parameter& param);
   std::vector<std::shared_ptr<rclcpp::Publisher<rad_msgs::msg::PressureStamped>>> pressurePublishers;
   std::shared_ptr<rclcpp::TimerBase> publisher_timer;
@@ -56,7 +58,7 @@ private:
   float filter(float prev, float input);
 
 public:
-  PressureController(std::shared_ptr<rclcpp::Node> node, int num_joints);
+  PressureController(int num_joints);
   ~PressureController();
   void do_pressure_control();
   void ping_devices();
