@@ -18,7 +18,7 @@
 
 /**
  * @class PressureController
- * @brief Designed to create a ROS node and create an interface with multiple lower level pressure control microcontrollers
+ * @brief Designed to create a ROS2 node and create an interface with multiple lower level pressure control microcontrollers
  */
 class PressureController : public rclcpp::Node
 {
@@ -28,7 +28,6 @@ private:
 
   std::mutex m;
 
-  //std::map<std::string, int> convert_parameter_map(const rclcpp::Parameter& param);
   std::vector<std::shared_ptr<rclcpp::Publisher<rad_msgs::msg::PressureStamped>>> pressurePublishers;
   std::shared_ptr<rclcpp::TimerBase> publisher_timer;
 
@@ -44,7 +43,6 @@ private:
 
   int fd;
   std::map<std::string, int> rs485_addresses;
-  rclcpp::executors::MultiThreadedExecutor executor;
   double analogToKpa(unsigned short analog);
   unsigned short kpaToAnalog(float kPa);
   void initializeSerial();
