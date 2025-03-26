@@ -11,6 +11,7 @@ def check_numjoints(context, *args, **kwargs):
     return
 
 def generate_launch_description():
+    # Create a LaunchDescription that has arguments numjoints and ns, and starts the pressure_controller_node
     ld = LaunchDescription()
 
     ld.add_action(DeclareLaunchArgument('numjoints', default_value='', description='numjoints specifies the number of rs485 devices which should be included for pressure control.'))

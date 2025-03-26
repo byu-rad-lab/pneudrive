@@ -5,7 +5,6 @@
 #include <rad_msgs/msg/pressure_stamped.hpp>
 #include <std_msgs/msg/header.hpp>
 #include <std_msgs/msg/string.hpp>
-#include <rclcpp/executors/multi_threaded_executor.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <unistd.h> //for delay function
 #include <numeric>
@@ -26,7 +25,8 @@ private:
   int numJoints;
   int numPressuresPerJoint = 4;
 
-  std::mutex m;
+  std::thread control_thread;
+  std::mutex mutex_lock;
 
   std::vector<std::shared_ptr<rclcpp::Publisher<rad_msgs::msg::PressureStamped>>> pressurePublishers;
   std::shared_ptr<rclcpp::TimerBase> publisher_timer;
@@ -58,7 +58,7 @@ private:
 public:
   PressureController(int num_joints);
   ~PressureController();
-  void do_pressure_control();
+  void serial_loop();
   void ping_devices();
   void shortToBytes(unsigned short* short_array, unsigned char* byte_array);
   void byteToShorts(unsigned short* short_array, unsigned char* byte_array);

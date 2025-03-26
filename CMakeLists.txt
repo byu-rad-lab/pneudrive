@@ -13,12 +13,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "-Os")
 
 
-set(WIRINGPI_INCLUDE_DIRS "/usr/include/wiringpi2/")
-set(WIRINGPI_LIB "/usr/lib/aarch64-linux-gnu/libwiringPi.so")
+set(WIRINGPI_INCLUDE_DIRS "/usr/local/include/wiringpi2/")
+set(WIRINGPI_LIB "/usr/local/lib/libwiringPi.so")
 #include_directories(${WIRINGPI_INCLUDE_DIRS})
 
-# # Find catkin macros and libraries
-# # if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 # # is used, also find other catkin packages
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -29,28 +27,6 @@ find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(rad_msgs REQUIRED)
 
-
-# ##################################
-# # catkin specific configuration ##
-# ##################################
-# catkin_package(
-# INCLUDE_DIRS
-# CATKIN_DEPENDS message_runtime
-# rad_msgs
-# )
-
-# For profilling
-# add_compile_options(-pg)
-# set(catkin_LIBRARIES ${catkin_LIBRARIES} -pg)
-
-# ##########
-# # Build ##
-# ##########
-# include_directories(
-# include
-# ${catkin_INCLUDE_DIRS}
-# ${WIRINGPI_INCLUDE_DIRS}
-# )
 include_directories(include)
 
 add_executable(pressure_controller_node src/rs485_pressure_control.cpp src/PressureController.cpp)

@@ -42,7 +42,7 @@ PressureController::PressureController(int num_joints)
   this->startSubscribers();
   this->startPublishers();
 
-  std::thread control_thread([this]() {do_pressure_control(); });
+  control_thread = std::thread([this]() {this->serial_loop();});
   control_thread.detach();
 }
 
@@ -51,17 +51,6 @@ PressureController::~PressureController()
   serialFlush(this->fd);
   serialClose(this->fd);
 }
-
-/*std::map<std::string, int> PressureController::convert_parameter_map(const rclcpp::Parameter& param)
-{
-  std::map<std::string, int> result;
-  std::map<std::string, rclcpp::Parameter> param_map = param.as_map();
-
-  for (const auto& [key, value] : param_map)
-  {
-    result[key] = value.as_int();
-  }
-}*/
 
 void PressureController::ping_devices()
 {
@@ -102,7 +91,7 @@ void PressureController::ping_devices()
   }
 }
 
-void PressureController::do_pressure_control()
+void PressureController::serial_loop()
 {
   rclcpp::Duration max_loop_time(0, 0);
   unsigned long numLoops = 0;
@@ -128,13 +117,13 @@ void PressureController::do_pressure_control()
       if (DEBUG_MODE)
       {
         printf("Pressure commands: ");
-	this->m.lock();
+	this->mutex_lock.lock();
         for (int i = 0; i < 4; i++)
         {
           printf("%f ", this->pressureCommands[joint][i]);
         }
         printf("\n");
-	this->m.unlock();
+	this->mutex_lock.unlock();
 
         printf("Address + outgoing pressure command shorts: ");
         for (int i = 0; i < 5; i++)
@@ -163,24 +152,24 @@ void PressureController::do_pressure_control()
         if (handleIncomingBytes(joint))
         {
           // convert analog shorts to kpa and load for sending over ROS
-	  this->m.lock();
+	  this->mutex_lock.lock();
           for (size_t i = 0; i < numPressuresPerJoint; i++)
           {
             float tmp = analogToKpa(this->incomingDataShorts[i]);
             this->pressures[joint][i] = filter(this->pressures[joint][i], tmp);
           }
-	  this->m.unlock();
+	  this->mutex_lock.unlock();
 
           if (DEBUG_MODE)
           {
             printf("Converted to pressures: ");
-	    this->m.lock();
+	    this->mutex_lock.lock();
             for (int i = 0; i < 4; i++)
             {
               printf("%f ", this->pressures[joint][i]);
             }
             printf("\n");
-	    this->m.unlock();
+	    this->mutex_lock.unlock();
           }
 
           // reset counters since communication was succesful
@@ -205,7 +194,7 @@ void PressureController::do_pressure_control()
       //check if we have lots of consecutive misses, likely something broke
       if (jointMissedCounter[joint] > 50)
       {
-        RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), this->get_clock(), 1, "Lost connection with joint " << joint);
+        // RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), this->get_clock(), 1, "Lost connection with joint " << joint);
       }
     }
 
@@ -242,17 +231,16 @@ void PressureController::publishCallback()
 
     msg.pressure.resize(numPressuresPerJoint);
 
-    this->m.lock();
+    this->mutex_lock.lock();
     for (int p = 0; p < numPressuresPerJoint; p++)
     {
       msg.pressure[p] = pressures[joint][p];
     }
-    thi->m.unlock();
+    this->mutex_lock.unlock();
     pressurePublishers[joint]->publish(msg);
   }
 }
 
-// todo: move to utils header
 void PressureController::shortToBytes(unsigned short* short_array, unsigned char* byte_array)
 {
   // Function to convert array of 5 shorts to array of 10 bytes
@@ -268,7 +256,6 @@ void PressureController::shortToBytes(unsigned short* short_array, unsigned char
   }
 }
 
-// todo: move to utils header
 void PressureController::byteToShorts(unsigned short* short_array, unsigned char* byte_array)
 {
   // Function to convert array of 10 bytes to array of 5 shorts
@@ -372,13 +359,13 @@ void PressureController::startPublishers()
 
 void PressureController::pcmd_callback(const rad_msgs::msg::PressureStamped::SharedPtr msg, int joint)
 {
-  this->m.lock();
+  this->mutex_lock.lock();
   for (int i = 0; i < msg->pressure.size(); i++)
   {
     float temp = (float)msg->pressure[i]; // cast double/float64 to float/float to send over i2c
     pressureCommands[joint][i] = temp;
   }
-  this->m.unlock();
+  this->mutex_lock.unlock();
 }
 
 bool PressureController::waitForResponse(int timeoutMilliseconds)
