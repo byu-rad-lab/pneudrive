@@ -22,7 +22,7 @@ If the SBC is connected to the internet, the easiest way to use PneuDrive is to 
 scp -r <path to pneudrive on computer> <username@SBC_IP_ADDRESS>:<path to desired location on SBC>
 ```
 
-If you intend to use PneuDrive with ROS, just make sure the package is placed into the src directory of a ROS workspace. Once the pneudrive package in in the src directory, you can build it using ```catkin_make``` from the root of the workspace.
+If you intend to use PneuDrive with ROS, just make sure the package is placed into the src directory of a ROS workspace. Once the pneudrive package in in the src directory, you can build it using ```colcon build``` from the root of the workspace.
 
 If you intend to use PneuDrive without ROS (i.e. using the python bindings), you can place the package anywhere on the SBC. Python bindings are implemented using pybind11, so when cloning the repository, it is important to pass ```--recurse-submodules``` to git to ensure that pybind11 is cloned as well:
 
@@ -65,15 +65,15 @@ Once the SBC boots up it you can ssh into it with ```ssh ubuntu@192.168.0.xxx```
 Once you are logged in, you can launch the pressure control ROS node (along with a roscore) using the following command:
 
 ``` shell
-roslaunch pneudrive rs485_pressure.launch numjoints:=[number of joints]
+ros2 launch pneudrive rs485_pressure.launch.py numjoints:=[number of joints]
 ```
 
 where the ```numjoints``` command line argument is required and tells the node how many joints to look for on the serial bus. 
 
-This creates a ROS node called "PressureController". This launch file looks in the /config directory for a .yaml file describing the hardware configuration corresponding to how many joints you specified with ```numjoints```. The node creates publishers and subscribers for every joint specified in the yaml file. If the SBC cannot find all of the specified addresses, the node throw an error and shut down. If this happens, here are some common fixes:
+This creates a ROS node called "PressureController". Depending on ```numjoints```, the node will create addresses for each joint. The node then creates publishers and subscribers for every joint specified by the addresses. If the SBC cannot find all of the specified addresses, the node throw an error and shut down. If this happens, here are some common fixes:
 
 * Make sure your wires are all connected securely and correctly.
-* Make sure that each pressure control board dip switch is set to the proper address. The dip switch positions are printed on the pcb and they should match what is specified in the yaml file. For example, if I have a 3 joint arm, I would make sure that the first joint is set to 0 then the next as 1 and the last as 2, with those same addresses specified in the yaml file. 
+* Make sure that each pressure control board dip switch is set to the proper address. The dip switch positions are printed on the pcb and they should match what is specified in the yaml file. For example, if I have a 3 joint arm, I would make sure that the first joint is set to 0 then the next as 1 and the last as 2, with those same addresses specified in the code. 
 * Make sure you didn't flip the A+ and B- wires when wiring up the connectors. We chose to use screw terminals for ease of use, but this does make flipping wires easier if you aren't being careful. 
 
 When the node launches, it will print out all of the joints it detected and start the node.
@@ -102,4 +102,3 @@ If you use PneuDrive in your research, please cite the our paper:
  }
 
 ```
-# This is a comment to test the new branch

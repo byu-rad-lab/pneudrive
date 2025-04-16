@@ -3,7 +3,7 @@
 ### Requirements
 
 - [Download Balena Etcher](https://etcher.balena.io/#download-etcher)
-- Ubuntu image: Find the image in JDrive at `groups/rad-software/odroid_pneudrive_20_04.zip`
+- Ubuntu image: Find the image in JDrive at `groups/rad-software/odroid_pneudrive_22_04.zip`
 
 ### Flashing Ubuntu Image to SD Card
 
@@ -30,7 +30,7 @@ Ensure the directory contains the Pneudrive package. Ensure that it is the most 
 
 #### Change Static IP Address
 
-1. Check the [Lab Wiki](https://rad-wiki.groups.et.byu.net/index.php?title=Lab_Computers) for an available IP address.
+1. Check the [Lab Wiki](https://github.com/byu-rad-lab/rad-lab-wiki/blob/main/infrastructure/lab_ip_addresses.md) for an available IP address.
 2. Update the Lab Wiki with your IP address and device information.
 3. Print a label and attach it to the Odroid for future reference.
 4. Determine the network interface with `ip addr` (likely `eth0`).
@@ -52,9 +52,9 @@ ip addr show
 
 1. Navigate to the `ros_ws` directory and delete the `devel` and `build` directories using the command `rm -rf devel build`.
 2. Navigate to the home directory and source the `.bashrc` file by running the command `source .bashrc`.
-3. Navigate back to the `ros_ws` directory and run the command `catkin_make`.
-4. Once the `catkin_make` is complete, verify that the Pneudrive package can be found by running the command `rospack find pneudrive`.
-- If the command works, you should see a file path to the directory such as `/home/ubuntu/ros_ws/src/pneudrive`.
-- If the command does not work, you should see `[rospack] Error: package 'pneudrive' not found`. If this is the case, keep trying variations of what is listed above until it works.
+3. Navigate back to the `ros_ws` directory and run the command `colcon build`.
+4. Once the `colcon build` is complete, verify that the Pneudrive package can be found by running the command `ros2 pkg list`.
+- You should see a list of packages including pneudrive.
+- If pneudrive is not present in the list of packages, keep trying variations of what is listed above until it works.
 
 

@@ -22,37 +22,37 @@
 class PressureController : public rclcpp::Node
 {
 private:
-  int numJoints;
-  int numPressuresPerJoint = 4;
+  int num_joints;
+  int num_pressures_per_joint = 4;
 
   std::thread control_thread;
   std::mutex mutex_lock;
 
-  std::vector<std::shared_ptr<rclcpp::Publisher<rad_msgs::msg::PressureStamped>>> pressurePublishers;
+  std::vector<std::shared_ptr<rclcpp::Publisher<rad_msgs::msg::PressureStamped>>> pressure_publishers;
   std::shared_ptr<rclcpp::TimerBase> publisher_timer;
 
-  std::vector<std::shared_ptr<rclcpp::Subscription<rad_msgs::msg::PressureStamped>>> pressureCommandSubscribers;
+  std::vector<std::shared_ptr<rclcpp::Subscription<rad_msgs::msg::PressureStamped>>> pressure_command_subscribers;
   std::vector<std::vector<float>> pressures;
-  std::vector<std::vector<float>> pressureCommands;
-  std::vector<int> jointMissedCounter;
+  std::vector<std::vector<float>> pressure_commands;
+  std::vector<int> joint_missed_counter;
 
-  unsigned char incomingDataBytes[BYTES_IN_PACKET - 2];
-  unsigned char outgoingBytes[BYTES_IN_PACKET];
-  unsigned short incomingDataShorts[4] = { 0, 0, 0, 0 };
-  unsigned short outgoingShorts[5] = { 0, 0, 0, 0, 0 };
+  unsigned char incoming_data_bytes[BYTES_IN_PACKET - 2];
+  unsigned char outgoing_bytes[BYTES_IN_PACKET];
+  unsigned short incoming_data_shorts[4] = { 0, 0, 0, 0 };
+  unsigned short outgoing_shorts[5] = { 0, 0, 0, 0, 0 };
 
   int fd;
   std::map<std::string, int> rs485_addresses;
-  double analogToKpa(unsigned short analog);
-  unsigned short kpaToAnalog(float kPa);
-  void initializeSerial();
-  void initializeDataVectors();
-  void startSubscribers();
-  void startPublishers();
+  double analog_to_kpa(unsigned short analog);
+  unsigned short kpa_to_analog(float kPa);
+  void initialize_serial();
+  void initialize_data_vectors();
+  void start_subscribers();
+  void start_publishers();
 
-  bool waitForResponse(int timeoutMillieconds);
-  bool handleIncomingBytes(int joint);
-  void prepareOutgoingBytes(int joint);
+  bool wait_for_response(int timeout_millieconds);
+  bool handle_incoming_bytes(int joint);
+  void prepare_outgoing_bytes(int joint);
   float filter(float prev, float input);
 
 public:
@@ -60,10 +60,10 @@ public:
   ~PressureController();
   void serial_loop();
   void ping_devices();
-  void shortToBytes(unsigned short* short_array, unsigned char* byte_array);
-  void byteToShorts(unsigned short* short_array, unsigned char* byte_array);
+  void short_to_bytes(unsigned short* short_array, unsigned char* byte_array);
+  void byte_to_shorts(unsigned short* short_array, unsigned char* byte_array);
   void pcmd_callback(const rad_msgs::msg::PressureStamped::SharedPtr msg, int joint);
-  void publishCallback();
+  void publish_callback();
 };
 
 #endif /* PCONTROL_H_ */
