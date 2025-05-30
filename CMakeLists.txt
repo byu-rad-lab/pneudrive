@@ -8,8 +8,8 @@ add_compile_options(-std=c++11)
 set(CMAKE_CXX_FLAGS "-Os")
 
 # Set the path to WiringPi library and include directories
-set(WIRINGPI_INCLUDE_DIRS "/usr/local/include/")
-set(WIRINGPI_LIBRARIES "/usr/lib/libwiringPi.so")
+set(WIRINGPI_INCLUDE_DIRS "/usr/include/wiringpi2")
+set(WIRINGPI_LIBRARIES "/usr/lib/aarch64-linux-gnu/libwiringPi.so")
 
 # # Find catkin macros and libraries
 # # if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
