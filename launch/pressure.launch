@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<launch>
+  <!-- start pressure control node -->
+  <node name='rs485_pressure_node' pkg='pneudrive' type='pressure_controller_node' output='screen' />
+
+  <rosparam command="load" file="$(find pneudrive)/config/three_joints.yaml" />
+
+</launch>
